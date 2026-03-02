@@ -651,12 +651,15 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Panel Izquierdo - Formulario */}
-        <div className={`
-          ${isMobile 
-            ? `fixed inset-0 top-[60px] bottom-[72px] z-40 bg-white transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`
-            : 'w-[380px] border-r border-[#E8E6E0] bg-white flex flex-col overflow-hidden'
-          }
-        `}>
+        <div
+          className={`
+            ${isMobile
+              ? `fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`
+              : 'w-[380px] border-r border-[#E8E6E0] bg-white flex flex-col overflow-hidden'
+            }
+          `}
+          style={isMobile ? { bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' } : {}}
+        >
           {/* Tabs de navegacion - Pills scrollable on mobile */}
           <div className={`
             ${isMobile 
@@ -851,7 +854,10 @@ export default function Home() {
                       <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar
                     </Button>
                   </div>
-                  <div className={`space-y-2 max-h-[${isMobile ? '350px' : '280px'}] overflow-y-auto pr-1`}>
+                  <div
+                    className="space-y-2 overflow-y-auto pr-1"
+                    style={{ maxHeight: isMobile ? '350px' : '280px' }}
+                  >
                     {instruments.map((inst, i) => (
                       <div key={i} className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl group relative`}>
                         <div className={`flex items-center ${isMobile ? 'gap-3 flex-wrap' : 'gap-2'}`}>
@@ -876,9 +882,9 @@ export default function Home() {
                             variant="ghost" 
                             size="sm" 
                             onClick={() => setInstruments(prev => prev.filter((_, j) => j !== i))} 
-                            className={`${isMobile ? 'h-10 w-10' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}
+                            className={`${isMobile ? 'h-10 w-10 flex-shrink-0' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-red-500`} />
                           </Button>
                         </div>
                       </div>
@@ -923,7 +929,10 @@ export default function Home() {
                       <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar
                     </Button>
                   </div>
-                  <div className={`space-y-2 max-h-[${isMobile ? '200px' : '120px'}] overflow-y-auto`}>
+                  <div
+                    className="space-y-2 overflow-y-auto"
+                    style={{ maxHeight: isMobile ? '200px' : '120px' }}
+                  >
                     {obligacionesNegociables.map((on, i) => (
                       <div key={i} className={`${isMobile ? 'grid-cols-5 gap-2 p-3' : 'grid-cols-4 gap-1 p-1.5'} grid bg-[#F5F4F0] rounded-xl group`}>
                         <Input 
@@ -948,9 +957,9 @@ export default function Home() {
                           variant="ghost" 
                           size="sm" 
                           onClick={() => setObligacionesNegociables(prev => prev.filter((_, j) => j !== i))} 
-                          className={`${isMobile ? 'h-11 w-11' : 'h-6 w-6 p-0 opacity-0 group-hover:opacity-100'}`}
+                          className={`${isMobile ? 'h-11 w-11 flex-shrink-0' : 'h-6 w-6 p-0 opacity-0 group-hover:opacity-100'}`}
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-red-500`} />
                         </Button>
                       </div>
                     ))}
@@ -960,7 +969,10 @@ export default function Home() {
                 {/* Riesgos */}
                 <div>
                   <Label className={`${labelClass} mt-2`}>Riesgos ({riesgos.length})</Label>
-                  <div className={`space-y-2 mt-2 max-h-[${isMobile ? '200px' : '100px'}] overflow-y-auto`}>
+                  <div
+                    className="space-y-2 mt-2 overflow-y-auto"
+                    style={{ maxHeight: isMobile ? '200px' : '100px' }}
+                  >
                     {riesgos.map((r, i) => (
                       <div key={i} className={`${isMobile ? 'grid-cols-1 gap-2 p-3' : 'grid-cols-3 gap-1 p-1.5'} grid bg-[#F5F4F0] rounded-xl`}>
                         <Input 
@@ -993,7 +1005,10 @@ export default function Home() {
                 {/* Beneficios fiscales */}
                 <div>
                   <Label className={`${labelClass} mt-2`}>Beneficios Fiscales</Label>
-                  <div className={`space-y-2 mt-2 max-h-[${isMobile ? '150px' : '80px'}] overflow-y-auto`}>
+                  <div
+                    className="space-y-2 mt-2 overflow-y-auto"
+                    style={{ maxHeight: isMobile ? '150px' : '80px' }}
+                  >
                     {beneficiosFiscales.map((b, i) => (
                       <Textarea 
                         key={i} 
@@ -1065,12 +1080,15 @@ export default function Home() {
         </div>
 
         {/* Panel Derecho - Preview */}
-        <div className={`
-          ${isMobile 
-            ? `fixed inset-0 top-[60px] bottom-[72px] z-40 bg-[#F5F4F0] transition-transform duration-300 ${mobilePanel === 'preview' ? 'translate-x-0' : 'translate-x-full'}`
-            : 'flex-1 flex flex-col bg-[#F5F4F0] overflow-hidden'
-          }
-        `}>
+        <div
+          className={`
+            ${isMobile
+              ? `fixed inset-0 top-[60px] z-40 bg-[#F5F4F0] flex flex-col transition-transform duration-300 ${mobilePanel === 'preview' ? 'translate-x-0' : 'translate-x-full'}`
+              : 'flex-1 flex flex-col bg-[#F5F4F0] overflow-hidden'
+            }
+          `}
+          style={isMobile ? { bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' } : {}}
+        >
           {/* Header preview */}
           <div className={`flex items-center justify-between ${isMobile ? 'px-4 py-3' : 'px-4 py-2'} bg-white border-b border-[#E8E6E0] flex-shrink-0`}>
             <span className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-[#1F2D26]`}>Vista Previa</span>
@@ -1168,14 +1186,14 @@ export default function Home() {
 
       {/* Mobile Bottom Tab Bar */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom">
-          <div className="flex">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom h-[calc(64px+env(safe-area-inset-bottom,0px))]">
+          <div className="flex h-16">
             {mobileBottomTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setMobilePanel(tab.id as 'form' | 'preview')}
                 className={`
-                  flex-1 py-3 px-4 flex flex-col items-center justify-center gap-1 transition-colors relative
+                  flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative
                   ${mobilePanel === tab.id 
                     ? 'text-[#2D5A4A]' 
                     : 'text-[#7A8B80]'
