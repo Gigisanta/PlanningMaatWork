@@ -64,9 +64,6 @@ import {
   FileCode,
   ClipboardList,
 } from 'lucide-react'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
-
 // ============================================================
 // TYPES & INTERFACES
 // ============================================================
@@ -522,6 +519,10 @@ export default function Home() {
     if (!previewRef.current) return
     setIsDownloadingPdf(true)
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ])
       const iframe = previewRef.current.querySelector('iframe')
       if (!iframe || !iframe.contentDocument) throw new Error('No iframe')
       const canvas = await html2canvas(iframe.contentDocument.body, { scale: 2, useCORS: true, backgroundColor: '#FAFAF8', windowWidth: 900 })
@@ -534,7 +535,7 @@ export default function Home() {
       heightLeft -= pageHeight
       while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight }
       pdf.save(`plan-${edad}anos.pdf`)
-    } catch (error) { alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
+    } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
   }
 
   // Navigation tabs
@@ -1114,8 +1115,10 @@ export default function Home() {
                   </Button>
                 </div>
                 
-                {/* Action buttons - horizontal scroll on mobile */}
-                <div className={`flex ${isMobile ? 'overflow-x-auto scrollbar-hide gap-2' : 'gap-1'}`}>
+                {/* Action buttons - Improved visibility on mobile */}
+                <div
+                  className={`flex ${isMobile ? 'overflow-x-auto scrollbar-hide gap-2 max-w-[180px]' : 'gap-1'}`}
+                >
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -1231,8 +1234,29 @@ export default function Home() {
         configSaved={configSaved}
       />
 
-      {/* Hide scrollbar for pills on mobile */}
+      {/* Scroll refinement and UI fixes */}
       <style jsx global>{`
+        /* Smooth scrolling */
+        * {
+          scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar for better visibility */
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 6px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background: #E8E6E0;
+          border-radius: 10px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background: #D8D6D0;
+        }
+
+        /* Hide scrollbar for pills and other specific areas */
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
@@ -1242,6 +1266,11 @@ export default function Home() {
         }
         .safe-area-bottom {
           padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+
+        /* Prevent body scroll when fixed panels are open on mobile */
+        body {
+          overscroll-behavior-y: none;
         }
       `}</style>
     </div>
