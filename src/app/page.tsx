@@ -50,6 +50,8 @@ import {
   Edit3,
   Eye,
   Save,
+  Lock,
+  Unlock,
   RotateCcw,
   Sparkles,
   FileUp,
@@ -74,6 +76,7 @@ interface Instrument {
   asignacion: number
   moneda: string
   objetivo: string
+  locked?: boolean
 }
 
 interface AsignacionEstrategica {
@@ -81,6 +84,7 @@ interface AsignacionEstrategica {
   porcentaje: number
   sector: string
   objetivo: string
+  locked?: boolean
 }
 
 interface ObligacionNegociable {
@@ -185,6 +189,111 @@ const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+const normalizeWeights = <T extends { asignacion?: number; porcentaje?: number; locked?: boolean }>(
+  items: T[],
+  key: 'asignacion' | 'porcentaje'
+): T[] => {
+  if (items.length === 0) return items
+  const currentTotal = items.reduce((sum, item) => sum + (Number(item[key]) || 0), 0)
+  if (currentTotal === 0) {
+    const perItem = Math.floor(100 / items.length)
+    const newItems = items.map(item => ({ ...item, [key]: perItem }))
+    let sum = newItems.reduce((s, i) => s + (Number(i[key]) || 0), 0)
+    let i = 0
+    while (sum < 100) {
+      newItems[i % items.length][key] = (Number(newItems[i % items.length][key]) || 0) + 1
+      sum++
+      i++
+    }
+    return newItems
+  }
+
+  const factor = 100 / currentTotal
+  const newItems = items.map(item => ({ ...item, [key]: Math.round((Number(item[key]) || 0) * factor) }))
+
+  let currentSum = newItems.reduce((sum, item) => sum + (Number(item[key]) || 0), 0)
+  let attempts = 0
+  while (currentSum !== 100 && attempts < 100) {
+    const diff = 100 - currentSum
+    const step = diff > 0 ? 1 : -1
+    // Adjust items, prioritizing those with largest values or just in order
+    for (let i = 0; i < newItems.length; i++) {
+      const val = Number(newItems[i][key]) || 0
+      if (val + step >= 0) {
+        newItems[i][key] = val + step
+        currentSum += step
+        if (currentSum === 100) break
+      }
+    }
+    attempts++
+  }
+  return newItems
+}
+
+const adjustWeights = <T extends { asignacion?: number; porcentaje?: number; locked?: boolean }>(
+  items: T[],
+  changedIndex: number,
+  newValue: number,
+  key: 'asignacion' | 'porcentaje'
+): T[] => {
+  const newItems = [...items]
+  const oldItem = newItems[changedIndex]
+
+  // Cap newValue between 0 and 100
+  const cappedValue = Math.min(100, Math.max(0, newValue))
+  newItems[changedIndex] = { ...oldItem, [key]: cappedValue }
+
+  const unlockedItemsIndices = newItems
+    .map((item, index) => ({ item, index }))
+    .filter(({ item, index }) => index !== changedIndex && !item.locked)
+    .map(({ index }) => index)
+
+  if (unlockedItemsIndices.length === 0) {
+    return newItems
+  }
+
+  const currentOtherTotal = newItems.reduce((sum, item, index) => {
+    if (index === changedIndex) return sum
+    return sum + (Number(item[key]) || 0)
+  }, 0)
+
+  const targetOtherTotal = 100 - cappedValue
+
+  if (currentOtherTotal === 0) {
+    const perItem = targetOtherTotal / unlockedItemsIndices.length
+    unlockedItemsIndices.forEach(idx => {
+      newItems[idx] = { ...newItems[idx], [key]: Math.round(perItem) }
+    })
+  } else {
+    const factor = targetOtherTotal / currentOtherTotal
+    unlockedItemsIndices.forEach(idx => {
+      const val = Number(newItems[idx][key]) || 0
+      newItems[idx] = { ...newItems[idx], [key]: Math.round(val * factor) }
+    })
+  }
+
+  // Adjust for rounding errors
+  let currentSum = newItems.reduce((sum, item) => sum + (Number(item[key]) || 0), 0)
+  let attempts = 0
+  while (currentSum !== 100 && attempts < 10) {
+    const diff = 100 - currentSum
+    const step = diff > 0 ? 1 : -1
+
+    // Find an unlocked item to adjust
+    for (const idx of unlockedItemsIndices) {
+      const val = Number(newItems[idx][key]) || 0
+      if (val + step >= 0) {
+        newItems[idx] = { ...newItems[idx], [key]: val + step }
+        currentSum += step
+        if (currentSum === 100) break
+      }
+    }
+    attempts++
+  }
+
+  return newItems
 }
 
 // ============================================================
@@ -836,9 +945,16 @@ export default function Home() {
                     <p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>ARS</p>
                     <p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} text-[#C4846C]`}>{exposicionARS}%</p>
                   </div>
-                  <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center`}>
+                  <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center group relative cursor-pointer`}
+                    onClick={() => setInstruments(normalizeWeights(instruments, 'asignacion'))}
+                  >
                     <p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>Total</p>
                     <p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} ${totalAsignacion !== 100 ? 'text-red-500' : 'text-[#2D5A4A]'}`}>{totalAsignacion}%</p>
+                    {totalAsignacion !== 100 && (
+                      <div className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl">
+                        <Sparkles className="w-4 h-4 text-[#2D5A4A]" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -846,14 +962,32 @@ export default function Home() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className={labelClass}>Instrumentos</Label>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setInstruments(prev => [...prev, { nombre: '', tipo: '', asignacion: 0, moneda: 'USD', objetivo: '' }])} 
-                      className={`${isMobile ? 'h-10 text-sm' : 'h-5 text-[10px]'} text-[#3D7A5F]`}
-                    >
-                      <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const perItem = Math.floor(100 / (instruments.length || 1));
+                          const base = instruments.map(inst => ({ ...inst, asignacion: perItem, locked: false }));
+                          setInstruments(normalizeWeights(base, 'asignacion'));
+                        }}
+                        className={`${isMobile ? 'h-10 text-xs' : 'h-5 text-[9px]'} text-[#7A8B80]`}
+                      >
+                        Igualar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setInstruments(prev => {
+                          const currentTotal = prev.reduce((s, i) => s + i.asignacion, 0);
+                          const remaining = Math.max(0, 100 - currentTotal);
+                          return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }];
+                        })}
+                        className={`${isMobile ? 'h-10 text-sm' : 'h-5 text-[10px]'} text-[#3D7A5F]`}
+                      >
+                        <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar
+                      </Button>
+                    </div>
                   </div>
                   <div
                     className="space-y-2 overflow-y-auto pr-1"
@@ -862,7 +996,32 @@ export default function Home() {
                     {instruments.map((inst, i) => (
                       <div key={i} className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl group relative`}>
                         <div className={`flex items-center ${isMobile ? 'gap-3 flex-wrap' : 'gap-2'}`}>
-                          <Badge className={`bg-[#2D5A4A] ${isMobile ? 'text-xs h-6' : 'text-[9px] h-4'}`}>{inst.asignacion}%</Badge>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const arr = [...instruments];
+                                arr[i] = { ...arr[i], locked: !arr[i].locked };
+                                setInstruments(arr);
+                              }}
+                              className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${inst.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}
+                            >
+                              {inst.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                            </Button>
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                value={inst.asignacion}
+                                onChange={(e) => {
+                                  const newVal = parseInt(e.target.value) || 0;
+                                  setInstruments(adjustWeights(instruments, i, newVal, 'asignacion'));
+                                }}
+                                className={`${isMobile ? 'w-16 h-11 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center`}
+                              />
+                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span>
+                            </div>
+                          </div>
                           <Input 
                             value={inst.nombre} 
                             onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} 
@@ -895,18 +1054,45 @@ export default function Home() {
 
                 {/* Asignacion estrategica */}
                 <div>
-                  <Label className={labelClass}>Asignación Estratégica ({totalAsignacionEstrategica}%)</Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className={labelClass}>Asignación Estratégica ({totalAsignacionEstrategica}%)</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAsignacionEstrategica(normalizeWeights(asignacionEstrategica, 'porcentaje'))}
+                      className={`${isMobile ? 'h-10 text-xs' : 'h-5 text-[9px]'} text-[#3D7A5F]`}
+                    >
+                      Ajustar a 100%
+                    </Button>
+                  </div>
                   <div className={`space-y-2 mt-2`}>
                     {asignacionEstrategica.map((asig, i) => (
                       <div key={i} className={`flex items-center ${isMobile ? 'gap-3 p-3' : 'gap-2 p-1.5'} bg-[#F5F4F0] rounded-xl`}>
-                        <Badge className={`bg-[#3D7A5F] ${isMobile ? 'text-xs h-6' : 'text-[9px] h-4'}`}>{asig.porcentaje}%</Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const arr = [...asignacionEstrategica];
+                            arr[i] = { ...arr[i], locked: !arr[i].locked };
+                            setAsignacionEstrategica(arr);
+                          }}
+                          className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${asig.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}
+                        >
+                          {asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                        </Button>
                         <span className={`${isMobile ? 'text-sm' : 'text-xs'} flex-1 truncate`}>{asig.horizonte}</span>
-                        <Input 
-                          type="number" 
-                          value={asig.porcentaje} 
-                          onChange={(e) => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], porcentaje: parseInt(e.target.value) || 0 }; setAsignacionEstrategica(arr) }} 
-                          className={`${isMobile ? 'w-16 h-11 text-base' : 'w-12 h-6 text-[10px]'}`} 
-                        />
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={asig.porcentaje}
+                            onChange={(e) => {
+                              const newVal = parseInt(e.target.value) || 0;
+                              setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje'));
+                            }}
+                            className={`${isMobile ? 'w-16 h-11 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center`}
+                          />
+                          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span>
+                        </div>
                       </div>
                     ))}
                   </div>
