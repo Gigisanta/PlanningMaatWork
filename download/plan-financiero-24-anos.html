@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Financiero Personal - Semilla 24</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --cactus-dark: #2D5A3D;
+  --cactus-medium: #4A7C59;
+  --cactus-light: #6B9B7A;
+  --sand-light: #F5F0E8;
+  --sand-medium: #E8DFD0;
+  --sand-dark: #D4C5A9;
+  --terracotta: #C17F59;
+  --white: #FFFFFF;
+  --text-dark: #1A1A1A;
+  --text-medium: #4A4A4A;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, var(--sand-light) 0%, var(--sand-medium) 100%);
+  color: var(--text-dark);
+  line-height: 1.7;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(45, 90, 61, 0.15);
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(135deg, var(--cactus-dark) 0%, var(--cactus-medium) 100%);
+  color: var(--white);
+  padding: 50px 40px;
+  text-align: center;
+}
+
+.header h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+.header .subtitle { font-size: 18px; opacity: 0.95; }
+.header .meta { display: flex; justify-content: center; gap: 30px; margin-top: 24px; font-size: 14px; opacity: 0.9; }
+
+.content { padding: 40px; }
+
+.section { margin-bottom: 48px; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--sand-medium);
+}
+
+.section-header .emoji {
+  font-size: 32px;
+  background: linear-gradient(135deg, var(--cactus-light) 0%, var(--cactus-medium) 100%);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.section-header h2 { font-size: 22px; font-weight: 700; color: var(--cactus-dark); }
+
+blockquote {
+  background: linear-gradient(135deg, var(--sand-light) 0%, var(--sand-medium) 100%);
+  border-left: 4px solid var(--terracotta);
+  padding: 20px 24px;
+  margin: 20px 0;
+  border-radius: 0 12px 12px 0;
+  font-style: italic;
+}
+
+.highlight-box {
+  background: linear-gradient(135deg, var(--cactus-light) 0%, var(--cactus-medium) 100%);
+  color: var(--white);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin: 24px 0;
+}
+
+.highlight-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+
+.terracotta-box {
+  background: linear-gradient(135deg, var(--terracotta) 0%, #D4956B 100%);
+  color: var(--white);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin: 24px 0;
+}
+
+.terracotta-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+
+ul { list-style: none; margin: 20px 0; }
+li { position: relative; padding: 12px 0 12px 32px; border-bottom: 1px solid var(--sand-light); }
+li::before { content: '🌵'; position: absolute; left: 0; font-size: 16px; }
+
+table { width: 100%; border-collapse: collapse; margin: 24px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(45, 90, 61, 0.1); }
+
+thead { background: linear-gradient(135deg, var(--cactus-dark) 0%, var(--cactus-medium) 100%); }
+
+th { padding: 16px 20px; text-align: left; color: var(--white); font-weight: 600; font-size: 13px; text-transform: uppercase; }
+
+td { padding: 14px 20px; border-bottom: 1px solid var(--sand-light); }
+
+tbody tr:nth-child(even) { background-color: var(--sand-light); }
+tbody tr:hover { background-color: var(--sand-medium); }
+
+.footer { background: var(--sand-light); padding: 30px 40px; text-align: center; border-top: 3px solid var(--sand-medium); }
+.footer p { font-size: 13px; color: #6B6B6B; margin: 4px 0; }
+.disclaimer { background: var(--white); padding: 16px 24px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--sand-dark); }
+
+hr { border: none; height: 2px; background: linear-gradient(90deg, transparent, var(--sand-dark), transparent); margin: 32px 0; }
+
+.instrument-card {
+  background: var(--sand-light);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  border-left: 4px solid var(--cactus-medium);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.instrument-card .name { font-weight: 600; color: var(--cactus-dark); }
+.instrument-card .type { font-size: 13px; color: var(--text-medium); }
+.instrument-card .details { text-align: right; font-size: 13px; }
+.instrument-card .risk { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.risk-low { background: #D4EDDA; color: #155724; }
+.risk-medium { background: #FFF3CD; color: #856404; }
+.risk-medium-low { background: #E8F5E9; color: #2E7D32; }
+
+.goal-box {
+  background: var(--white);
+  border: 2px solid var(--cactus-light);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+
+.goal-box h4 { color: var(--cactus-dark); font-weight: 700; margin-bottom: 8px; }
+
+@media (max-width: 600px) {
+  .header { padding: 30px 20px; }
+  .header h1 { font-size: 24px; }
+  .content { padding: 24px; }
+  .header .meta { flex-direction: column; gap: 8px; }
+  .instrument-card { flex-direction: column; text-align: left; gap: 8px; }
+  .instrument-card .details { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- HEADER -->
+  <header class="header">
+    <h1>🌵 Plan Financiero: Semilla 24</h1>
+    <p class="subtitle">Estrategia de Acumulación para Joven Profesional en Formación</p>
+    <div class="meta">
+      <span>📅 Fecha: Enero 2025</span>
+      <span>👤 Cliente: 24 años | Estudiante</span>
+      <span>🎯 Perfil: Moderado-Conservador</span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- 🏦 SECCIÓN 1: Estrategia Principal -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">🏦</span>
+        <h2>Estrategia Principal: "Semilla 24"</h2>
+      </div>
+      
+      <blockquote>
+        <strong>¿Qué es?</strong> Una estrategia de acumulación progresiva diseñada para un joven de 24 años que está formándose como ingeniero de datos. El objetivo es construir una base financiera sólida mediante un fondo de emergencia, ahorro a mediano plazo para oportunidades profesionales, y capital semilla para proyectos futuros. La estrategia prioriza la preservación de capital con crecimiento moderado, adaptándose a la etapa de transición del cliente.
+      </blockquote>
+      
+      <div class="goal-box">
+        <h4>🎯 Objetivo Principal</h4>
+        <p><strong>Meta de ahorro total:</strong> US$12,000 en un horizonte de 36 meses</p>
+        <p><strong>Desglose:</strong> Fondo de emergencia US$4,500 + Ahorro mediano plazo US$5,000 + Capital oportunidades US$2,500</p>
+        <p><strong>Aporte mensual sugerido:</strong> US$250-350 (aprox. $250,000-350,000 ARS al cambio actual)</p>
+      </div>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">📊 Instrumentos Principales</h3>
+      
+      <div class="instrument-card">
+        <div>
+          <div class="name">Fondo Común de Inversión - Liquidez</div>
+          <div class="type">Tipo: FCI Money Market | Liquidez: T+1</div>
+        </div>
+        <div class="details">
+          <span class="risk risk-low">Riesgo Bajo</span>
+        </div>
+      </div>
+      
+      <div class="instrument-card">
+        <div>
+          <div class="name">Cauciones Bursátiles en USD</div>
+          <div class="type">Tipo: Renta Fija | Liquidez: 7-30 días</div>
+        </div>
+        <div class="details">
+          <span class="risk risk-low">Riesgo Bajo</span>
+        </div>
+      </div>
+      
+      <div class="instrument-card">
+        <div>
+          <div class="name">Plazo Fijo UVA</div>
+          <div class="type">Tipo: Renta Fija | Liquidez: 90 días</div>
+        </div>
+        <div class="details">
+          <span class="risk risk-low">Riesgo Bajo</span>
+        </div>
+      </div>
+      
+      <div class="instrument-card">
+        <div>
+          <div class="name">CEDEARs Diversificados (SPY, QQQ)</div>
+          <div class="type">Tipo: Renta Variable | Liquidez: Inmediata</div>
+        </div>
+        <div class="details">
+          <span class="risk risk-medium-low">Riesgo Medio-Bajo</span>
+        </div>
+      </div>
+      
+      <div class="highlight-box">
+        <h3>📖 Término Clave: Fondo de Emergencia</h3>
+        <p>Es un reservorio de liquidez equivalente a 3-6 meses de gastos básicos que actúa como colchón financiero ante imprevistos. Para un joven que vive con su familia y tiene gastos reducidos (universidad + salidas), un fondo de US$3,000-4,500 representa aproximadamente 4-6 meses de cobertura. Debe mantenerse en instrumentos de alta liquidez (T+1) y bajo riesgo.</p>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- 📊 SECCIÓN 2: Asignación Estratégica -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">📊</span>
+        <h2>Asignación Estratégica de Cartera</h2>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Horizonte</th>
+            <th>% Cartera</th>
+            <th>Sector</th>
+            <th>Objetivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Inmediato</strong></td>
+            <td>35%</td>
+            <td>Liquidez (FCI / Cauciones)</td>
+            <td>Fondo de emergencia + gastos universidad</td>
+          </tr>
+          <tr>
+            <td><strong>1-2 años</strong></td>
+            <td>40%</td>
+            <td>Renta Fija USD / CER</td>
+            <td>Ahorro mediano plazo + protección inflacionaria</td>
+          </tr>
+          <tr>
+            <td><strong>2-5 años</strong></td>
+            <td>20%</td>
+            <td>CEDEARs Globales</td>
+            <td>Crecimiento con exposición a mercados desarrollados</td>
+          </tr>
+          <tr>
+            <td><strong>> 5 años</strong></td>
+            <td>5%</td>
+            <td>Equity AR / Cripto (opcional)</td>
+            <td>Exposición oportunista a upside local</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">💡 Explicación por Sector</h3>
+      
+      <ul>
+        <li><strong>Liquidez (35%):</strong> Dado que eres estudiante y tu gasto principal es la universidad (~$320,000 ARS/mes equivalentes a ~US$260), necesitas mantener un colchón de liquidez robusto. Los FCI money market ofrecen rendimiento diario con disponibilidad inmediata, ideales para el fondo de emergencia y para cubrir el pago trimestral/semental de la universidad.</li>
+        <li><strong>Renta Fija USD / CER (40%):</strong> Para el ahorro mediano plazo, combinamos instrumentos en dólares (cauciones, ONs) con instrumentos ajustados por inflación (UVA, CER). Esta asignación protege tu poder adquisitivo mientras genera un rendimiento real del 2-4% anual sobre la inflación.</li>
+        <li><strong>CEDEARs Globales (20%):</strong> A los 24 años, tienes la ventaja del horizonte temporal. Los CEDEARs de ETFs como SPY (S&P 500) o QQQ (Nasdaq) te permiten participar del crecimiento de la economía global con diversificación instantánea. Aunque son renta variable, tu horizonte largo amortigua la volatilidad.</li>
+        <li><strong>Equity AR / Oportunista (5%):</strong> Un porcentaje menor para explorar oportunidades locales o activos de mayor riesgo cuando tengas más experiencia y estabilidad laboral. Este 5% es "dinero de aprendizaje" que te permite familiarizarte con mercados más volátiles.</li>
+      </ul>
+    </section>
+
+    <hr>
+
+    <!-- 🧮 SECCIÓN 3: Plan de Aportes y Cash-Flow -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">🧮</span>
+        <h2>Plan de Aportes y Proyección de Cash-Flow</h2>
+      </div>
+      
+      <div class="highlight-box">
+        <h3>📐 Supuestos de Cálculo</h3>
+        <p><strong>Retorno real anual estimado:</strong> 2.8% (cartera moderada-conservadora)</p>
+        <p><strong>Aporte mensual base:</strong> US$300</p>
+        <p><strong>Horizonte total:</strong> 36 meses</p>
+        <p><strong>Mes de inicio:</strong> Febrero 2025</p>
+      </div>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">📅 Proyección Mensual (Primeros 6 Meses)</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Aporte</th>
+            <th>Rendimiento</th>
+            <th>Acumulado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Feb 2025</td>
+            <td>US$300.00</td>
+            <td>US$0.00</td>
+            <td>US$300.00</td>
+          </tr>
+          <tr>
+            <td>Mar 2025</td>
+            <td>US$300.00</td>
+            <td>US$0.68</td>
+            <td>US$600.68</td>
+          </tr>
+          <tr>
+            <td>Abr 2025</td>
+            <td>US$300.00</td>
+            <td>US$1.38</td>
+            <td>US$902.06</td>
+          </tr>
+          <tr>
+            <td>May 2025</td>
+            <td>US$300.00</td>
+            <td>US$2.10</td>
+            <td>US$1,204.16</td>
+          </tr>
+          <tr>
+            <td>Jun 2025</td>
+            <td>US$300.00</td>
+            <td>US$2.84</td>
+            <td>US$1,507.00</td>
+          </tr>
+          <tr>
+            <td>Jul 2025</td>
+            <td>US$300.00</td>
+            <td>US$3.60</td>
+            <td>US$1,810.60</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">📈 Proyección Trimestral (Año 1)</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Trimestre</th>
+            <th>Aportes Totales</th>
+            <th>Rendimiento Acum.</th>
+            <th>Capital Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>T1 (Feb-Abr 2025)</td>
+            <td>US$900.00</td>
+            <td>US$2.06</td>
+            <td>US$902.06</td>
+          </tr>
+          <tr>
+            <td>T2 (May-Jul 2025)</td>
+            <td>US$900.00</td>
+            <td>US$8.54</td>
+            <td>US$1,808.60</td>
+          </tr>
+          <tr>
+            <td>T3 (Ago-Oct 2025)</td>
+            <td>US$900.00</td>
+            <td>US$19.44</td>
+            <td>US$2,719.44</td>
+          </tr>
+          <tr>
+            <td>T4 (Nov-Ene 2026)</td>
+            <td>US$900.00</td>
+            <td>US$34.78</td>
+            <td>US$3,634.78</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">🎯 Proyección Anual (Horizonte Completo)</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Año</th>
+            <th>Aportes Acumulados</th>
+            <th>Rendimiento Total</th>
+            <th>Capital Final</th>
+            <th>% Meta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Año 1 (2025)</td>
+            <td>US$3,600.00</td>
+            <td>US$34.78</td>
+            <td>US$3,634.78</td>
+            <td>30%</td>
+          </tr>
+          <tr>
+            <td>Año 2 (2026)</td>
+            <td>US$7,200.00</td>
+            <td>US$139.12</td>
+            <td>US$7,339.12</td>
+            <td>61%</td>
+          </tr>
+          <tr>
+            <td>Año 3 (2027)</td>
+            <td>US$10,800.00</td>
+                       <td>US$321.45</td>
+            <td>US$11,121.45</td>
+            <td>93%</td>
+          </tr>
+          <tr style="background-color: var(--cactus-light); color: white;">
+            <td><strong>Meta Final</strong></td>
+            <td><strong>US$10,800</strong></td>
+            <td><strong>US$321+</strong></td>
+            <td><strong>US$11,121+</strong></td>
+            <td><strong>93%+</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="terracotta-box">
+        <h3>💰 Consideración Especial: Gastos en ARS (Universidad)</h3>
+        <p>Tu gasto principal es la universidad (~$320,000 ARS/mes). Para cubrir este compromiso sin afectar tus inversiones en USD, se recomienda:</p>
+        <p><strong>1.</strong> Mantener 2-3 cuotas universitarias en un FCI CER (ej: Balanz Renta Fija CER) que ajusta por inflación.</p>
+        <p><strong>2.</strong> Utilizar plazos fijos UVA para horizontes de 90+ días, protegiendo el poder adquisitivo.</p>
+        <p><strong>3.</strong> El fondo de emergencia en USD actúa como respaldo si necesitas cubrir la universidad en caso de devaluación abrupta.</p>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- 🧱 SECCIÓN 4: Cartera Sugerida -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">🧱</span>
+        <h2>Cartera Sugerida de Instrumentos</h2>
+      </div>
+      
+      <p style="margin-bottom: 20px;">Basado en tu perfil moderado-conservador, horizonte de 3-5 años y necesidad de liquidez, te proponemos la siguiente cartera diversificada:</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Instrumento</th>
+            <th>Tipo</th>
+            <th>Asignación</th>
+            <th>Liquidez</th>
+            <th>Función</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Balanz Ahorro</strong></td>
+            <td>FCI Liquidez</td>
+            <td>20%</td>
+            <td>T+1</td>
+            <td>Fondo de emergencia</td>
+          </tr>
+          <tr>
+            <td><strong>Balanz Renta Fija Dólar Linked</strong></td>
+            <td>FCI Renta Fija</td>
+            <td>15%</td>
+            <td>T+2</td>
+            <td>Cobertura devaluatoria</td>
+          </tr>
+          <tr>
+            <td><strong>Balanz Performance I</strong></td>
+            <td>FCI CER</td>
+            <td>15%</td>
+            <td>T+1</td>
+            <td>Ajuste por inflación</td>
+          </tr>
+          <tr>
+            <td><strong>Cauciones Bursátiles USD</strong></td>
+            <td>Renta Fija</td>
+            <td>15%</td>
+            <td>7-30 días</td>
+            <td>Rendimiento en USD</td>
+          </tr>
+          <tr>
+            <td><strong>CEDEAR SPY (S&P 500 ETF)</strong></td>
+            <td>Renta Variable</td>
+            <td>15%</td>
+            <td>Inmediata</td>
+            <td>Exposición global</td>
+          </tr>
+          <tr>
+            <td><strong>CEDEAR KO (Coca-Cola)</strong></td>
+            <td>Renta Variable</td>
+            <td>10%</td>
+            <td>Inmediata</td>
+            <td>Dividendos estables</td>
+          </tr>
+          <tr>
+            <td><strong>Plazo Fijo UVA</strong></td>
+            <td>Renta Fija</td>
+            <td>10%</td>
+            <td>90 días</td>
+            <td>Protección inflacionaria</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="goal-box">
+        <h4>🎯 Resumen de la Cartera</h4>
+        <p><strong>Renta Fija:</strong> 75% (FCI + Cauciones + PF UVA)</p>
+        <p><strong>Renta Variable:</strong> 25% (CEDEARs diversificados)</p>
+        <p><strong>Rendimiento esperado real:</strong> 2.5-3.5% anual sobre inflación</p>
+        <p><strong>Volatilidad estimada:</strong> 8-12% anual (perfil moderado-conservador)</p>
+      </div>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">💡 ¿Por qué esta composición?</h3>
+      
+      <ul>
+        <li><strong>Balanz Ahorro (20%):</strong> Es un FCI money market que rinde diariamente y permite rescatar en 24 horas. Ideal para tu fondo de emergencia. Actualmente ofrece tasas competitivas cercanas al 85-90% de la tasa de política monetaria.</li>
+        <li><strong>FCI Dólar Linked + CER (30% combinados):</strong> Te protegen de los dos mayores riesgos en Argentina: devaluación e inflación. El Dólar Linked sigue el tipo de cambio oficial, mientras que el CER ajusta por el índice de inflación.</li>
+        <li><strong>CEDEARs SPY y KO (25% combinados):</strong> A los 24 años, necesitas exposición al crecimiento global. SPY te da acceso a las 500 empresas más grandes de EE.UU., mientras que KO es una empresa defensiva que paga dividendos consistentes desde hace 60+ años.</li>
+        <li><strong>Plazo Fijo UVA (10%):</strong> Complementa la cobertura inflacionaria con un instrumento bancario garantido, ideal para horizontes de 90 días o más.</li>
+      </ul>
+    </section>
+
+    <hr>
+
+    <!-- 🏷️ SECCIÓN 5: ONs en USD -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">🏷️</span>
+        <h2>Obligaciones Negociables en USD</h2>
+      </div>
+      
+      <p style="margin-bottom: 20px;">Para la porción de renta fija en dólares, estas ONs ofrecen rendimientos competitivos con riesgo controlado. Todas cuentan con exención impositiva bajo la Ley 23.576:</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Emisor</th>
+            <th>Cupón</th>
+            <th>Vencimiento</th>
+            <th>ISIN</th>
+            <th>Moneda</th>
+            <th>Pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>YPF S.A.</strong></td>
+            <td>8.50%</td>
+            <td>2027</td>
+            <td>ARYPF2900P29</td>
+            <td>USD</td>
+            <td>Semestral</td>
+          </tr>
+          <tr>
+            <td><strong>Pampa Energía</strong></td>
+            <td>7.75%</td>
+            <td>2028</td>
+            <td>ARPAMP2800G38</td>
+            <td>USD</td>
+            <td>Semestral</td>
+          </tr>
+          <tr>
+            <td><strong>Central Puerto</strong></td>
+            <td>7.25%</td>
+            <td>2026</td>
+            <td>ARCEPU2600N66</td>
+            <td>USD</td>
+            <td>Semestral</td>
+          </tr>
+          <tr>
+            <td><strong>Transportadora Gas Sur</strong></td>
+            <td>7.875%</td>
+            <td>2027</td>
+            <td>ARTGS2700H58</td>
+            <td>USD</td>
+            <td>Semestral</td>
+          </tr>
+          <tr>
+            <td><strong>IRSA Inversiones</strong></td>
+            <td>6.50%</td>
+            <td>2026</td>
+            <td>ARIRSA2600M45</td>
+            <td>USD</td>
+            <td>Semestral</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="highlight-box">
+        <h3>⚠️ Nota sobre ONs</h3>
+        <p>Las ONs en USD son instrumentos de deuda emitidos por empresas argentinas. Aunque pagan en dólares, llevan riesgo de default del emisor. Para un perfil moderado-conservador, se recomienda diversificar entre 2-3 emisores y no superar el 20% de la cartera en ONs individuales. Alternativamente, los FCI de renta fija diversifican automáticamente entre múltiples emisores.</p>
+      </div>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">📊 Análisis de Emisores Recomendados</h3>
+      
+      <ul>
+        <li><strong>YPF:</strong> Mayor empresa energética de Argentina. Sus ONs ofrecen el cupón más alto (8.50%) pero con mayor riesgo dado el contexto sectorial. Vencimiento 2027 ofrece un horizonte de 2 años, compatible con tu plan de mediano plazo.</li>
+        <li><strong>Pampa Energía:</strong> Empresa integrada de energía con generación, transmisión y distribución. Perfil de riesgo medio-alto con cupón competitivo (7.75%). Diversificación geográfica en sus activos reduce el riesgo concentrado.</li>
+        <li><strong>Central Puerto:</strong> Mayor generadora eléctrica de Argentina. Cupón moderado (7.25%) con vencimiento más corto (2026), ideal para quienes buscan menor duración y exposición temporal.</li>
+      </ul>
+    </section>
+
+    <hr>
+
+    <!-- 🧾 SECCIÓN 6: Beneficio Fiscal -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">🧾</span>
+        <h2>Beneficio Fiscal y Tratamiento Impositivo</h2>
+      </div>
+      
+      <p style="margin-bottom: 20px;">En Argentina, el tratamiento fiscal de los instrumentos financieros varía significativamente. Conocer estas diferencias te permite optimizar tu rentabilidad neta:</p>
+      
+      <ul>
+        <li><strong>Obligaciones Negociables (Ley 23.576):</strong> Los intereses y ajustes de capital de las ONs cotizantes están exentos del Impuesto a los Bienes Personales y del Impuesto a las Ganancias. Esto representa una ventaja fiscal significativa respecto a plazos fijos u otros instrumentos de renta fija gravados. Para una ON con cupón del 8%, el beneficio fiscal equivaldría a ~1.5-2% adicional de rendimiento neto anual.</li>
+        <li><strong>CEDEARs - Venta exenta:</strong> La venta de CEDEARs en Bolsa de Buenos Aires está exenta de Impuesto a las Ganancias (hasta US$66.000 anuales en ganancias de capital). Sin embargo, los dividendos recibidos están gravados al 7% (retención). Para un joven inversor con montos moderados, esto significa que las ganancias de capital por revalorización de CEDEARs no tributan, optimizando el rendimiento del componente de crecimiento de tu cartera.</li>
+        <li><strong>Fondos Comunes de Inversión - Transparencia fiscal:</strong> Los FCI operan bajo el régimen de transparencia: el fondo no tributa, y las ganancias se trasladan al inversor. Esto permite el reinversión automática sin fricción impositiva mientras el capital permanece en el fondo. Al momento del rescate, se calcula la ganancia y aplica la retención correspondiente según el tipo de activo subyacente.</li>
+        <li><strong>Seguros de Vida con Ahorro:</strong> Las primas de seguros de vida pueden deducirse hasta $996.706,23 anuales (monto actualizado 2024) del Impuesto a las Ganancias para trabajadores en relación de dependencia. Aunque este beneficio no aplica directamente a tu situación actual como estudiante, es relevante conocerlo para tu futura planificación financiera cuando ingreses al mercado laboral formal.</li>
+        <li><strong>Cauciones y Plazos Fijos:</strong> Los rendimientos de cauciones y plazos fijos en pesos están alcanzados por impuestos (Bienes Personales para plazos fijos, Ganancias para intereses). Sin embargo, los plazos fijos UVA tienen tratamiento preferencial al ajustar por inflación antes de calcular el interés gravable, reduciendo la base imponible real.</li>
+      </ul>
+      
+      <div class="goal-box">
+        <h4>🎯 Estrategia Fiscal Recomendada</h4>
+        <p>Para tu perfil y horizonte, prioriza:</p>
+        <p>1. <strong>FCI</strong> para liquidez (transparencia fiscal y reinversión automática)</p>
+        <p>2. <strong>CEDEARs</strong> para crecimiento (ganancias de capital exentas)</p>
+        <p>3. <strong>ONs</strong> para renta fija en USD (exención completa bajo Ley 23.576)</p>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- 📚 SECCIÓN 7: Educación y Riesgos -->
+    <section class="section">
+      <div class="section-header">
+        <span class="emoji">📚</span>
+        <h2>Educación Financiera y Gestión de Riesgos</h2>
+      </div>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">⚠️ Riesgos Identificados y Estrategias de Mitigación</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Riesgo</th>
+            <th>Descripción</th>
+            <th>Mitigación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Riesgo Cambiario</strong></td>
+            <td>Devaluación abrupta del peso que afecte tu capacidad de ahorro en ARS</td>
+            <td>Mantener 50%+ de cartera en activos dolarizados (CEDEARs, ONs USD, Dólar Linked)</td>
+          </tr>
+          <tr>
+            <td><strong>Riesgo de Liquidez</strong></td>
+            <td>Necesidad imprevista de fondos cuando los mercados están cerrados o con baja liquidez</td>
+            <td>Fondo de emergencia en FCI T+1; no invertir más del 15% en activos ilíquidos</td>
+          </tr>
+          <tr>
+            <td><strong>Riesgo de Mercado</strong></td>
+            <td>Caídas temporales en el valor de los CEDEARs por volatilidad global</td>
+            <td>Horizonte de inversión de 3-5 años permite superar ciclos; diversificación geográfica con SPY</td>
+          </tr>
+          <tr>
+            <td><strong>Riesgo Profesional</strong></td>
+            <td>Como estudiante, tu capacidad de aporte depende de ingresos informales o apoyo familiar</td>
+            <td>Mantener flexibilidad en aportes (mínimo US$150, máximo US$500); priorizar liquidez</td>
+          </tr>
+          <tr>
+            <td><strong>Riesgo Inflacionario</strong></td>
+            <td>Pérdida de poder adquisitivo en activos en pesos</td>
+            <td>FCI CER y Plazos Fijos UVA para la porción en pesos; revisar mensualmente</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3 style="color: var(--cactus-dark); margin: 24px 0 16px 0;">📖 Conceptos Clave para tu Educación Financiera</h3>
+      
+      <ul>
+        <li><strong>Interés Compuesto:</strong> A los 24 años, tu mayor activo es el tiempo. El interés compuesto genera rendimientos sobre rendimientos anteriores. Un aporte de US$300 mensuales durante 36 meses a 2.8% real anual resulta en US$11,121, de los cuales US$321 son puramente intereses compuestos. Si extiendes el horizonte a 10 años (cuando tengas 34), el capital alcanzado sería de ~US$42,000, de los cuales más de US$6,000 serían intereses compuestos.</li>
+        <li><strong>Diversificación:</strong> No pongas todos los huevos en la misma canasta. Tu cartera incluye 7 tipos de activos diferentes, reduciendo el riesgo de que una crisis sectorial o de un emisor específico afecte significativamente tu patrimonio.</li>
+        <li><strong>Dólar Cost Averaging:</strong> Al aportar mensualmente un monto fijo, compras más unidades cuando los precios están bajos y menos cuando están altos. Esta disciplina automática reduce el impacto de la volatilidad sobre tu rendimiento promedio.</li>
+        <li><strong>Horizonte Temporal:</strong> Los instrumentos de renta variable (CEDEARs) son volátiles a corto plazo pero históricamente rentables a largo plazo. Tu horizonte de 5+ años te permite tolerar esta volatilidad sin necesidad de vender en momentos desfavorables.</li>
+      </ul>
+      
+      <div class="terracotta-box">
+        <h3>🌟 Consejo Final: Tu Ventaja Competitiva</h3>
+        <p>A los 24 años, tienes algo que ningún inversor experimentado puede comprar: <strong>tiempo</strong>. Estudiando ingeniería de datos, entras en uno de los sectores con mayor demanda y potencial de ingresos. Este plan financiero no es solo sobre ahorrar dinero; es sobre construir los cimientos de tu libertad financiera futura. Cada US$300 que aportes hoy, multiplicado por décadas de interés compuesto, puede convertirse en una base sólida para oportunidades que ni imaginas hoy.</p>
+        <p style="margin-top: 12px;"><em>"El mejor momento para plantar un árbol fue hace 20 años. El segundo mejor momento es ahora."</em> — Proverbio chino</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p><strong>FinPlan Agent</strong> | Asesor Financiero Personal</p>
+    <p>Plan generado el 15 de Enero de 2025</p>
+    <div class="disclaimer">
+      <p><strong>Aviso Legal:</strong> Este plan financiero tiene carácter educativo e informativo. No constituye asesoramiento financiero personalizado ni recomendación de inversión. Los rendimientos pasados no garantizan resultados futuros. Los valores presentados son estimaciones basadas en supuestos de mercado y pueden variar. Antes de invertir, consulte con un profesional matriculado y evalúe su tolerancia al riesgo y situación particular. Los instrumentos mencionados pueden estar sujetos a cambios en su regulación, liquidez y rendimiento.</p>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
