@@ -3,117 +3,41 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
 import {
-  Copy,
-  FileText,
-  Loader2,
-  Check,
-  Download,
-  FileDown,
-  Plus,
-  Trash2,
   TrendingUp,
-  Shield,
-  Target,
-  PiggyBank,
-  Building2,
-  Scale,
-  Lightbulb,
-  Heart,
-  Settings,
-  ExternalLink,
-  Instagram,
-  MessageCircle,
-  Link2,
-  Edit3,
-  Eye,
-  Save,
-  Lock,
-  Unlock,
+  Check,
   RotateCcw,
   Sparkles,
-  FileUp,
-  Paperclip,
-  User,
-  DollarSign,
-  Calendar,
-  Briefcase,
-  ChevronDown,
+  Settings,
+  Instagram,
+  MessageCircle,
   X,
-  Menu,
-  FileCode,
   ClipboardList,
+  Eye,
+  Loader2,
 } from 'lucide-react'
-// ============================================================
-// TYPES & INTERFACES
-// ============================================================
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
 
-interface Instrument {
-  nombre: string
-  tipo: string
-  asignacion: number
-  moneda: string
-  objetivo: string
-  locked?: boolean
-}
-
-interface AsignacionEstrategica {
-  horizonte: string
-  porcentaje: number
-  sector: string
-  objetivo: string
-  locked?: boolean
-}
-
-interface ObligacionNegociable {
-  emisor: string
-  cupon: string
-  vencimiento: string
-  ticker: string
-  moneda: string
-  pago: string
-}
-
-interface Riesgo {
-  riesgo: string
-  nivel: 'Bajo' | 'Medio' | 'Alto'
-  mitigacion: string
-}
-
-interface ConfigurableLink {
-  name: string
-  url: string
-  icon: 'link' | 'instagram' | 'whatsapp'
-}
-
-interface AttachedFile {
-  name: string
-  type: string
-  data: string
-  size: number
-}
+import {
+  Instrument,
+  AsignacionEstrategica,
+  ObligacionNegociable,
+  Riesgo,
+  ConfigurableLink,
+  AttachedFile
+} from '@/components/portfolio/types'
+import { PortfolioEditor } from '@/components/portfolio/PortfolioEditor'
+import { PortfolioPreview } from '@/components/portfolio/PortfolioPreview'
 
 // ============================================================
 // STORAGE & DEFAULTS
@@ -185,12 +109,6 @@ const saveConfig = (data: object) => {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) } catch {}
 }
 
-const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-}
-
 const normalizeWeights = <T extends { asignacion?: number; porcentaje?: number; locked?: boolean }>(
   items: T[],
   key: 'asignacion' | 'porcentaje'
@@ -218,7 +136,6 @@ const normalizeWeights = <T extends { asignacion?: number; porcentaje?: number; 
   while (currentSum !== 100 && attempts < 100) {
     const diff = 100 - currentSum
     const step = diff > 0 ? 1 : -1
-    // Adjust items, prioritizing those with largest values or just in order
     for (let i = 0; i < newItems.length; i++) {
       const val = Number(newItems[i][key]) || 0
       if (val + step >= 0) {
@@ -240,8 +157,6 @@ const adjustWeights = <T extends { asignacion?: number; porcentaje?: number; loc
 ): T[] => {
   const newItems = [...items]
   const oldItem = newItems[changedIndex]
-
-  // Cap newValue between 0 and 100
   const cappedValue = Math.min(100, Math.max(0, newValue))
   newItems[changedIndex] = { ...oldItem, [key]: cappedValue }
 
@@ -250,9 +165,7 @@ const adjustWeights = <T extends { asignacion?: number; porcentaje?: number; loc
     .filter(({ item, index }) => index !== changedIndex && !item.locked)
     .map(({ index }) => index)
 
-  if (unlockedItemsIndices.length === 0) {
-    return newItems
-  }
+  if (unlockedItemsIndices.length === 0) return newItems
 
   const currentOtherTotal = newItems.reduce((sum, item, index) => {
     if (index === changedIndex) return sum
@@ -260,7 +173,6 @@ const adjustWeights = <T extends { asignacion?: number; porcentaje?: number; loc
   }, 0)
 
   const targetOtherTotal = 100 - cappedValue
-
   if (currentOtherTotal === 0) {
     const perItem = targetOtherTotal / unlockedItemsIndices.length
     unlockedItemsIndices.forEach(idx => {
@@ -274,14 +186,11 @@ const adjustWeights = <T extends { asignacion?: number; porcentaje?: number; loc
     })
   }
 
-  // Adjust for rounding errors
   let currentSum = newItems.reduce((sum, item) => sum + (Number(item[key]) || 0), 0)
   let attempts = 0
   while (currentSum !== 100 && attempts < 10) {
     const diff = 100 - currentSum
     const step = diff > 0 ? 1 : -1
-
-    // Find an unlocked item to adjust
     for (const idx of unlockedItemsIndices) {
       const val = Number(newItems[idx][key]) || 0
       if (val + step >= 0) {
@@ -292,7 +201,6 @@ const adjustWeights = <T extends { asignacion?: number; porcentaje?: number; loc
     }
     attempts++
   }
-
   return newItems
 }
 
@@ -312,154 +220,32 @@ interface MobileSettingsSheetProps {
   asesorRecomendacion: boolean
   setAsesorRecomendacion: (v: boolean) => void
   onReset: () => void
-  onSave: () => void
   configSaved: boolean
 }
 
 function MobileSettingsSheet({
-  isOpen,
-  onClose,
-  asesorNombre,
-  setAsesorNombre,
-  platformLinks,
-  setPlatformLinks,
-  socialLinks,
-  setSocialLinks,
-  asesorRecomendacion,
-  setAsesorRecomendacion,
-  onReset,
-  onSave,
-  configSaved,
+  isOpen, onClose, asesorNombre, setAsesorNombre, platformLinks, setPlatformLinks, socialLinks, setSocialLinks, asesorRecomendacion, setAsesorRecomendacion, onReset, configSaved,
 }: MobileSettingsSheetProps) {
   if (!isOpen) return null
-
   return (
     <div className="fixed inset-0 z-50 md:hidden">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      {/* Sheet */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-2">
-          <div className="w-10 h-1 bg-[#E8E6E0] rounded-full" />
-        </div>
-        
-        {/* Header */}
+        <div className="flex justify-center pt-3 pb-2"><div className="w-10 h-1 bg-[#E8E6E0] rounded-full" /></div>
         <div className="flex items-center justify-between px-4 pb-3 border-b border-[#E8E6E0]">
           <h2 className="text-lg font-semibold text-[#1F2D26]">Configuración</h2>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              onClick={onReset} 
-              className="text-[#C4846C] text-sm h-9"
-            >
-              <RotateCcw className="w-4 h-4 mr-1" />Restaurar
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={onClose}
-              className="h-9 w-9 rounded-full"
-            >
-              <X className="w-5 h-5" />
-            </Button>
+            <Button variant="ghost" onClick={onReset} className="text-[#C4846C] text-sm h-9"><RotateCcw className="w-4 h-4 mr-1" />Restaurar</Button>
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-9 w-9 rounded-full"><X className="w-5 h-5" /></Button>
           </div>
         </div>
-        
-        {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-4 space-y-5">
-          {/* Tu nombre */}
-          <div>
-            <Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Tu nombre</Label>
-            <Input 
-              value={asesorNombre} 
-              onChange={(e) => setAsesorNombre(e.target.value)} 
-              placeholder="Juan Perez" 
-              className="h-12 text-base rounded-xl" 
-            />
-          </div>
-          
-          {/* Plataformas */}
-          <div>
-            <Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Plataformas</Label>
-            <div className="space-y-2">
-              {platformLinks.map((link, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input 
-                    value={link.name} 
-                    onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} 
-                    className="h-11 text-base flex-1 rounded-xl" 
-                    placeholder="Nombre"
-                  />
-                  <Input 
-                    value={link.url} 
-                    onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} 
-                    className="h-11 text-base flex-[2] rounded-xl" 
-                    placeholder="URL"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Redes */}
-          <div>
-            <Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Redes Sociales</Label>
-            <div className="space-y-2">
-              {socialLinks.map((link, i) => (
-                <div key={i} className="flex gap-2">
-                  <div className="flex items-center gap-2 flex-1">
-                    {link.icon === 'instagram' ? (
-                      <Instagram className="w-5 h-5 text-[#E1306C] flex-shrink-0" />
-                    ) : (
-                      <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />
-                    )}
-                    <Input 
-                      value={link.name} 
-                      onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} 
-                      className="h-11 text-base rounded-xl" 
-                    />
-                  </div>
-                  <Input 
-                    value={link.url} 
-                    onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} 
-                    className="h-11 text-base flex-[2] rounded-xl" 
-                    placeholder="URL"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Checkbox */}
-          <div className="flex items-center gap-3 py-2">
-            <input 
-              type="checkbox" 
-              checked={asesorRecomendacion} 
-              onChange={(e) => setAsesorRecomendacion(e.target.checked)} 
-              className="w-5 h-5 rounded text-[#3D7A5F] accent-[#3D7A5F]" 
-            />
-            <Label className="text-base">Incluir recomendaciones</Label>
-          </div>
+          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-12 text-base rounded-xl" /></div>
+          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Plataformas</Label><div className="space-y-2">{platformLinks.map((link, i) => (<div key={i} className="flex gap-2"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-1 rounded-xl" placeholder="Nombre" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
+          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Redes Sociales</Label><div className="space-y-2">{socialLinks.map((link, i) => (<div key={i} className="flex gap-2"><div className="flex items-center gap-2 flex-1">{link.icon === 'instagram' ? <Instagram className="w-5 h-5 text-[#E1306C] flex-shrink-0" /> : <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-11 text-base rounded-xl" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
+          <div className="flex items-center gap-3 py-2"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="w-5 h-5 rounded text-[#3D7A5F] accent-[#3D7A5F]" /><Label className="text-base">Incluir recomendaciones</Label></div>
         </div>
-        
-        {/* Footer */}
-        <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0]">
-          <Button 
-            onClick={() => { onSave(); onClose(); }} 
-            className="w-full h-12 bg-[#2D5A4A] hover:bg-[#3D7A5F] rounded-xl text-base"
-          >
-            {configSaved ? (
-              <><Check className="w-5 h-5 mr-2" />Guardado</>
-            ) : (
-              <><Save className="w-5 h-5 mr-2" />Guardar Configuración</>
-            )}
-          </Button>
-        </div>
+        <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0]"><div className="flex items-center justify-center py-2 px-4 bg-[#E8F5E9] text-[#2D5A4A] rounded-xl border border-[#C8E6C9] animate-in fade-in zoom-in duration-300"><Check className="w-5 h-5 mr-2" /><span className="font-medium">Cambios guardados automáticamente</span></div><Button onClick={onClose} className="w-full h-12 mt-4 bg-[#2D5A4A] hover:bg-[#3D7A5F] rounded-xl text-base">Listo</Button></div>
       </div>
     </div>
   )
@@ -470,12 +256,10 @@ function MobileSettingsSheet({
 // ============================================================
 
 export default function Home() {
-  // Mobile detection
   const [isMobile, setIsMobile] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<'form' | 'preview'>('form')
   const [showMobileSettings, setShowMobileSettings] = useState(false)
   
-  // Cliente (no persiste)
   const [edad, setEdad] = useState(24)
   const [profesion, setProfesion] = useState('Estudiante')
   const [objetivo, setObjetivo] = useState('Fondo de emergencia')
@@ -485,7 +269,6 @@ export default function Home() {
   const [gastosPrincipales, setGastosPrincipales] = useState('')
   const [observaciones, setObservaciones] = useState('')
 
-  // Configuracion (persiste)
   const [asignacionEstrategica, setAsignacionEstrategica] = useState(defaultAsignacionEstrategica)
   const [instruments, setInstruments] = useState(defaultInstruments)
   const [obligacionesNegociables, setObligacionesNegociables] = useState(defaultObligacionesNegociables)
@@ -501,7 +284,6 @@ export default function Home() {
   const [asesorRecomendacion, setAsesorRecomendacion] = useState(true)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
 
-  // UI State
   const [generatedHTML, setGeneratedHTML] = useState('')
   const [editableHTML, setEditableHTML] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -514,17 +296,14 @@ export default function Home() {
   const previewRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Mobile detection effect
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Cargar config al iniciar
+  const [isLoaded, setIsLoaded] = useState(false)
   useEffect(() => {
     const stored = getStoredConfig()
     if (stored) {
@@ -542,13 +321,18 @@ export default function Home() {
       if (stored.asesorNombre !== undefined) setAsesorNombre(stored.asesorNombre)
       if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
     }
+    setIsLoaded(true)
   }, [])
 
-  const handleSaveConfig = useCallback(() => {
-    saveConfig({ asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
-    setConfigSaved(true)
-    setTimeout(() => setConfigSaved(false), 2000)
-  }, [asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
+  useEffect(() => {
+    if (!isLoaded) return
+    const timer = setTimeout(() => {
+      saveConfig({ asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
+      setConfigSaved(true)
+      setTimeout(() => setConfigSaved(false), 2000)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [isLoaded, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
 
   const handleResetConfig = useCallback(() => {
     setAsignacionEstrategica(defaultAsignacionEstrategica)
@@ -567,7 +351,6 @@ export default function Home() {
     localStorage.removeItem(STORAGE_KEY)
   }, [])
 
-  // File handlers
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
@@ -584,7 +367,6 @@ export default function Home() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }, [])
 
-  // Computed
   const totalAsignacion = instruments.reduce((sum, i) => sum + i.asignacion, 0)
   const totalAsignacionEstrategica = asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0)
   const metaCalculada = aporteMensual * horizonteMeses
@@ -592,22 +374,13 @@ export default function Home() {
   const exposicionUSD = instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0)
   const exposicionARS = instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0)
 
-  // Generate Plan
   const handleGeneratePlan = async () => {
     setIsLoading(true)
     try {
       const formData = { edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, observaciones, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, attachedFiles }
       const response = await fetch('/api/generate-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
       const data = await response.json()
-      if (data.html) { 
-        setGeneratedHTML(data.html); 
-        setEditableHTML(data.html); 
-        setViewMode('preview');
-        // Auto-switch to preview on mobile after generating
-        if (isMobile) {
-          setMobilePanel('preview')
-        }
-      }
+      if (data.html) { setGeneratedHTML(data.html); setEditableHTML(data.html); setViewMode('preview'); if (isMobile) setMobilePanel('preview') }
     } catch (error) { console.error('Error:', error) } finally { setIsLoading(false) }
   }
 
@@ -617,139 +390,54 @@ export default function Home() {
 
   const handleDownloadHTML = () => {
     const blob = new Blob([editableHTML], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `plan-${edad}anos.html`
-    document.body.appendChild(a); a.click(); document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `plan-${edad}anos.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
   }
 
   const handleDownloadPDF = async () => {
     if (!previewRef.current) return
     setIsDownloadingPdf(true)
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas'),
-        import('jspdf')
-      ])
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
       const iframe = previewRef.current.querySelector('iframe')
       if (!iframe || !iframe.contentDocument) throw new Error('No iframe')
       const canvas = await html2canvas(iframe.contentDocument.body, { scale: 2, useCORS: true, backgroundColor: '#FAFAF8', windowWidth: 900 })
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const imgWidth = 210, pageHeight = 297
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const imgWidth = 210, pageHeight = 297, imgHeight = (canvas.height * imgWidth) / canvas.width
       let heightLeft = imgHeight, position = 0
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight
       while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight }
       pdf.save(`plan-${edad}anos.pdf`)
     } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
   }
 
-  // Navigation tabs
-  const tabs = [
-    { id: 'cliente', label: 'Cliente', icon: User },
-    { id: 'cartera', label: 'Cartera', icon: Building2 },
-    { id: 'otros', label: 'Otros', icon: Settings },
-  ]
+  const editorProps = {
+    isMobile, activeSection, setActiveSection, edad, setEdad, aporteMensual, setAporteMensual, horizonteMeses, setHorizonteMeses, profesion, setProfesion, objetivo, setObjetivo, perfilRiesgo, setPerfilRiesgo, gastosPrincipales, setGastosPrincipales, attachedFiles, setAttachedFiles, handleFileUpload, fileInputRef, instruments, setInstruments, asignacionEstrategica, setAsignacionEstrategica, exposicionUSD, exposicionARS, totalAsignacion, totalAsignacionEstrategica, adjustWeights, normalizeWeights, obligacionesNegociables, setObligacionesNegociables, riesgos, setRiesgos, beneficiosFiscales, setBeneficiosFiscales, usarTerminoIA, setUsarTerminoIA, terminoFinanciero, setTerminoFinanciero, usarConsejoIA, setUsarConsejoIA, consejoFinal, setConsejoFinal, metaCalculada, formatNumber
+  }
 
-  // Mobile bottom tabs
-  const mobileBottomTabs = [
-    { id: 'form', label: 'Formulario', icon: ClipboardList },
-    { id: 'preview', label: 'Preview', icon: Eye },
-  ]
-
-  // Common input class for mobile
-  const inputClass = isMobile 
-    ? "h-12 text-base rounded-xl px-4" 
-    : "h-8 text-sm"
-  
-  const textareaClass = isMobile
-    ? "text-base rounded-xl p-4 min-h-[100px]"
-    : "text-sm min-h-[50px]"
-    
-  const labelClass = isMobile
-    ? "text-sm font-medium text-[#3D7A5F] mb-2 block"
-    : "text-[10px] text-[#7A8B80] uppercase tracking-wide"
+  const previewProps = {
+    isMobile, generatedHTML, viewMode, setViewMode, editableHTML, setEditableHTML, handleCopyToClipboard, handleDownloadHTML, handleDownloadPDF, isDownloadingPdf, copied, previewRef
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
-      {/* Header */}
       <header className="bg-[#2D5A4A] text-white md:py-3 py-2.5 px-4 shadow-sm flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-xl">
-              <TrendingUp className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
-            </div>
-            <div>
-              <h1 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold`}>Cactus</h1>
-              <p className="text-xs text-[#8BC4A8]">Generador de Planes</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* Save button - hidden on mobile, shown in sheet */}
-            {!isMobile && (
-              <Button onClick={handleSaveConfig} variant="outline" size="sm" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-8">
-                {configSaved ? <><Check className="w-3 h-3 mr-1" />Guardado</> : <><Save className="w-3 h-3 mr-1" />Guardar</>}
-              </Button>
-            )}
-
-            {/* Settings - Popover on desktop, Sheet on mobile */}
+          <div className="flex items-center gap-3"><div className="p-2 bg-white/10 rounded-xl"><TrendingUp className="w-5 h-5" /></div><div><h1 className="md:text-lg text-base font-bold">Cactus</h1><p className="text-xs text-[#8BC4A8]">Generador de Planes</p></div></div>
+          <div className="flex items-center gap-4">
+            {!isMobile && <div className={`flex items-center text-xs transition-opacity duration-500 ${configSaved ? 'opacity-100' : 'opacity-40'} text-[#8BC4A8]`}><Check className="w-3 h-3 mr-1" />Auto-guardado</div>}
             {isMobile ? (
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={() => setShowMobileSettings(true)}
-                className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-10 w-10"
-              >
-                <Settings className="w-5 h-5" />
-              </Button>
+              <Button variant="outline" size="icon" onClick={() => setShowMobileSettings(true)} className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-10 w-10"><Settings className="w-5 h-5" /></Button>
             ) : (
               <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-8 w-8">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                </PopoverTrigger>
+                <PopoverTrigger asChild><Button variant="outline" size="icon" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-8 w-8"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
                 <PopoverContent className="w-80 bg-white border-[#E8E6E0] shadow-xl rounded-xl" align="end">
                   <div className="space-y-3 p-1">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]">
-                      <span className="font-medium text-sm">Configuracion</span>
-                      <Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2">
-                        <RotateCcw className="w-3 h-3 mr-1" />Restaurar
-                      </Button>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-[#3D7A5F]">Tu nombre</Label>
-                      <Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-[#3D7A5F]">Plataformas</Label>
-                      {platformLinks.map((link, i) => (
-                        <div key={i} className="flex gap-1 mt-1">
-                          <Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" />
-                          <Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" />
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <Label className="text-xs text-[#3D7A5F]">Redes</Label>
-                      {socialLinks.map((link, i) => (
-                        <div key={i} className="flex gap-1 mt-1">
-                          <div className="flex items-center gap-1 w-24">
-                            {link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}
-                            <Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" />
-                          </div>
-                          <Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]">
-                      <input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[#3D7A5F]" />
-                      <Label className="text-xs">Incluir recomendaciones</Label>
-                    </div>
+                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
+                    <div><Label className="text-xs text-[#3D7A5F]">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" /></div>
+                    <div><Label className="text-xs text-[#3D7A5F]">Plataformas</Label>{platformLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
+                    <div><Label className="text-xs text-[#3D7A5F]">Redes</Label>{socialLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><div className="flex items-center gap-1 w-24">{link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[#3D7A5F]" /><Label className="text-xs">Incluir recomendaciones</Label></div>
                   </div>
                 </PopoverContent>
               </Popover>
@@ -758,706 +446,69 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Panel Izquierdo - Formulario */}
-        <div
-          className={`
-            ${isMobile
-              ? `fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`
-              : 'w-[380px] border-r border-[#E8E6E0] bg-white flex flex-col overflow-hidden'
-            }
-          `}
-          style={isMobile ? { bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' } : {}}
-        >
-          {/* Tabs de navegacion - Pills scrollable on mobile */}
-          <div className={`
-            ${isMobile 
-              ? 'flex gap-2 p-3 overflow-x-auto bg-[#F5F4F0] border-b border-[#E8E6E0] scrollbar-hide' 
-              : 'flex border-b border-[#E8E6E0] bg-[#F5F4F0]'
-            }
-          `}>
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveSection(tab.id)}
-                className={`
-                  ${isMobile 
-                    ? `flex-shrink-0 py-2.5 px-4 text-sm font-medium flex items-center gap-2 rounded-full transition-colors ${
-                        activeSection === tab.id 
-                          ? 'bg-[#2D5A4A] text-white shadow-sm' 
-                          : 'bg-white text-[#7A8B80] border border-[#E8E6E0]'
-                      }`
-                    : `flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                        activeSection === tab.id 
-                          ? 'bg-white text-[#2D5A4A] border-b-2 border-[#2D5A4A]' 
-                          : 'text-[#7A8B80] hover:text-[#1F2D26]'
-                      }`
-                  }
-                `}
-              >
-                <tab.icon className={isMobile ? "w-4 h-4" : "w-3.5 h-3.5"} />
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Contenido del tab */}
-          <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4 space-y-4' : 'p-3 space-y-3'}`}>
-            {/* TAB: CLIENTE */}
-            {activeSection === 'cliente' && (
-              <>
-                {/* Datos basicos en grid */}
-                <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-3 gap-2'}`}>
-                  <div>
-                    <Label className={labelClass}>Edad</Label>
-                    <Input 
-                      type="number" 
-                      value={edad} 
-                      onChange={(e) => setEdad(parseInt(e.target.value) || 0)} 
-                      className={`${inputClass} mt-1`} 
-                    />
-                  </div>
-                  <div>
-                    <Label className={labelClass}>Aporte USD</Label>
-                    <Input 
-                      type="number" 
-                      value={aporteMensual} 
-                      onChange={(e) => setAporteMensual(parseInt(e.target.value) || 0)} 
-                      className={`${inputClass} mt-1`} 
-                    />
-                  </div>
-                  <div>
-                    <Label className={labelClass}>Meses</Label>
-                    <Input 
-                      type="number" 
-                      value={horizonteMeses} 
-                      onChange={(e) => setHorizonteMeses(parseInt(e.target.value) || 0)} 
-                      className={`${inputClass} mt-1`} 
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className={labelClass}>Profesión</Label>
-                  <Input 
-                    value={profesion} 
-                    onChange={(e) => setProfesion(e.target.value)} 
-                    className={`${inputClass} mt-1`} 
-                  />
-                </div>
-
-                <div>
-                  <Label className={labelClass}>Objetivo</Label>
-                  <Textarea 
-                    value={objetivo} 
-                    onChange={(e) => setObjetivo(e.target.value)} 
-                    className={`${textareaClass} mt-1`} 
-                  />
-                </div>
-
-                <div>
-                  <Label className={labelClass}>Perfil de Riesgo</Label>
-                  <Select value={perfilRiesgo} onValueChange={setPerfilRiesgo}>
-                    <SelectTrigger className={`${inputClass} mt-1`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Conservador">Conservador</SelectItem>
-                      <SelectItem value="Moderado-Conservador">Moderado-Conservador</SelectItem>
-                      <SelectItem value="Moderado">Moderado</SelectItem>
-                      <SelectItem value="Moderado-Agresivo">Moderado-Agresivo</SelectItem>
-                      <SelectItem value="Agresivo">Agresivo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className={labelClass}>Gastos principales</Label>
-                  <Textarea 
-                    value={gastosPrincipales} 
-                    onChange={(e) => setGastosPrincipales(e.target.value)} 
-                    className={`${textareaClass} mt-1`}
-                    placeholder="Ej: Alquiler $150k/mes" 
-                  />
-                </div>
-
-                {/* Meta calculada */}
-                {aporteMensual > 0 && horizonteMeses > 0 && (
-                  <div className={`p-4 bg-gradient-to-r from-[#F5F4F0] to-white rounded-xl border border-[#E8E6E0] ${isMobile ? '' : 'p-3 rounded-lg'}`}>
-                    <div className="flex justify-between items-center">
-                      <span className={`${isMobile ? 'text-sm' : 'text-xs'} font-medium text-[#1F2D26]`}>Meta</span>
-                      <span className={`${isMobile ? 'text-2xl' : 'text-lg'} font-bold text-[#C4846C]`}>USD {formatNumber(metaCalculada)}</span>
-                    </div>
-                    <p className={`${isMobile ? 'text-xs' : 'text-[10px]'} text-[#5A9E7F] mt-1`}>
-                      {horizonteMeses} meses × USD {formatNumber(aporteMensual)}
-                    </p>
-                  </div>
-                )}
-
-                {/* Archivos adjuntos */}
-                <div>
-                  <Label className={`${labelClass} flex items-center gap-2`}>
-                    <Paperclip className="w-4 h-4" /> Documentos PDF
-                  </Label>
-                  <input ref={fileInputRef} type="file" accept="application/pdf" multiple onChange={handleFileUpload} className="hidden" />
-                  <Button 
-                    variant="outline" 
-                    onClick={() => fileInputRef.current?.click()} 
-                    className={`w-full ${isMobile ? 'h-12 text-base rounded-xl border-dashed mt-2' : 'h-8 text-xs mt-1 border-dashed'}`}
-                  >
-                    <FileUp className={`${isMobile ? 'w-5 h-5' : 'w-3 h-3'} mr-2`} /> Cargar PDF
-                  </Button>
-                  {attachedFiles.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {attachedFiles.map((file, i) => (
-                        <div key={i} className={`flex items-center justify-between ${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl ${isMobile ? '' : 'rounded'} text-sm group`}>
-                          <div className="flex items-center gap-2 truncate">
-                            <FileText className="w-4 h-4 text-[#C4846C] flex-shrink-0" />
-                            <span className="truncate">{file.name}</span>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))} 
-                            className={`${isMobile ? 'h-10 w-10' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* TAB: CARTERA */}
-            {activeSection === 'cartera' && (
-              <>
-                {/* Resumen rapido */}
-                <div className={`grid ${isMobile ? 'grid-cols-3 gap-3' : 'grid-cols-3 gap-2'}`}>
-                  <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center`}>
-                    <p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>USD</p>
-                    <p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} text-[#3D7A5F]`}>{exposicionUSD}%</p>
-                  </div>
-                  <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center`}>
-                    <p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>ARS</p>
-                    <p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} text-[#C4846C]`}>{exposicionARS}%</p>
-                  </div>
-                  <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center group relative cursor-pointer`}
-                    onClick={() => setInstruments(normalizeWeights(instruments, 'asignacion'))}
-                  >
-                    <p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>Total</p>
-                    <p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} ${totalAsignacion !== 100 ? 'text-red-500' : 'text-[#2D5A4A]'}`}>{totalAsignacion}%</p>
-                    {totalAsignacion !== 100 && (
-                      <div className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl">
-                        <Sparkles className="w-4 h-4 text-[#2D5A4A]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Instrumentos */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className={labelClass}>Instrumentos</Label>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const perItem = Math.floor(100 / (instruments.length || 1));
-                          const base = instruments.map(inst => ({ ...inst, asignacion: perItem, locked: false }));
-                          setInstruments(normalizeWeights(base, 'asignacion'));
-                        }}
-                        className={`${isMobile ? 'h-10 text-xs' : 'h-5 text-[9px]'} text-[#7A8B80]`}
-                      >
-                        Igualar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setInstruments(prev => {
-                          const currentTotal = prev.reduce((s, i) => s + i.asignacion, 0);
-                          const remaining = Math.max(0, 100 - currentTotal);
-                          return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }];
-                        })}
-                        className={`${isMobile ? 'h-10 text-sm' : 'h-5 text-[10px]'} text-[#3D7A5F]`}
-                      >
-                        <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar
-                      </Button>
-                    </div>
-                  </div>
-                  <div
-                    className="space-y-2 overflow-y-auto pr-1"
-                    style={{ maxHeight: isMobile ? '350px' : '280px' }}
-                  >
-                    {instruments.map((inst, i) => (
-                      <div key={i} className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl group relative`}>
-                        <div className={`flex items-center ${isMobile ? 'gap-3 flex-wrap' : 'gap-2'}`}>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                const arr = [...instruments];
-                                arr[i] = { ...arr[i], locked: !arr[i].locked };
-                                setInstruments(arr);
-                              }}
-                              className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${inst.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}
-                            >
-                              {inst.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                            </Button>
-                            <div className="relative">
-                              <Input
-                                type="number"
-                                value={inst.asignacion}
-                                onChange={(e) => {
-                                  const newVal = parseInt(e.target.value) || 0;
-                                  setInstruments(adjustWeights(instruments, i, newVal, 'asignacion'));
-                                }}
-                                className={`${isMobile ? 'w-16 h-11 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center`}
-                              />
-                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span>
-                            </div>
-                          </div>
-                          <Input 
-                            value={inst.nombre} 
-                            onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} 
-                            className={`${isMobile ? 'h-11 text-base flex-[2]' : 'h-6 text-xs flex-1'}`} 
-                            placeholder="Nombre" 
-                          />
-                          <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}>
-                            <SelectTrigger className={`${isMobile ? 'w-20 h-11 text-sm' : 'w-14 h-6 text-[10px]'}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="USD">USD</SelectItem>
-                              <SelectItem value="ARS">ARS</SelectItem>
-                              <SelectItem value="ARS/USD">Mix</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setInstruments(prev => prev.filter((_, j) => j !== i))} 
-                            className={`${isMobile ? 'h-10 w-10 flex-shrink-0' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}
-                          >
-                            <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-red-500`} />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Asignacion estrategica */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className={labelClass}>Asignación Estratégica ({totalAsignacionEstrategica}%)</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setAsignacionEstrategica(normalizeWeights(asignacionEstrategica, 'porcentaje'))}
-                      className={`${isMobile ? 'h-10 text-xs' : 'h-5 text-[9px]'} text-[#3D7A5F]`}
-                    >
-                      Ajustar a 100%
-                    </Button>
-                  </div>
-                  <div className={`space-y-2 mt-2`}>
-                    {asignacionEstrategica.map((asig, i) => (
-                      <div key={i} className={`flex items-center ${isMobile ? 'gap-3 p-3' : 'gap-2 p-1.5'} bg-[#F5F4F0] rounded-xl`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const arr = [...asignacionEstrategica];
-                            arr[i] = { ...arr[i], locked: !arr[i].locked };
-                            setAsignacionEstrategica(arr);
-                          }}
-                          className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${asig.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}
-                        >
-                          {asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                        </Button>
-                        <span className={`${isMobile ? 'text-sm' : 'text-xs'} flex-1 truncate`}>{asig.horizonte}</span>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={asig.porcentaje}
-                            onChange={(e) => {
-                              const newVal = parseInt(e.target.value) || 0;
-                              setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje'));
-                            }}
-                            className={`${isMobile ? 'w-16 h-11 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center`}
-                          />
-                          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* TAB: OTROS */}
-            {activeSection === 'otros' && (
-              <>
-                {/* ONs */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className={labelClass}>ONs en USD ({obligacionesNegociables.length})</Label>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setObligacionesNegociables(prev => [...prev, { emisor: '', cupon: '', vencimiento: '', ticker: '', moneda: 'USD', pago: 'Semestral' }])} 
-                      className={`${isMobile ? 'h-10 text-sm' : 'h-5 text-[10px]'} text-[#3D7A5F]`}
-                    >
-                      <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar
-                    </Button>
-                  </div>
-                  <div
-                    className="space-y-2 overflow-y-auto"
-                    style={{ maxHeight: isMobile ? '200px' : '120px' }}
-                  >
-                    {obligacionesNegociables.map((on, i) => (
-                      <div key={i} className={`${isMobile ? 'grid-cols-5 gap-2 p-3' : 'grid-cols-4 gap-1 p-1.5'} grid bg-[#F5F4F0] rounded-xl group`}>
-                        <Input 
-                          value={on.emisor} 
-                          onChange={(e) => { const arr = [...obligacionesNegociables]; arr[i] = { ...arr[i], emisor: e.target.value }; setObligacionesNegociables(arr) }} 
-                          className={`${isMobile ? 'h-11 text-sm' : 'h-6 text-[10px]'}`} 
-                          placeholder="Emisor" 
-                        />
-                        <Input 
-                          value={on.cupon} 
-                          onChange={(e) => { const arr = [...obligacionesNegociables]; arr[i] = { ...arr[i], cupon: e.target.value }; setObligacionesNegociables(arr) }} 
-                          className={`${isMobile ? 'h-11 text-sm' : 'h-6 text-[10px]'}`} 
-                          placeholder="Cupón" 
-                        />
-                        <Input 
-                          value={on.ticker} 
-                          onChange={(e) => { const arr = [...obligacionesNegociables]; arr[i] = { ...arr[i], ticker: e.target.value }; setObligacionesNegociables(arr) }} 
-                          className={`${isMobile ? 'h-11 text-sm' : 'h-6 text-[10px]'}`} 
-                          placeholder="Ticker" 
-                        />
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => setObligacionesNegociables(prev => prev.filter((_, j) => j !== i))} 
-                          className={`${isMobile ? 'h-11 w-11 flex-shrink-0' : 'h-6 w-6 p-0 opacity-0 group-hover:opacity-100'}`}
-                        >
-                          <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-red-500`} />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Riesgos */}
-                <div>
-                  <Label className={`${labelClass} mt-2`}>Riesgos ({riesgos.length})</Label>
-                  <div
-                    className="space-y-2 mt-2 overflow-y-auto"
-                    style={{ maxHeight: isMobile ? '200px' : '100px' }}
-                  >
-                    {riesgos.map((r, i) => (
-                      <div key={i} className={`${isMobile ? 'grid-cols-1 gap-2 p-3' : 'grid-cols-3 gap-1 p-1.5'} grid bg-[#F5F4F0] rounded-xl`}>
-                        <Input 
-                          value={r.riesgo} 
-                          onChange={(e) => { const arr = [...riesgos]; arr[i] = { ...arr[i], riesgo: e.target.value }; setRiesgos(arr) }} 
-                          className={`${isMobile ? 'h-11 text-sm' : 'h-6 text-[10px]'}`} 
-                          placeholder="Riesgo" 
-                        />
-                        <Select value={r.nivel} onValueChange={(v: 'Bajo' | 'Medio' | 'Alto') => { const arr = [...riesgos]; arr[i] = { ...arr[i], nivel: v }; setRiesgos(arr) }}>
-                          <SelectTrigger className={`${isMobile ? 'h-11 text-sm' : 'h-6 text-[10px]'}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Bajo">Bajo</SelectItem>
-                            <SelectItem value="Medio">Medio</SelectItem>
-                            <SelectItem value="Alto">Alto</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input 
-                          value={r.mitigacion} 
-                          onChange={(e) => { const arr = [...riesgos]; arr[i] = { ...arr[i], mitigacion: e.target.value }; setRiesgos(arr) }} 
-                          className={`${isMobile ? 'h-11 text-sm' : 'h-6 text-[10px]'}`} 
-                          placeholder="Mitigación" 
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Beneficios fiscales */}
-                <div>
-                  <Label className={`${labelClass} mt-2`}>Beneficios Fiscales</Label>
-                  <div
-                    className="space-y-2 mt-2 overflow-y-auto"
-                    style={{ maxHeight: isMobile ? '150px' : '80px' }}
-                  >
-                    {beneficiosFiscales.map((b, i) => (
-                      <Textarea 
-                        key={i} 
-                        value={b} 
-                        onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} 
-                        className={`${isMobile ? 'text-sm min-h-[50px] p-3' : 'text-[10px] min-h-[30px] py-1'} rounded-xl`} 
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Termino y Consejo */}
-                <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-2 gap-2'} mt-2`}>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input 
-                        type="checkbox" 
-                        checked={usarTerminoIA} 
-                        onChange={(e) => setUsarTerminoIA(e.target.checked)} 
-                        className={`rounded text-[#3D7A5F] ${isMobile ? 'w-5 h-5' : ''}`} 
-                      />
-                      <Label className={`${isMobile ? 'text-sm' : 'text-[10px]'}`}>Término IA</Label>
-                    </div>
-                    {!usarTerminoIA && (
-                      <Textarea 
-                        value={terminoFinanciero} 
-                        onChange={(e) => setTerminoFinanciero(e.target.value)} 
-                        className={`${isMobile ? 'text-sm min-h-[80px] p-3' : 'text-[10px] min-h-[40px]'} rounded-xl`} 
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input 
-                        type="checkbox" 
-                        checked={usarConsejoIA} 
-                        onChange={(e) => setUsarConsejoIA(e.target.checked)} 
-                        className={`rounded text-[#3D7A5F] ${isMobile ? 'w-5 h-5' : ''}`} 
-                      />
-                      <Label className={`${isMobile ? 'text-sm' : 'text-[10px]'}`}>Consejo IA</Label>
-                    </div>
-                    {!usarConsejoIA && (
-                      <Textarea 
-                        value={consejoFinal} 
-                        onChange={(e) => setConsejoFinal(e.target.value)} 
-                        className={`${isMobile ? 'text-sm min-h-[80px] p-3' : 'text-[10px] min-h-[40px]'} rounded-xl`} 
-                      />
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Boton generar fijo al pie */}
-          <div className={`${isMobile ? 'p-4' : 'p-3'} border-t border-[#E8E6E0] bg-white flex-shrink-0`}>
-            <Button 
-              onClick={handleGeneratePlan} 
-              disabled={isLoading} 
-              className={`w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] ${isMobile ? 'h-14 text-base' : 'h-10'} rounded-xl`}
-            >
-              {isLoading ? (
-                <><Loader2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} animate-spin mr-2`} />Generando...</>
-              ) : (
-                <><Sparkles className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} mr-2`} />Generar Plan</>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Panel Derecho - Preview */}
-        <div
-          className={`
-            ${isMobile
-              ? `fixed inset-0 top-[60px] z-40 bg-[#F5F4F0] flex flex-col transition-transform duration-300 ${mobilePanel === 'preview' ? 'translate-x-0' : 'translate-x-full'}`
-              : 'flex-1 flex flex-col bg-[#F5F4F0] overflow-hidden'
-            }
-          `}
-          style={isMobile ? { bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' } : {}}
-        >
-          {/* Header preview */}
-          <div className={`flex items-center justify-between ${isMobile ? 'px-4 py-3' : 'px-4 py-2'} bg-white border-b border-[#E8E6E0] flex-shrink-0`}>
-            <span className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-[#1F2D26]`}>Vista Previa</span>
-            {generatedHTML && (
-              <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-1'}`}>
-                {/* View mode toggle */}
-                <div className={`flex bg-[#F5F4F0] rounded-xl ${isMobile ? 'p-1 mr-2' : 'p-0.5 mr-2'}`}>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setViewMode('preview')} 
-                    className={`${isMobile ? 'h-10 text-sm px-3' : 'h-7 text-xs'} rounded-lg ${viewMode === 'preview' ? 'bg-white shadow-sm' : ''}`}
-                  >
-                    <Eye className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Vista
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setViewMode('edit')} 
-                    className={`${isMobile ? 'h-10 text-sm px-3' : 'h-7 text-xs'} rounded-lg ${viewMode === 'edit' ? 'bg-white shadow-sm' : ''}`}
-                  >
-                    <Edit3 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Editar
-                  </Button>
-                </div>
-                
-                {/* Action buttons - Improved visibility on mobile */}
-                <div
-                  className={`flex ${isMobile ? 'overflow-x-auto scrollbar-hide gap-2 max-w-[180px]' : 'gap-1'}`}
-                >
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleCopyToClipboard} 
-                    className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[#5A9E7F] text-[#5A9E7F] rounded-xl`}
-                  >
-                    {copied ? (
-                      <><Check className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Listo</>
-                    ) : (
-                      <><Copy className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Copiar</>
-                    )}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleDownloadHTML} 
-                    className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[#C4846C] text-[#C4846C] rounded-xl`}
-                  >
-                    <FileCode className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />HTML
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleDownloadPDF} 
-                    disabled={isDownloadingPdf} 
-                    className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[#2D5A4A] text-[#2D5A4A] rounded-xl`}
-                  >
-                    {isDownloadingPdf ? (
-                      <><Loader2 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} animate-spin mr-1`} />...</>
-                    ) : (
-                      <><FileDown className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />PDF</>
-                    )}
+        {!isMobile ? (
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel defaultSize={25} minSize={20} maxSize={45}>
+              <div className="h-full bg-white flex flex-col overflow-hidden border-r border-[#E8E6E0]">
+                <PortfolioEditor {...editorProps} />
+                <div className="p-3 border-t border-[#E8E6E0] bg-white flex-shrink-0">
+                  <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-10 rounded-xl">
+                    {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-4 h-4 mr-2" />Generar Plan</>}
                   </Button>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Contenido preview */}
-          <div className={`flex-1 overflow-auto ${isMobile ? 'p-2' : 'p-4'}`} ref={previewRef}>
-            {generatedHTML ? (
-              viewMode === 'preview' ? (
-                <div className="bg-white rounded-xl shadow-sm border border-[#E8E6E0] overflow-hidden h-full">
-                  <iframe 
-                    srcDoc={editableHTML} 
-                    title="Preview" 
-                    className={`w-full ${isMobile ? 'h-full min-h-[500px]' : 'h-[calc(100vh-180px)]'} bg-[#FAFAF8]`} 
-                  />
-                </div>
-              ) : (
-                <Textarea 
-                  value={editableHTML} 
-                  onChange={(e) => setEditableHTML(e.target.value)} 
-                  className={`font-mono ${isMobile ? 'text-xs min-h-[500px] p-3' : 'text-[10px] min-h-[calc(100vh-180px)]'} bg-white rounded-xl`} 
-                  placeholder="HTML..." 
-                />
-              )
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-[#7A8B80]">
-                <FileText className={`${isMobile ? 'w-20 h-20' : 'w-16 h-16'} mb-4 opacity-30`} />
-                <p className={`${isMobile ? 'text-lg' : 'font-medium'}`}>Sin plan generado</p>
-                <p className={`${isMobile ? 'text-base mt-2' : 'text-sm mt-1'}`}>Completa el formulario y genera el plan</p>
+            </ResizablePanel>
+            <ResizableHandle withHandle className="bg-[#E8E6E0] w-1.5 hover:bg-[#3D7A5F]/20 transition-colors" />
+            <ResizablePanel defaultSize={75}>
+              <PortfolioPreview {...previewProps} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        ) : (
+          <>
+            <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+              <PortfolioEditor {...editorProps} />
+              <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
+                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-14 text-base rounded-xl">
+                  {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Plan</>}
+                </Button>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+            <div className={`fixed inset-0 top-[60px] z-40 bg-[#F5F4F0] flex flex-col transition-transform duration-300 ${mobilePanel === 'preview' ? 'translate-x-0' : 'translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+              <PortfolioPreview {...previewProps} />
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Mobile Bottom Tab Bar */}
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom h-[calc(64px+env(safe-area-inset-bottom,0px))]">
           <div className="flex h-16">
-            {mobileBottomTabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setMobilePanel(tab.id as 'form' | 'preview')}
-                className={`
-                  flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative
-                  ${mobilePanel === tab.id 
-                    ? 'text-[#2D5A4A]' 
-                    : 'text-[#7A8B80]'
-                  }
-                `}
-              >
-                {mobilePanel === tab.id && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#2D5A4A] rounded-b-full" />
-                )}
-                <tab.icon className="w-6 h-6" />
-                <span className="text-xs font-medium">{tab.label}</span>
-                {tab.id === 'preview' && generatedHTML && (
-                  <div className="absolute top-2 right-1/4 w-2 h-2 bg-[#3D7A5F] rounded-full" />
-                )}
-              </button>
-            ))}
+            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
+              {mobilePanel === 'form' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#2D5A4A] rounded-b-full" />}
+              <ClipboardList className="w-6 h-6" /><span className="text-xs font-medium">Formulario</span>
+            </button>
+            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
+              {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#2D5A4A] rounded-b-full" />}
+              <Eye className="w-6 h-6" /><span className="text-xs font-medium">Preview</span>
+              {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[#3D7A5F] rounded-full" />}
+            </button>
           </div>
         </div>
       )}
 
-      {/* Mobile Settings Sheet */}
-      <MobileSettingsSheet
-        isOpen={showMobileSettings}
-        onClose={() => setShowMobileSettings(false)}
-        asesorNombre={asesorNombre}
-        setAsesorNombre={setAsesorNombre}
-        platformLinks={platformLinks}
-        setPlatformLinks={setPlatformLinks}
-        socialLinks={socialLinks}
-        setSocialLinks={setSocialLinks}
-        asesorRecomendacion={asesorRecomendacion}
-        setAsesorRecomendacion={setAsesorRecomendacion}
-        onReset={handleResetConfig}
-        onSave={handleSaveConfig}
-        configSaved={configSaved}
-      />
+      <MobileSettingsSheet isOpen={showMobileSettings} onClose={() => setShowMobileSettings(false)} asesorNombre={asesorNombre} setAsesorNombre={setAsesorNombre} platformLinks={platformLinks} setPlatformLinks={setPlatformLinks} socialLinks={socialLinks} setSocialLinks={setSocialLinks} asesorRecomendacion={asesorRecomendacion} setAsesorRecomendacion={setAsesorRecomendacion} onReset={handleResetConfig} configSaved={configSaved} />
 
-      {/* Scroll refinement and UI fixes */}
       <style jsx global>{`
-        /* Smooth scrolling */
-        * {
-          scroll-behavior: smooth;
-        }
-
-        /* Custom scrollbar for better visibility */
-        .overflow-y-auto::-webkit-scrollbar {
-          width: 6px;
-        }
-        .overflow-y-auto::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .overflow-y-auto::-webkit-scrollbar-thumb {
-          background: #E8E6E0;
-          border-radius: 10px;
-        }
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-          background: #D8D6D0;
-        }
-
-        /* Hide scrollbar for pills and other specific areas */
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .safe-area-bottom {
-          padding-bottom: env(safe-area-inset-bottom, 0);
-        }
-
-        /* Prevent body scroll when fixed panels are open on mobile */
-        body {
-          overscroll-behavior-y: none;
-        }
+        * { scroll-behavior: smooth; }
+        .overflow-y-auto::-webkit-scrollbar { width: 6px; }
+        .overflow-y-auto::-webkit-scrollbar-track { background: transparent; }
+        .overflow-y-auto::-webkit-scrollbar-thumb { background: #E8E6E0; border-radius: 10px; }
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover { background: #D8D6D0; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+        body { overscroll-behavior-y: none; }
       `}</style>
     </div>
   )
