@@ -21,12 +21,22 @@ import {
   ClipboardList,
   Eye,
   Loader2,
+  Save,
+  FolderOpen,
+  Trash2
 } from 'lucide-react'
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 import {
   Instrument,
@@ -38,12 +48,21 @@ import {
 } from '@/components/portfolio/types'
 import { PortfolioEditor } from '@/components/portfolio/PortfolioEditor'
 import { PortfolioPreview } from '@/components/portfolio/PortfolioPreview'
+import { toast } from 'sonner'
 
 // ============================================================
 // STORAGE & DEFAULTS
 // ============================================================
 
 const STORAGE_KEY = 'cactus-plan-config'
+const LIBRARY_KEY = 'cactus-portfolio-library'
+
+interface SavedPortfolio {
+    id: string;
+    name: string;
+    date: string;
+    data: any;
+}
 
 const defaultAsignacionEstrategica: AsignacionEstrategica[] = [
   { horizonte: 'Corto (0-12m)', porcentaje: 40, sector: 'Liquidez y Renta Fija', objetivo: 'Fondo de emergencia' },
@@ -293,6 +312,10 @@ export default function Home() {
   const [configSaved, setConfigSaved] = useState(false)
   const [activeSection, setActiveSection] = useState('cliente')
   
+  // Library state
+  const [portfolioLibrary, setPortfolioLibrary] = useState<SavedPortfolio[]>([])
+  const [saveName, setSaveName] = useState('')
+
   const previewRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -307,6 +330,13 @@ export default function Home() {
   useEffect(() => {
     const stored = getStoredConfig()
     if (stored) {
+      if (stored.edad !== undefined) setEdad(stored.edad)
+      if (stored.profesion) setProfesion(stored.profesion)
+      if (stored.objetivo) setObjetivo(stored.objetivo)
+      if (stored.aporteMensual !== undefined) setAporteMensual(stored.aporteMensual)
+      if (stored.perfilRiesgo) setPerfilRiesgo(stored.perfilRiesgo)
+      if (stored.horizonteMeses !== undefined) setHorizonteMeses(stored.horizonteMeses)
+      if (stored.gastosPrincipales) setGastosPrincipales(stored.gastosPrincipales)
       if (stored.asignacionEstrategica) setAsignacionEstrategica(stored.asignacionEstrategica)
       if (stored.instruments) setInstruments(stored.instruments)
       if (stored.obligacionesNegociables) setObligacionesNegociables(stored.obligacionesNegociables)
@@ -321,20 +351,34 @@ export default function Home() {
       if (stored.asesorNombre !== undefined) setAsesorNombre(stored.asesorNombre)
       if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
     }
+
+    // Load library
+    try {
+        const lib = localStorage.getItem(LIBRARY_KEY)
+        if (lib) setPortfolioLibrary(JSON.parse(lib))
+    } catch (e) {}
+
     setIsLoaded(true)
   }, [])
 
   useEffect(() => {
     if (!isLoaded) return
     const timer = setTimeout(() => {
-      saveConfig({ asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
+      saveConfig({ edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
       setConfigSaved(true)
       setTimeout(() => setConfigSaved(false), 2000)
     }, 1000)
     return () => clearTimeout(timer)
-  }, [isLoaded, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
+  }, [isLoaded, edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
 
   const handleResetConfig = useCallback(() => {
+    setEdad(24)
+    setProfesion('Estudiante')
+    setObjetivo('Fondo de emergencia')
+    setAporteMensual(300)
+    setPerfilRiesgo('Moderado-Conservador')
+    setHorizonteMeses(36)
+    setGastosPrincipales('')
     setAsignacionEstrategica(defaultAsignacionEstrategica)
     setInstruments(defaultInstruments)
     setObligacionesNegociables(defaultObligacionesNegociables)
@@ -350,6 +394,50 @@ export default function Home() {
     setAsesorRecomendacion(true)
     localStorage.removeItem(STORAGE_KEY)
   }, [])
+
+  const handleSaveToLibrary = () => {
+    if (!saveName) return;
+    const newEntry: SavedPortfolio = {
+        id: crypto.randomUUID(),
+        name: saveName,
+        date: new Date().toLocaleString(),
+        data: { edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA }
+    }
+    const updated = [...portfolioLibrary, newEntry]
+    setPortfolioLibrary(updated)
+    localStorage.setItem(LIBRARY_KEY, JSON.stringify(updated))
+    setSaveName('')
+    toast.success('Cartera guardada en tu biblioteca')
+  }
+
+  const handleLoadFromLibrary = (id: string) => {
+    const entry = portfolioLibrary.find(p => p.id === id)
+    if (!entry) return;
+    const d = entry.data
+    if (d.edad !== undefined) setEdad(d.edad)
+    if (d.profesion) setProfesion(d.profesion)
+    if (d.objetivo) setObjetivo(d.objetivo)
+    if (d.aporteMensual !== undefined) setAporteMensual(d.aporteMensual)
+    if (d.perfilRiesgo) setPerfilRiesgo(d.perfilRiesgo)
+    if (d.horizonteMeses !== undefined) setHorizonteMeses(d.horizonteMeses)
+    if (d.gastosPrincipales) setGastosPrincipales(d.gastosPrincipales)
+    if (d.asignacionEstrategica) setAsignacionEstrategica(d.asignacionEstrategica)
+    if (d.instruments) setInstruments(d.instruments)
+    if (d.obligacionesNegociables) setObligacionesNegociables(d.obligacionesNegociables)
+    if (d.riesgos) setRiesgos(d.riesgos)
+    if (d.beneficiosFiscales) setBeneficiosFiscales(d.beneficiosFiscales)
+    if (d.terminoFinanciero !== undefined) setTerminoFinanciero(d.terminoFinanciero)
+    if (d.usarTerminoIA !== undefined) setUsarTerminoIA(d.usarTerminoIA)
+    if (d.consejoFinal !== undefined) setConsejoFinal(d.consejoFinal)
+    if (d.usarConsejoIA !== undefined) setUsarConsejoIA(d.usarConsejoIA)
+    toast.success(`Cartera "${entry.name}" cargada`)
+  }
+
+  const handleDeleteFromLibrary = (id: string) => {
+    const updated = portfolioLibrary.filter(p => p.id !== id)
+    setPortfolioLibrary(updated)
+    localStorage.setItem(LIBRARY_KEY, JSON.stringify(updated))
+  }
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -400,14 +488,30 @@ export default function Home() {
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
       const iframe = previewRef.current.querySelector('iframe')
       if (!iframe || !iframe.contentDocument) throw new Error('No iframe')
-      const canvas = await html2canvas(iframe.contentDocument.body, { scale: 2, useCORS: true, backgroundColor: '#FAFAF8', windowWidth: 900 })
-      const imgData = canvas.toDataURL('image/png')
+
+      const originalHeight = iframe.style.height;
+      iframe.style.height = iframe.contentDocument.documentElement.scrollHeight + "px";
+      const content = iframe.contentDocument.body
+
+      const canvas = await html2canvas(content, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#FFFFFF',
+        logging: false,
+        windowWidth: 850
+      })
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95)
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       const imgWidth = 210, pageHeight = 297, imgHeight = (canvas.height * imgWidth) / canvas.width
       let heightLeft = imgHeight, position = 0
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight
-      while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight }
-      pdf.save(`plan-${edad}anos.pdf`)
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight
+      while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight }
+
+      pdf.save(`plan-${profesion.replace(/\s+/g, '_')}-${edad}.pdf`)
+      iframe.style.height = originalHeight;
     } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
   }
 
@@ -421,19 +525,48 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
-      <header className="bg-[#2D5A4A] text-white md:py-3 py-2.5 px-4 shadow-sm flex-shrink-0">
+      <header className="bg-[#2D5A4A] text-white md:py-3 py-2.5 px-4 shadow-sm flex-shrink-0 sticky top-0 z-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3"><div className="p-2 bg-white/10 rounded-xl"><TrendingUp className="w-5 h-5" /></div><div><h1 className="md:text-lg text-base font-bold">Cactus</h1><p className="text-xs text-[#8BC4A8]">Generador de Planes</p></div></div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3"><div className="p-2 bg-white/10 rounded-xl"><TrendingUp className="w-5 h-5" /></div><div><h1 className="md:text-lg text-base font-bold">Cactus</h1><p className="text-xs text-[#8BC4A8]">Model Portfolios</p></div></div>
+
+          <div className="flex items-center gap-2 md:gap-4">
+            <Dialog>
+                <DialogTrigger asChild><Button variant="outline" size="sm" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 px-3"><FolderOpen className="w-4 h-4 mr-2" />Biblioteca</Button></DialogTrigger>
+                <DialogContent className="max-w-md bg-white">
+                    <DialogHeader><DialogTitle>Mis Carteras Guardadas</DialogTitle></DialogHeader>
+                    <div className="space-y-3 mt-4 max-h-[400px] overflow-y-auto pr-1">
+                        {portfolioLibrary.length === 0 ? <p className="text-center py-8 text-[#7A8B80]">No tienes carteras guardadas aún.</p> :
+                            portfolioLibrary.map(item => (
+                                <div key={item.id} className="p-3 bg-[#F5F4F0] rounded-xl flex items-center justify-between border border-[#E8E6E0] hover:border-[#3D7A5F] transition-colors group">
+                                    <div className="cursor-pointer flex-1" onClick={() => handleLoadFromLibrary(item.id)}>
+                                        <h4 className="font-semibold text-[#1F2D26]">{item.name}</h4>
+                                        <p className="text-[10px] text-[#7A8B80]">{item.date}</p>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleDeleteFromLibrary(item.id)} className="text-red-500 opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4"/></Button>
+                                </div>
+                            ))
+                        }
+                    </div>
+                    <div className="pt-4 border-t border-[#E8E6E0] mt-4">
+                        <Label className="text-xs mb-2 block">Guardar actual como...</Label>
+                        <div className="flex gap-2">
+                            <Input value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="Nombre del cliente o perfil" className="h-10"/>
+                            <Button onClick={handleSaveToLibrary} className="bg-[#2D5A4A] hover:bg-[#3D7A5F] px-4"><Save className="w-4 h-4 mr-2"/>Guardar</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {!isMobile && <div className={`flex items-center text-xs transition-opacity duration-500 ${configSaved ? 'opacity-100' : 'opacity-40'} text-[#8BC4A8]`}><Check className="w-3 h-3 mr-1" />Auto-guardado</div>}
+
             {isMobile ? (
               <Button variant="outline" size="icon" onClick={() => setShowMobileSettings(true)} className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-10 w-10"><Settings className="w-5 h-5" /></Button>
             ) : (
               <Popover>
-                <PopoverTrigger asChild><Button variant="outline" size="icon" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-8 w-8"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
+                <PopoverTrigger asChild><Button variant="outline" size="icon" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 w-9"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
                 <PopoverContent className="w-80 bg-white border-[#E8E6E0] shadow-xl rounded-xl" align="end">
                   <div className="space-y-3 p-1">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
+                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
                     <div><Label className="text-xs text-[#3D7A5F]">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" /></div>
                     <div><Label className="text-xs text-[#3D7A5F]">Plataformas</Label>{platformLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
                     <div><Label className="text-xs text-[#3D7A5F]">Redes</Label>{socialLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><div className="flex items-center gap-1 w-24">{link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
@@ -448,19 +581,19 @@ export default function Home() {
 
       <div className="flex-1 flex overflow-hidden">
         {!isMobile ? (
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={25} minSize={20} maxSize={45}>
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            <ResizablePanel defaultSize={30} minSize={25} maxSize={45}>
               <div className="h-full bg-white flex flex-col overflow-hidden border-r border-[#E8E6E0]">
                 <PortfolioEditor {...editorProps} />
-                <div className="p-3 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                  <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-10 rounded-xl">
-                    {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-4 h-4 mr-2" />Generar Plan</>}
+                <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
+                  <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-12 text-base font-semibold rounded-xl shadow-lg shadow-[#2D5A4A]/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Plan Maestro</>}
                   </Button>
                 </div>
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle className="bg-[#E8E6E0] w-1.5 hover:bg-[#3D7A5F]/20 transition-colors" />
-            <ResizablePanel defaultSize={75}>
+            <ResizablePanel defaultSize={70}>
               <PortfolioPreview {...previewProps} />
             </ResizablePanel>
           </ResizablePanelGroup>
@@ -469,7 +602,7 @@ export default function Home() {
             <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioEditor {...editorProps} />
               <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-14 text-base rounded-xl">
+                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-14 text-base font-bold rounded-xl shadow-lg shadow-[#2D5A4A]/20">
                   {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Plan</>}
                 </Button>
               </div>
@@ -491,7 +624,7 @@ export default function Home() {
             <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#2D5A4A] rounded-b-full" />}
               <Eye className="w-6 h-6" /><span className="text-xs font-medium">Preview</span>
-              {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[#3D7A5F] rounded-full" />}
+              {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[#3D7A5F] rounded-full animate-pulse" />}
             </button>
           </div>
         </div>

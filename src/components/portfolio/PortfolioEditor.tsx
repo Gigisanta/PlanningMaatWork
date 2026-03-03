@@ -1,3 +1,4 @@
+import { AllocationChart } from "./Charts"
 import {
   User,
   Building2,
@@ -10,7 +11,8 @@ import {
   Plus,
   Lock,
   Unlock,
-  Trash2
+  Trash2,
+  Percent
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -230,13 +232,20 @@ export function PortfolioEditor({
 
         {activeSection === 'cartera' && (
           <>
-            <div className={`grid ${isMobile ? 'grid-cols-3 gap-3' : 'grid-cols-3 gap-2'}`}>
-              <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center`}><p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>USD</p><p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} text-[#3D7A5F]`}>{exposicionUSD}%</p></div>
-              <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center`}><p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>ARS</p><p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} text-[#C4846C]`}>{exposicionARS}%</p></div>
-              <div className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl text-center group relative cursor-pointer`} onClick={() => setInstruments(normalizeWeights(instruments, 'asignacion'))}>
-                <p className={`${isMobile ? 'text-xs' : 'text-[9px]'} text-[#7A8B80]`}>Total</p><p className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'} ${totalAsignacion !== 100 ? 'text-red-500' : 'text-[#2D5A4A]'}`}>{totalAsignacion}%</p>
-                {totalAsignacion !== 100 && <div className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl"><Sparkles className="w-4 h-4 text-[#2D5A4A]" /></div>}
-              </div>
+            <div className="bg-[#F5F4F0] rounded-2xl p-4 mb-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-1/3 h-24">
+                        <AllocationChart data={instruments.map(i => ({ name: i.nombre, value: i.asignacion }))} />
+                    </div>
+                    <div className="flex-1 grid grid-cols-2 gap-2">
+                        <div className="p-2 bg-white rounded-lg text-center"><p className="text-[10px] text-[#7A8B80] uppercase">USD</p><p className="font-bold text-[#3D7A5F]">{exposicionUSD}%</p></div>
+                        <div className="p-2 bg-white rounded-lg text-center"><p className="text-[10px] text-[#7A8B80] uppercase">ARS</p><p className="font-bold text-[#C4846C]">{exposicionARS}%</p></div>
+                        <div className="p-2 bg-white rounded-lg text-center col-span-2 group relative cursor-pointer" onClick={() => setInstruments(normalizeWeights(instruments, "asignacion"))}>
+                            <p className="text-[10px] text-[#7A8B80] uppercase">Total</p><p className={`font-bold ${totalAsignacion !== 100 ? "text-red-500" : "text-[#2D5A4A]"}`}>{totalAsignacion}%</p>
+                            {totalAsignacion !== 100 && <div className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg"><Sparkles className="w-4 h-4 text-[#2D5A4A]" /></div>}
+                        </div>
+                    </div>
+                </div>
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -246,30 +255,54 @@ export function PortfolioEditor({
                   <Button variant="ghost" size="sm" onClick={() => setInstruments((prev: any) => { const currentTotal = prev.reduce((s: any, i: any) => s + i.asignacion, 0); const remaining = Math.max(0, 100 - currentTotal); return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }]; })} className={`${isMobile ? 'h-10 text-sm' : 'h-5 text-[10px]'} text-[#3D7A5F]`}><Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Agregar</Button>
                 </div>
               </div>
-              <div className="space-y-2 overflow-y-auto pr-1" style={{ maxHeight: isMobile ? '350px' : '280px' }}>
+              <div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: isMobile ? '450px' : '400px' }}>
                 {instruments.map((inst, i) => (
-                  <div key={i} className={`${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl group relative`}>
-                    <div className={`flex items-center ${isMobile ? 'gap-3 flex-wrap' : 'gap-2'}`}>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${inst.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
-                        <div className="relative"><Input type="number" value={inst.asignacion} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setInstruments(adjustWeights(instruments, i, newVal, 'asignacion')); }} className={`${isMobile ? 'w-16 h-11 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center`} /><span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span></div>
-                      </div>
-                      <Input value={inst.nombre} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} className={`${isMobile ? 'h-11 text-base flex-[2]' : 'h-6 text-xs flex-1'}`} placeholder="Nombre" />
-                      <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}><SelectTrigger className={`${isMobile ? 'w-20 h-11 text-sm' : 'w-14 h-6 text-[10px]'}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="ARS/USD">Mix</SelectItem></SelectContent></Select>
-                      <Button variant="ghost" size="sm" onClick={() => setInstruments((prev: any) => prev.filter((_: any, j: number) => j !== i))} className={`${isMobile ? 'h-10 w-10 flex-shrink-0' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}><Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-red-500`} /></Button>
+                  <div key={i} className={`${isMobile ? 'p-4' : 'p-3'} bg-[#F5F4F0] rounded-xl group relative border border-[#E8E6E0]`}>
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${inst.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
+                            <div className="relative">
+                                <Input type="number" value={inst.asignacion} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setInstruments(adjustWeights(instruments, i, newVal, 'asignacion')); }} className={`${isMobile ? 'w-20 h-10 text-base' : 'w-16 h-8 text-sm'} pr-5 font-bold text-center rounded-lg`} />
+                                <Percent className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#7A8B80] pointer-events-none" />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}><SelectTrigger className={`${isMobile ? 'w-24 h-10 text-sm' : 'w-20 h-8 text-xs'} rounded-lg`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="ARS/USD">Mix</SelectItem></SelectContent></Select>
+                             <Button variant="ghost" size="sm" onClick={() => setInstruments((prev: any) => prev.filter((_: any, j: number) => j !== i))} className={`${isMobile ? 'h-10 w-10 flex-shrink-0' : 'h-8 w-8 flex-shrink-0'} text-red-500 hover:bg-red-50`}><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2">
+                        <div className="relative">
+                            <Label className="text-[9px] uppercase tracking-wider text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-[#F5F4F0]">Nombre</Label>
+                            <Input value={inst.nombre} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} className={`${isMobile ? 'h-11 text-base' : 'h-8 text-sm'} rounded-lg bg-white/50 focus:bg-white`} placeholder="Ej: CEDEAR SPY" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="relative">
+                                <Label className="text-[9px] uppercase tracking-wider text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-[#F5F4F0]">Tipo</Label>
+                                <Input value={inst.tipo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], tipo: e.target.value }; setInstruments(arr) }} className={`${isMobile ? 'h-11 text-base' : 'h-8 text-sm'} rounded-lg bg-white/50 focus:bg-white`} placeholder="Ej: ETF S&P500" />
+                            </div>
+                            <div className="relative">
+                                <Label className="text-[9px] uppercase tracking-wider text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-[#F5F4F0]">Objetivo</Label>
+                                <Input value={inst.objetivo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], objetivo: e.target.value }; setInstruments(arr) }} className={`${isMobile ? 'h-11 text-base' : 'h-8 text-sm'} rounded-lg bg-white/50 focus:bg-white`} placeholder="Ej: Crecimiento" />
+                            </div>
+                        </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-2"><Label className={labelClass}>Asignación Estratégica ({totalAsignacionEstrategica}%)</Label><Button variant="ghost" size="sm" onClick={() => setAsignacionEstrategica(normalizeWeights(asignacionEstrategica, 'porcentaje'))} className={`${isMobile ? 'h-10 text-xs' : 'h-5 text-[9px]'} text-[#3D7A5F]`}>Ajustar a 100%</Button></div>
-              <div className="space-y-2 mt-2">
+            <div className="pt-4 border-t border-[#E8E6E0] mt-4">
+              <div className="flex items-center justify-between mb-3"><Label className={labelClass}>Asignación Estratégica ({totalAsignacionEstrategica}%)</Label><Button variant="ghost" size="sm" onClick={() => setAsignacionEstrategica(normalizeWeights(asignacionEstrategica, 'porcentaje'))} className={`${isMobile ? 'h-10 text-xs' : 'h-5 text-[9px]'} text-[#3D7A5F]`}>Ajustar a 100%</Button></div>
+              <div className="space-y-2">
                 {asignacionEstrategica.map((asig, i) => (
-                  <div key={i} className={`flex items-center ${isMobile ? 'gap-3 p-3' : 'gap-2 p-1.5'} bg-[#F5F4F0] rounded-xl`}>
+                  <div key={i} className={`flex items-center ${isMobile ? 'gap-3 p-3' : 'gap-2 p-1.5'} bg-[#F5F4F0] rounded-xl border border-transparent hover:border-[#E8E6E0] transition-colors`}>
                     <Button variant="ghost" size="sm" onClick={() => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setAsignacionEstrategica(arr); }} className={`${isMobile ? 'h-10 w-10' : 'h-6 w-6 p-0'} ${asig.locked ? 'text-[#C4846C]' : 'text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
-                    <span className={`${isMobile ? 'text-sm' : 'text-xs'} flex-1 truncate`}>{asig.horizonte}</span>
-                    <div className="relative"><Input type="number" value={asig.porcentaje} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje')); }} className={`${isMobile ? 'w-16 h-11 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center`} /><span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span></div>
+                    <span className={`${isMobile ? 'text-sm' : 'text-xs'} flex-1 truncate font-medium text-[#4A5B50]`}>{asig.horizonte}</span>
+                    <div className="relative">
+                        <Input type="number" value={asig.porcentaje} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje')); }} className={`${isMobile ? 'w-16 h-10 text-base' : 'w-14 h-7 text-xs'} pr-4 font-bold text-center rounded-lg`} />
+                        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A8B80] pointer-events-none">%</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -311,8 +344,12 @@ export function PortfolioEditor({
               <Label className={`${labelClass} mt-2`}>Beneficios Fiscales</Label>
               <div className="space-y-2 mt-2 overflow-y-auto" style={{ maxHeight: isMobile ? '150px' : '80px' }}>
                 {beneficiosFiscales.map((b, i) => (
-                  <Textarea key={i} value={b} onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} className={`${isMobile ? 'text-sm min-h-[50px] p-3' : 'text-[10px] min-h-[30px] py-1'} rounded-xl`} />
+                  <div key={i} className="flex gap-2">
+                      <Textarea value={b} onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} className={`${isMobile ? 'text-sm min-h-[50px] p-3' : 'text-[10px] min-h-[30px] py-1'} rounded-xl flex-1`} />
+                      <Button variant="ghost" size="sm" onClick={() => setBeneficiosFiscales((prev: string[]) => prev.filter((_, j) => j !== i))} className="h-auto px-2 text-red-500"><X className="w-4 h-4"/></Button>
+                  </div>
                 ))}
+                <Button variant="ghost" size="sm" onClick={() => setBeneficiosFiscales((prev: string[]) => [...prev, ""])} className="w-full h-8 text-xs text-[#3D7A5F]"><Plus className="w-3 h-3 mr-1" />Agregar beneficio</Button>
               </div>
             </div>
             <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-2 gap-2'} mt-2`}>
