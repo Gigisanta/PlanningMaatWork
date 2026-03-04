@@ -34,24 +34,6 @@ import {
 } from './types'
 
 interface PortfolioEditorProps {
-  wizardStep: number
-  setWizardStep: (v: number) => void
-  ingresosMensuales: number
-  setIngresosMensuales: (v: number) => void
-  gastosMensuales: number
-  setGastosMensuales: (v: number) => void
-  fondoEmergenciaMeses: number
-  setFondoEmergenciaMeses: (v: number) => void
-  fondoEmergenciaActual: number
-  setFondoEmergenciaActual: (v: number) => void
-  metasVida: any[]
-  setMetasVida: (v: any) => void
-  proyeccionRetiro: string
-  setProyeccionRetiro: (v: string) => void
-  patrimonioActivos: number
-  setPatrimonioActivos: (v: number) => void
-  patrimonioDeudas: number
-  setPatrimonioDeudas: (v: number) => void
   isMobile: boolean
   activeSection: string
   setActiveSection: (section: string) => void
@@ -106,15 +88,6 @@ interface PortfolioEditorProps {
 }
 
 export function PortfolioEditor({
-  wizardStep, setWizardStep,
-  ingresosMensuales, setIngresosMensuales,
-  gastosMensuales, setGastosMensuales,
-  fondoEmergenciaMeses, setFondoEmergenciaMeses,
-  fondoEmergenciaActual, setFondoEmergenciaActual,
-  metasVida, setMetasVida,
-  proyeccionRetiro, setProyeccionRetiro,
-  patrimonioActivos, setPatrimonioActivos,
-  patrimonioDeudas, setPatrimonioDeudas,
   isMobile,
   activeSection,
   setActiveSection,
@@ -143,18 +116,8 @@ export function PortfolioEditor({
   metaCalculada, formatNumber
 }: PortfolioEditorProps) {
 
-  const steps = [
-    { id: 0, label: "Perfil", section: "cliente" },
-    { id: 1, label: "Salud Fin.", section: "salud" },
-    { id: 2, label: "Metas", section: "metas" },
-    { id: 3, label: "Cartera", section: "cartera" },
-    { id: 4, label: "Final", section: "otros" },
-  ]
-
   const tabs = [
     { id: 'cliente', label: 'Cliente', icon: User },
-    { id: 'salud', label: 'Salud', icon: Building2 },
-    { id: 'metas', label: 'Metas', icon: Building2 },
     { id: 'cartera', label: 'Cartera', icon: Building2 },
     { id: 'otros', label: 'Otros', icon: Settings },
   ]
@@ -163,48 +126,37 @@ export function PortfolioEditor({
   const textareaClass = isMobile ? "text-base rounded-xl p-4 min-h-[100px]" : "text-sm min-h-[50px]"
   const labelClass = isMobile ? "text-sm font-medium text-[#3D7A5F] mb-2 block" : "text-[10px] text-[#7A8B80] uppercase tracking-wide"
 
-  const nextStep = () => {
-    const next = Math.min(steps.length - 1, wizardStep + 1);
-    setWizardStep(next);
-    setActiveSection(steps[next].section);
-  }
-  const prevStep = () => {
-    const prev = Math.max(0, wizardStep - 1);
-    setWizardStep(prev);
-    setActiveSection(steps[prev].section);
-  }
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="bg-[#F5F4F0] border-b border-[#E8E6E0] flex-shrink-0 px-4 py-3">
-        <div className="flex items-center justify-between relative">
-          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#E8E6E0] -translate-y-1/2 z-0" />
-          {steps.map((step, idx) => (
-            <button
-              key={step.id}
-              onClick={() => {
-                setWizardStep(idx);
-                setActiveSection(step.section);
-              }}
-              className="relative z-10 flex flex-col items-center gap-1.5 group"
-            >
-              <div className={`
-                w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black transition-all
-                ${wizardStep === idx
-                  ? 'bg-[#2D5A4A] text-white scale-110 shadow-lg shadow-[#2D5A4A]/20'
-                  : wizardStep > idx
-                    ? 'bg-[#3D7A5F] text-white'
-                    : 'bg-white text-[#7A8B80] border border-[#E8E6E0] group-hover:border-[#3D7A5F]'
-                }
-              `}>
-                {wizardStep > idx ? "✓" : idx + 1}
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-tighter ${wizardStep === idx ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
-                {step.label}
-              </span>
-            </button>
-          ))}
-        </div>
+      <div className={`
+        ${isMobile
+          ? 'flex gap-2 p-3 overflow-x-auto bg-[#F5F4F0] border-b border-[#E8E6E0] scrollbar-hide flex-shrink-0'
+          : 'flex border-b border-[#E8E6E0] bg-[#F5F4F0] flex-shrink-0'
+        }
+      `}>
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveSection(tab.id)}
+            className={`
+              ${isMobile
+                ? `flex-shrink-0 py-2.5 px-4 text-sm font-medium flex items-center gap-2 rounded-full transition-colors ${
+                    activeSection === tab.id
+                      ? 'bg-[#2D5A4A] text-white shadow-sm'
+                      : 'bg-white text-[#7A8B80] border border-[#E8E6E0]'
+                  }`
+                : `flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                    activeSection === tab.id
+                      ? 'bg-white text-[#2D5A4A] border-b-2 border-[#2D5A4A]'
+                      : 'text-[#7A8B80] hover:text-[#1F2D26]'
+                  }`
+              }
+            `}
+          >
+            <tab.icon className={isMobile ? "w-4 h-4" : "w-3.5 h-3.5"} />
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4 space-y-4' : 'p-3 space-y-3'}`}>
@@ -278,91 +230,6 @@ export function PortfolioEditor({
           </>
         )}
 
-        {activeSection === 'salud' && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className={labelClass}>Ingresos Mensuales</Label>
-                <Input type="number" value={ingresosMensuales} onChange={(e) => setIngresosMensuales(parseInt(e.target.value) || 0)} className={inputClass} />
-              </div>
-              <div>
-                <Label className={labelClass}>Gastos Mensuales</Label>
-                <Input type="number" value={gastosMensuales} onChange={(e) => setGastosMensuales(parseInt(e.target.value) || 0)} className={inputClass} />
-              </div>
-            </div>
-            <div className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm">
-              <Label className={labelClass}>Fondo de Emergencia (Meses)</Label>
-              <div className="flex items-center gap-4 mt-2">
-                <Input type="number" value={fondoEmergenciaMeses} onChange={(e) => setFondoEmergenciaMeses(parseInt(e.target.value) || 0)} className="w-20 h-10 text-center font-bold" />
-                <div className="flex-1 h-2 bg-[#F5F4F0] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#3D7A5F] transition-all" style={{ width: `${Math.min(100, (fondoEmergenciaActual / (gastosMensuales * fondoEmergenciaMeses || 1)) * 100)}%` }}></div>
-                </div>
-              </div>
-              <p className="text-[10px] text-[#7A8B80] mt-2">Objetivo: USD {(gastosMensuales * fondoEmergenciaMeses).toLocaleString()}</p>
-            </div>
-            <div>
-              <Label className={labelClass}>Fondo de Emergencia Actual</Label>
-              <Input type="number" value={fondoEmergenciaActual} onChange={(e) => setFondoEmergenciaActual(parseInt(e.target.value) || 0)} className={inputClass} />
-            </div>
-            <div className="p-4 bg-[#F5F4F0] rounded-2xl border border-[#E8E6E0]">
-                <Label className={labelClass}>Patrimonio Neto</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                    <div className="bg-white p-2 rounded-xl border border-[#E8E6E0]">
-                        <span className="text-[9px] uppercase font-bold text-[#7A8B80]">Activos</span>
-                        <Input type="number" value={patrimonioActivos} onChange={(e) => setPatrimonioActivos(parseInt(e.target.value) || 0)} className="h-7 text-xs border-none p-0" />
-                    </div>
-                    <div className="bg-white p-2 rounded-xl border border-[#E8E6E0]">
-                        <span className="text-[9px] uppercase font-bold text-[#7A8B80]">Deudas</span>
-                        <Input type="number" value={patrimonioDeudas} onChange={(e) => setPatrimonioDeudas(parseInt(e.target.value) || 0)} className="h-7 text-xs border-none p-0" />
-                    </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-white/50 flex justify-between items-center">
-                    <span className="text-xs font-bold text-[#1F2D26]">Total Neto</span>
-                    <span className="text-sm font-black text-[#2D5A4A]">USD {(patrimonioActivos - patrimonioDeudas).toLocaleString()}</span>
-                </div>
-            </div>
-          </div>
-        )}
-
-        {activeSection === 'metas' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-                <Label className={labelClass}>Metas de Vida</Label>
-                <Button variant="ghost" size="sm" onClick={() => setMetasVida([...metasVida, { id: Date.now().toString(), descripcion: "", monto: 0, plazo: 12 }])} className="h-7 text-[10px] font-bold text-[#3D7A5F]"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
-            </div>
-            <div className="space-y-3">
-              {metasVida.map((meta: any, i: number) => (
-                <div key={meta.id} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm relative group transition-all hover:border-[#3D7A5F]/30">
-                  <Button variant="ghost" size="sm" onClick={() => setMetasVida(metasVida.filter((m: any) => m.id !== meta.id))} className="absolute top-2 right-2 h-7 w-7 text-red-300 opacity-0 group-hover:opacity-100"><X className="w-4 h-4" /></Button>
-                  <Input value={meta.descripcion} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].descripcion = e.target.value; setMetasVida(newMetas); }} className="h-8 text-sm font-bold border-none p-0 bg-transparent mb-2" placeholder="Nombre de la meta" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-[#F5F4F0] p-2 rounded-xl">
-                        <span className="text-[9px] uppercase font-bold text-[#7A8B80]">Monto USD</span>
-                        <Input type="number" value={meta.monto} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].monto = parseInt(e.target.value) || 0; setMetasVida(newMetas); }} className="h-6 text-xs border-none p-0 bg-transparent font-bold" />
-                    </div>
-                    <div className="bg-[#F5F4F0] p-2 rounded-xl">
-                        <span className="text-[9px] uppercase font-bold text-[#7A8B80]">Plazo (meses)</span>
-                        <Input type="number" value={meta.plazo} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].plazo = parseInt(e.target.value) || 0; setMetasVida(newMetas); }} className="h-6 text-xs border-none p-0 bg-transparent font-bold" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-5 bg-gradient-to-br from-[#2D5A4A] to-[#3D7A5F] rounded-3xl border border-[#2D5A4A] shadow-xl text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-16 h-16" /></div>
-                <Label className="text-[10px] font-black uppercase tracking-widest text-[#8BC4A8] mb-4 block">Plan de Retiro Estructurado</Label>
-                <div className="space-y-4 relative z-10">
-                    <p className="text-xs leading-relaxed text-[#D1E7DD] italic font-medium">"Un retiro exitoso comienza con la visualización clara de sus necesidades futuras."</p>
-                    <Textarea
-                      value={proyeccionRetiro}
-                      onChange={(e) => setProyeccionRetiro(e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-h-[120px] rounded-2xl text-sm focus:border-white/40 focus:ring-0"
-                      placeholder="Especifique edad de retiro deseada, ingresos proyectados y fondos actuales..."
-                    />
-                </div>
-            </div>
-          </div>
-        )}
         {activeSection === 'cartera' && (
           <>
             <div className="bg-[#F5F4F0] rounded-2xl p-4 mb-4 border border-[#E8E6E0]">
@@ -395,22 +262,6 @@ export function PortfolioEditor({
                     <span className="text-[10px] text-[#7A8B80]">{instruments.length} activos seleccionados</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => {
-                      let suggested = [];
-                      if (perfilRiesgo === "Conservador") suggested = ["Money Market", "Renta Fija USD", "Renta Fija USD"];
-                      else if (perfilRiesgo === "Moderado") suggested = ["Renta Fija USD", "Equity Internacional", "Renta Fija USD"];
-                      else suggested = ["Equity Internacional", "Equity Internacional", "Equity Internacional"];
-
-                      const newInstruments = suggested.map(type => ({
-                          nombre: `Nuevo ${type}`,
-                          tipo: type,
-                          asignacion: Math.floor(100 / suggested.length),
-                          moneda: type.includes("USD") || type.includes("Internacional") ? "USD" : "ARS",
-                          objetivo: "Optimización",
-                          locked: false
-                      }));
-                      setInstruments(normalizeWeights(newInstruments, 'asignacion'));
-                  }} className="h-8 text-[10px] font-bold text-[#3D7A5F] uppercase hover:bg-white flex items-center gap-1"><Sparkles className="w-3 h-3" /> Sugerir</Button>
                   <Button variant="ghost" size="sm" onClick={() => { const perItem = Math.floor(100 / (instruments.length || 1)); const base = instruments.map(inst => ({ ...inst, asignacion: perItem, locked: false })); setInstruments(normalizeWeights(base, 'asignacion')); }} className="h-8 text-[10px] font-bold text-[#7A8B80] uppercase hover:bg-white">Igualar</Button>
                   <Button variant="outline" size="sm" onClick={() => setInstruments((prev: any) => { const currentTotal = prev.reduce((s: any, i: any) => s + i.asignacion, 0); const remaining = Math.max(0, 100 - currentTotal); return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }]; })} className="h-8 text-[10px] font-bold text-[#3D7A5F] uppercase border-[#3D7A5F]/20 hover:bg-[#3D7A5F] hover:text-white transition-all"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
                 </div>
@@ -427,7 +278,7 @@ export function PortfolioEditor({
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                             <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}><SelectTrigger className="w-24 h-9 rounded-xl font-bold text-xs bg-[#F5F4F0] border-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="Mix">Mix</SelectItem></SelectContent></Select>
+                             <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}><SelectTrigger className="w-24 h-9 rounded-xl font-bold text-xs bg-[#F5F4F0] border-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="ARS/USD">Mix</SelectItem></SelectContent></Select>
                              <Button variant="ghost" size="sm" onClick={() => setInstruments((prev: any) => prev.filter((_: any, j: number) => j !== i))} className="h-9 w-9 rounded-full text-red-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="w-4.5 h-4.5" /></Button>
                         </div>
                     </div>
@@ -440,22 +291,11 @@ export function PortfolioEditor({
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-[#7A8B80] absolute -top-2 left-3 px-1.5 bg-white z-10">Categoría</Label>
-                                <Select value={inst.tipo} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], tipo: v }; setInstruments(arr) }}>
-                                    <SelectTrigger className="h-10 text-xs font-medium rounded-xl border-[#E8E6E0] bg-white"><SelectValue placeholder="Tipo" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Money Market">Money Market</SelectItem>
-                                        <SelectItem value="Renta Fija ARS">Renta Fija ARS</SelectItem>
-                                        <SelectItem value="Renta Fija USD">Renta Fija USD</SelectItem>
-                                        <SelectItem value="Equity Internacional">Equity Internacional</SelectItem>
-                                        <SelectItem value="Equity Local">Equity Local</SelectItem>
-                                        <SelectItem value="Cripto">Cripto</SelectItem>
-                                        <SelectItem value="Otro">Otro</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Input value={inst.tipo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], tipo: e.target.value }; setInstruments(arr) }} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F]" placeholder="Ej: Acciones" />
                             </div>
                             <div className="relative">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-[#7A8B80] absolute -top-2 left-3 px-1.5 bg-white z-10">Objetivo</Label>
-                                <Input value={inst.objetivo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], objetivo: e.target.value }; setInstruments(arr) }} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F]" placeholder="Ej: Liquidez" />
+                                <Input value={inst.objetivo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], objetivo: e.target.value }; setInstruments(arr) }} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F]" placeholder="Ej: Crecimiento" />
                             </div>
                         </div>
                     </div>
@@ -556,28 +396,6 @@ export function PortfolioEditor({
             </div>
           </>
         )}
-      </div>
-      <div className="p-4 border-t border-[#E8E6E0] bg-white flex justify-between gap-3 flex-shrink-0">
-          <Button
-            variant="outline"
-            onClick={prevStep}
-            disabled={wizardStep === 0}
-            className="flex-1 h-12 rounded-xl font-bold text-[#7A8B80]"
-          >
-              Anterior
-          </Button>
-          <Button
-            onClick={() => {
-                if (wizardStep < steps.length - 1) {
-                    const next = wizardStep + 1;
-                    setWizardStep(next);
-                    setActiveSection(steps[next].section);
-                }
-            }}
-            className="flex-[2] h-12 bg-[#2D5A4A] hover:bg-[#3D7A5F] rounded-xl font-bold shadow-lg shadow-[#2D5A4A]/20"
-          >
-              {wizardStep === steps.length - 1 ? "Revisar Plan" : "Continuar"}
-          </Button>
       </div>
     </div>
   )

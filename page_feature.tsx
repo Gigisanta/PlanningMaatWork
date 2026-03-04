@@ -230,7 +230,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<"form" | "preview">("form")
   const [showMobileSettings, setShowMobileSettings] = useState(false)
-  
+
   // Financial Planning States
   const [wizardStep, setWizardStep] = useState(0)
   const [ingresosMensuales, setIngresosMensuales] = useState(1000)
