@@ -58,6 +58,14 @@ interface PlanData {
   socialLinks?: ConfigurableLink[];
   asesorNombre?: string;
   asesorRecomendacion?: boolean;
+  ingresosMensuales: number;
+  gastosMensuales: number;
+  fondoEmergenciaMeses: number;
+  fondoEmergenciaActual: number;
+  metasVida: any[];
+  proyeccionRetiro: string;
+  patrimonioActivos: number;
+  patrimonioDeudas: number;
 }
 
 const COLORS = {
@@ -182,6 +190,66 @@ function generateBaseHTML(data: PlanData): string {
 
     <div class="content">
         <section>
+            <div class="section-header">
+                <div class="num">01</div>
+                <h2>Salud Financiera y Patrimonio</h2>
+            </div>
+            <div class="summary-grid" style="grid-template-cols: repeat(2, 1fr); margin-bottom: 30px;">
+                <div class="summary-card">
+                    <div class="label">Ingresos Mensuales</div>
+                    <div class="value">USD ${data.ingresosMensuales?.toLocaleString() || '0'}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Gastos Mensuales</div>
+                    <div class="value">USD ${data.gastosMensuales?.toLocaleString() || '0'}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Fondo de Emergencia Actual</div>
+                    <div class="value">USD ${data.fondoEmergenciaActual?.toLocaleString() || '0'}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Objetivo de Fondo</div>
+                    <div class="value">USD ${(data.gastosMensuales * data.fondoEmergenciaMeses).toLocaleString()}</div>
+                </div>
+            </div>
+
+            <div style="background: ${COLORS.accentSoft}; padding: 30px; border-radius: 24px; border: 1px solid ${COLORS.accent}; margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="margin: 0; color: ${COLORS.primary}; font-size: 14px; text-transform: uppercase;">Patrimonio Neto Proyectado</h4>
+                        <p style="margin: 5px 0 0; font-size: 12px; color: ${COLORS.textLight};">Diferencia entre activos líquidos y deudas</p>
+                    </div>
+                    <div style="font-size: 32px; font-weight: 900; color: ${COLORS.primary};">
+                        USD ${(data.patrimonioActivos - data.patrimonioDeudas).toLocaleString()}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-header">
+                <div class="num">02</div>
+                <h2>Objetivos de Vida y Retiro</h2>
+            </div>
+            <div style="display: grid; gap: 20px; margin-bottom: 40px;">
+                ${data.metasVida?.map(meta => `
+                    <div style="background: #fff; padding: 24px; border-radius: 20px; border: 1px solid ${COLORS.border}; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 16px; color: ${COLORS.primary};">${meta.descripcion}</h4>
+                            <p style="margin: 5px 0 0; font-size: 12px; color: ${COLORS.textLight};">Plazo: ${meta.plazo} meses</p>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 800; color: ${COLORS.accent};">USD ${meta.monto.toLocaleString()}</div>
+                    </div>
+                `).join('')}
+            </div>
+            ${data.proyeccionRetiro ? `
+                <div style="padding: 30px; background: #F8FAFC; border-radius: 24px; border-left: 5px solid ${COLORS.primary};">
+                    <h4 style="margin: 0 0 15px; font-size: 14px; text-transform: uppercase; color: ${COLORS.primary};">Proyección de Retiro / Fondos Especiales</h4>
+                    <div style="font-size: 15px; line-height: 1.6; color: ${COLORS.textLight}; white-space: pre-wrap;">${data.proyeccionRetiro}</div>
+                </div>
+            ` : ''}
+        </section>
+        <section>
             <div class="summary-grid">
                 <div class="summary-card"><div class="label">Aporte Mensual</div><div class="value">USD ${data.aporteMensual.toLocaleString()}</div></div>
                 <div class="summary-card"><div class="label">Horizonte</div><div class="value">${data.horizonteMeses} Meses</div></div>
@@ -190,7 +258,7 @@ function generateBaseHTML(data: PlanData): string {
             </div>
 
             <div class="section-header">
-                <div class="num">01</div>
+                <div class="num">03</div>
                 <h2>Visión Estratégica</h2>
             </div>
             <div style="font-size: 17px; line-height: 1.8; color: ${COLORS.textLight}; margin-bottom: 50px;">
@@ -226,7 +294,7 @@ function generateBaseHTML(data: PlanData): string {
 
         <section>
             <div class="section-header">
-                <div class="num">02</div>
+                <div class="num">04</div>
                 <h2>Arquitectura de Cartera</h2>
             </div>
             <div class="portfolio-grid">
@@ -246,7 +314,7 @@ function generateBaseHTML(data: PlanData): string {
 
         <section>
             <div class="section-header">
-                <div class="num">03</div>
+                <div class="num">05</div>
                 <h2>Renta Fija Corporativa (ONs)</h2>
             </div>
             <div class="table-container">
@@ -277,7 +345,7 @@ function generateBaseHTML(data: PlanData): string {
 
         <section>
             <div class="section-header">
-                <div class="num">04</div>
+                <div class="num">06</div>
                 <h2>Eficiencia Fiscal</h2>
             </div>
             <div class="tax-grid">
