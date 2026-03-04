@@ -1,12 +1,21 @@
+import {
+  AsignacionEstrategica,
+  Instrument,
+  ObligacionNegociable,
+  Riesgo,
+  MetaVida,
+  ConfigurableLink,
+} from '@/stores/portfolio-store';
+
 // Paleta de colores CACTUS
 const COLORS = {
-  cactusDark: '#2D5A3D',
-  cactusMedium: '#4A7C59',
-  cactusLight: '#6B9B7A',
+  cactusDark: '#2D5A4A',
+  cactusMedium: '#3D7A5F',
+  cactusLight: '#5A9E7F',
   sandLight: '#F5F0E8',
   sandMedium: '#E8DFD0',
   sandDark: '#D4C5A9',
-  terracotta: '#C17F59',
+  terracotta: '#C4846C',
   white: '#FFFFFF',
   text: '#333333',
 };
@@ -20,6 +29,32 @@ export interface PlanData {
   horizonteMeses: number;
   gastosPrincipales: string;
   observaciones?: string;
+  // New configuration fields
+  webUrl?: string;
+  tipoAporte?: 'mensual' | 'unico' | 'semanal' | 'quincenal';
+  asesorNombre?: string;
+  asesorRecomendacion?: boolean;
+  platformLinks?: { name: string; url: string }[];
+  socialLinks?: { name: string; url: string; icon?: string }[];
+  // Portfolio data
+  asignacionEstrategica?: AsignacionEstrategica[];
+  instruments?: Instrument[];
+  obligacionesNegociables?: ObligacionNegociable[];
+  riesgos?: Riesgo[];
+  beneficiosFiscales?: string[];
+  terminoFinanciero?: string;
+  usarTerminoIA?: boolean;
+  consejoFinal?: string;
+  usarConsejoIA?: boolean;
+  // Financial health data
+  ingresosMensuales?: number;
+  gastosMensuales?: number;
+  fondoEmergenciaMeses?: number;
+  fondoEmergenciaActual?: number;
+  metasVida?: MetaVida[];
+  proyeccionRetiro?: string;
+  patrimonioActivos?: number;
+  patrimonioDeudas?: number;
 }
 
 export function generatePlanHTML(data: PlanData): string {
@@ -29,493 +64,1505 @@ export function generatePlanHTML(data: PlanData): string {
     year: 'numeric',
   });
 
-  const montoObjetivo = data.aporteMensual * data.horizonteMeses;
+  // Calculate contribution based on type
+  let contributionText = '';
+  let montoObjetivo = data.aporteMensual * data.horizonteMeses;
+  
+  switch (data.tipoAporte) {
+    case 'unico':
+      contributionText = `Aporte único de USD ${data.aporteMensual.toLocaleString()}`;
+      montoObjetivo = data.aporteMensual;
+      break;
+    case 'semanal':
+      contributionText = `Aporte semanal de USD ${data.aporteMensual.toLocaleString()}`;
+      montoObjetivo = data.aporteMensual * 4 * (data.horizonteMeses / 4);
+      break;
+    case 'quincenal':
+      contributionText = `Aporte quincenal de USD ${data.aporteMensual.toLocaleString()}`;
+      montoObjetivo = data.aporteMensual * 2 * (data.horizonteMeses / 2);
+      break;
+    default: // mensual
+      contributionText = `Aporte mensual de USD ${data.aporteMensual.toLocaleString()}`;
+      montoObjetivo = data.aporteMensual * data.horizonteMeses;
+  }
+
+  const webUrl = data.webUrl || 'cactuswealth.com.ar';
+  const asesorNombre = data.asesorNombre || 'Giolivo Santarelli';
+  const showRecomendaciones = data.asesorRecomendacion !== false;
+
+  // Platform links
+  const platformLinksHTML = (data.platformLinks || []).map(link => 
+    `<a href="${link.url}" target="_blank" class="account-link">
+      <span class="link-icon">🔗</span>
+      ${link.name}
+    </a>`
+  ).join('\n    ');
+
+  // Social links
+  const socialLinksHTML = (data.socialLinks || []).map(link => {
+    const isInstagram = link.icon === 'instagram' || link.name.toLowerCase().includes('instagram');
+    const isWhatsapp = link.icon === 'whatsapp' || link.name.toLowerCase().includes('whatsapp');
+    const className = isInstagram ? 'footer-link instagram' : (isWhatsapp ? 'footer-link whatsapp' : 'footer-link');
+    const icon = isInstagram ? '📸' : (isWhatsapp ? '💬' : '🔗');
+    return `<a href="${link.url}" target="_blank" class="${className}">
+      <span class="icon">${icon}</span>
+      ${link.name}
+    </a>`;
+  }).join('\n    ');
+
+  // Recommendation box HTML
+  const recommendBoxHTML = showRecomendaciones ? `
+    <div class="recommend-box">
+      <span class="icon">💬</span>
+      <p>
+        <strong>Te gustó este plan?</strong> Si tenés amigos o familiares que podrían beneficiarse de una planificación financiera, 
+        no dudes en recomendar a <strong>${asesorNombre}</strong>. Las referencias son la mejor forma de agradecer!
+      </p>
+    </div>` : '';
 
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plan Financiero Personal - ${data.profesion}</title>
+  <title>Plan Financiero - ${data.profesion}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --primary-dark: #2D5A4A;
+      --primary: #3D7A5F;
+      --primary-light: #5A9E7F;
+      --primary-pale: #8BC4A8;
+      --primary-muted: #B8DBC8;
+      --accent: #C4846C;
+      --accent-light: #D9A58B;
+      --accent-pale: #F0DFD5;
+      --background: #FAFAF8;
+      --surface: #FFFFFF;
+      --surface-alt: #F5F4F0;
+      --border: #E8E6E0;
+      --border-light: #F0EEE8;
+      --text-dark: #1F2D26;
+      --text-medium: #4A5B50;
+      --text-light: #7A8B80;
+      --text-muted: #A0ACA5;
+      --success: #5A9E7F;
+      --warning: #D4A574;
+      --danger: #C4746C;
+      --instagram: #E1306C;
+      --whatsapp: #25D366;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: ${COLORS.text};
-      background-color: ${COLORS.sandLight};
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.7;
+      color: var(--text-dark);
+      background-color: var(--background);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+
     .container {
-      max-width: 900px;
+      max-width: 880px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 32px 24px;
     }
+
+    /* ===== HEADER ===== */
     .header {
-      background: linear-gradient(135deg, ${COLORS.cactusDark}, ${COLORS.cactusMedium});
-      color: white;
-      padding: 30px;
-      border-radius: 12px;
-      margin-bottom: 30px;
+      background: linear-gradient(145deg, #1F4A3D 0%, #2D5A4A 50%, #3A6B58 100%);
+      color: #FFFFFF;
+      padding: 52px 44px;
+      border-radius: 28px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(45, 90, 74, 0.25);
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      right: -25%;
+      width: 70%;
+      height: 220%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+    }
+
+    .header::after {
+      content: '🌵';
+      position: absolute;
+      bottom: 16px;
+      right: 28px;
+      font-size: 90px;
+      opacity: 0.12;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
       text-align: center;
     }
+
     .header h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+      color: #FFFFFF;
     }
+
     .header .subtitle {
-      font-size: 16px;
-      opacity: 0.9;
+      font-size: 18px;
+      opacity: 0.92;
+      font-weight: 400;
+      color: #FFFFFF;
     }
+
     .header .meta {
-      margin-top: 15px;
+      margin-top: 22px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.85);
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 30px;
+      display: inline-block;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ===== ACCOUNT SECTION ===== */
+    .account-section {
+      background: #FFFFFF;
+      padding: 34px;
+      border-radius: 22px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+      border: 1px solid #E8E6E0;
+    }
+
+    .account-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .account-header .icon {
+      font-size: 30px;
+    }
+
+    .account-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1F2D26;
+    }
+
+    .account-intro {
+      font-size: 15px;
+      color: #4A5B50;
+      margin-bottom: 26px;
+      line-height: 1.75;
+    }
+
+    .account-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .account-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 30px;
+      background: linear-gradient(145deg, #2D5A4A 0%, #3D7A5F 100%);
+      color: #FFFFFF;
+      text-decoration: none;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 16px rgba(61, 122, 95, 0.3);
+    }
+
+    .account-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(61, 122, 95, 0.4);
+      background: var(--primary-dark);
+    }
+
+    .account-link .link-icon {
+      font-size: 18px;
+    }
+
+    /* ===== WELCOME SECTION ===== */
+    .welcome-section {
+      background: #F5F4F0;
+      padding: 34px;
+      border-radius: 22px;
+      margin-bottom: 28px;
+      border: 1px solid #E8E6E0;
+      position: relative;
+    }
+
+    .welcome-section::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 24px;
+      bottom: 24px;
+      width: 4px;
+      background: linear-gradient(180deg, #3D7A5F 0%, #5A9E7F 100%);
+      border-radius: 4px;
+    }
+
+    .welcome-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .welcome-emoji {
+      font-size: 40px;
+    }
+
+    .welcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: #1F2D26;
+    }
+
+    .welcome-text {
+      color: #4A5B50;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .welcome-list {
+      margin-top: 22px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .welcome-list li {
+      margin-bottom: 14px;
+      color: #4A5B50;
       font-size: 14px;
-      opacity: 0.8;
+      padding-left: 26px;
+      position: relative;
     }
-    .section {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border-left: 4px solid ${COLORS.cactusMedium};
+
+    .welcome-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #3D7A5F;
+      font-weight: 600;
     }
-    .section-title {
-      font-size: 20px;
-      color: ${COLORS.cactusDark};
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid ${COLORS.sandMedium};
+
+    .welcome-list li strong {
+      color: #2D5A4A;
     }
-    .objetivo-box {
-      background: linear-gradient(135deg, ${COLORS.sandLight}, ${COLORS.sandMedium});
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      border-left: 4px solid ${COLORS.terracotta};
+
+    /* ===== RECOMMEND BOX ===== */
+    .recommend-box {
+      background: linear-gradient(135deg, #F0DFD5 0%, #FDF8F5 100%);
+      padding: 26px;
+      border-radius: 16px;
+      margin: 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid #D9A58B;
     }
-    .objetivo-box h3 {
-      color: ${COLORS.cactusDark};
+
+    .recommend-box .icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .recommend-box p {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #4A5B50;
+    }
+
+    .recommend-box strong {
+      color: #C4846C;
+    }
+
+    /* ===== CLIENT CARDS ===== */
+    .client-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .client-card {
+      background: #FFFFFF;
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      border: 1px solid #F0EEE8;
+      transition: all 0.2s ease;
+    }
+
+    .client-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    }
+
+    .client-card .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #3D7A5F;
+      font-weight: 600;
       margin-bottom: 10px;
     }
+
+    .client-card .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1F2D26;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .client-card .value.accent {
+      color: #C4846C;
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      background: #FFFFFF;
+      border-radius: 22px;
+      padding: 40px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+      border: 1px solid #F0EEE8;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 30px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #F0EEE8;
+    }
+
+    .section-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(145deg, #2D5A4A 0%, #3D7A5F 50%, #5A9E7F 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 6px 16px rgba(61, 122, 95, 0.25);
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: #1F2D26;
+      letter-spacing: -0.3px;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: #7A8B80;
+      margin-top: 5px;
+    }
+
+    /* ===== OBJETIVO BOX ===== */
+    .objetivo-box {
+      background: linear-gradient(135deg, #F5F4F0 0%, #FFFFFF 100%);
+      padding: 30px;
+      border-radius: 18px;
+      margin-bottom: 26px;
+      border-left: 4px solid #C4846C;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+    }
+
+    .objetivo-box h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #7A8B80;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .objetivo-box .objetivo-text {
+      font-size: 19px;
+      font-weight: 500;
+      color: #1F2D26;
+      margin-bottom: 22px;
+      line-height: 1.55;
+    }
+
+    .objetivo-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 22px;
+    }
+
+    .objetivo-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .objetivo-meta-item .label {
+      font-size: 13px;
+      color: #7A8B80;
+    }
+
+    .objetivo-meta-item .value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #C4846C;
+    }
+
+    /* ===== INFO BOX ===== */
+    .info-box {
+      background: #F5F4F0;
+      padding: 20px 24px;
+      border-radius: 14px;
+      margin: 22px 0;
+      color: #4A5B50;
+      font-size: 14px;
+      line-height: 1.75;
+      border: 1px solid #E8E6E0;
+    }
+
+    .info-box strong {
+      color: #2D5A4A;
+    }
+
+    /* ===== TABLES ===== */
+    .table-container {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 16px;
+      border: 1px solid #E8E6E0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
+      font-size: 14px;
     }
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid ${COLORS.sandDark};
-    }
+
     th {
-      background-color: ${COLORS.cactusDark};
-      color: white;
+      background: linear-gradient(135deg, #2D5A4A 0%, #3A6B58 100%);
+      color: #FFFFFF;
       font-weight: 600;
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
     }
+
+    th:first-child {
+      border-radius: 15px 0 0 0;
+    }
+
+    th:last-child {
+      border-radius: 0 15px 0 0;
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid #F0EEE8;
+      vertical-align: middle;
+      color: #4A5B50;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
     tr:nth-child(even) {
-      background-color: ${COLORS.sandMedium};
+      background: #FAFAF8;
     }
+
     tr:hover {
-      background-color: ${COLORS.sandLight};
+      background: rgba(61, 122, 95, 0.04);
     }
-    ul {
-      margin: 15px 0;
-      padding-left: 25px;
-    }
-    li {
-      margin-bottom: 10px;
-    }
-    .instrument-badge {
-      display: inline-block;
-      background: ${COLORS.cactusLight};
-      color: white;
-      padding: 3px 10px;
-      border-radius: 15px;
+
+    /* ===== BADGES ===== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: 20px;
       font-size: 12px;
-      margin-left: 5px;
-    }
-    .definition-box {
-      background: ${COLORS.sandLight};
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin: 15px 0;
-      font-style: italic;
-      border-left: 3px solid ${COLORS.cactusMedium};
-    }
-    .resumen-cartera {
-      background: linear-gradient(135deg, ${COLORS.cactusDark}, ${COLORS.cactusMedium});
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-    }
-    .consejo-box {
-      background: linear-gradient(135deg, ${COLORS.terracotta}, #D4956B);
-      color: white;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      margin-top: 20px;
-    }
-    .consejo-box h4 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    .badge-conservador { background: ${COLORS.cactusLight}; }
-    .badge-moderado { background: ${COLORS.cactusMedium}; }
-    .badge-agresivo { background: ${COLORS.terracotta}; }
-    .footer {
-      text-align: center;
-      padding: 20px;
-      color: ${COLORS.cactusMedium};
-      font-size: 12px;
-      border-top: 1px solid ${COLORS.sandDark};
-      margin-top: 30px;
-    }
-    .highlight {
-      color: ${COLORS.terracotta};
       font-weight: 600;
+    }
+
+    .badge-bajo {
+      background: rgba(90, 158, 127, 0.12);
+      color: var(--primary-dark);
+    }
+
+    .badge-medio {
+      background: rgba(212, 165, 116, 0.15);
+      color: #A67C4A;
+    }
+
+    .badge-alto {
+      background: rgba(196, 116, 108, 0.12);
+      color: #A65D55;
+    }
+
+    .badge-moneda {
+      background: var(--surface-alt);
+      color: var(--text-dark);
+      border: 1px solid var(--border);
+    }
+
+    /* ===== PROGRESS BARS ===== */
+    .progress-container {
+      margin: 20px 0;
+    }
+
+    .progress-item {
+      margin-bottom: 16px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--text-medium);
+    }
+
+    .progress-header strong {
+      color: var(--text-dark);
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--surface-alt);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+    }
+
+    /* ===== CARDS GRID ===== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .instrument-card {
+      background: var(--surface-alt);
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid var(--border-light);
+      transition: all 0.2s ease;
+    }
+
+    .instrument-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .instrument-card .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      background: none;
+      padding: 0;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    .instrument-card .name {
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 15px;
+    }
+
+    .instrument-card .type {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 12px;
+    }
+
+    .instrument-card .allocation {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .instrument-card .allocation-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .instrument-card .allocation-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .instrument-card .allocation-value {
+      font-weight: 600;
+      color: var(--primary-dark);
+      min-width: 40px;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .instrument-card .objetivo {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    /* ===== RESUMEN CARTERA ===== */
+    .resumen-cartera {
+      background: linear-gradient(145deg, #1F4A3D 0%, #2D5A4A 50%, #3A6B58 100%);
+      color: #FFFFFF;
+      padding: 32px;
+      border-radius: 20px;
+      margin-top: 32px;
+      box-shadow: 0 8px 32px rgba(45, 90, 74, 0.2);
+    }
+
+    .resumen-cartera h4 {
+      font-size: 16px;
+      margin-bottom: 24px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .resumen-item {
+      text-align: center;
+      padding: 16px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .resumen-item .label {
+      font-size: 11px;
+      opacity: 0.85;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .resumen-item .value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    /* ===== DEFINITION BOX ===== */
+    .definition-box {
+      background: #F5F4F0;
+      padding: 26px;
+      border-radius: 16px;
+      margin: 26px 0;
+      border-left: 4px solid #3D7A5F;
+    }
+
+    .definition-box .term {
+      font-weight: 600;
+      color: #2D5A4A;
+      margin-bottom: 12px;
+      display: block;
+      font-size: 14px;
+    }
+
+    .definition-box .definition {
+      color: #4A5B50;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    /* ===== BENEFICIOS LIST ===== */
+    .beneficios-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .beneficios-list li {
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      background: #F5F4F0;
+      border-radius: 14px;
+      border-left: 3px solid #5A9E7F;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .beneficios-list li .icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+
+    .beneficios-list li .content {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-medium);
+      line-height: 1.6;
+    }
+
+    .beneficios-list li strong {
+      color: var(--text-dark);
+    }
+
+    /* ===== CONSEJO BOX ===== */
+    .consejo-box {
+      background: linear-gradient(145deg, #B8765A 0%, #C4846C 40%, #D99A7B 100%);
+      color: #FFFFFF;
+      padding: 44px 48px;
+      border-radius: 24px;
+      text-align: center;
+      margin-top: 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(196, 132, 108, 0.35);
+    }
+
+    .consejo-box::before {
+      content: '"';
+      position: absolute;
+      top: -15px;
+      left: 18px;
+      font-size: 130px;
+      opacity: 0.06;
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+      color: #FFFFFF;
+    }
+
+    .consejo-box::after {
+      content: '"';
+      position: absolute;
+      bottom: -50px;
+      right: 18px;
+      font-size: 130px;
+      opacity: 0.06;
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+      color: #FFFFFF;
+    }
+
+    .consejo-box h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #FFFFFF;
+      letter-spacing: -0.3px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .consejo-box p {
+      font-size: 17px;
+      line-height: 1.8;
+      color: #FFFFFF;
+      opacity: 0.98;
+      position: relative;
+      z-index: 2;
+      max-width: 92%;
+      margin: 0 auto;
+    }
+
+    .consejo-box .consejo-footer {
+      margin-top: 24px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.92);
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.28);
+      font-style: italic;
+      position: relative;
+      z-index: 2;
+    }
+
+    .consejo-box .consejo-footer::before {
+      content: '📌 ';
+      font-style: normal;
+    }
+
+    /* ===== FOOTER WITH LINKS ===== */
+    .footer {
+      background: #FFFFFF;
+      border-radius: 24px;
+      padding: 40px;
+      margin-top: 40px;
+      border: 1px solid #E8E6E0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+
+    .footer-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .footer-header h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: #1F2D26;
+      margin-bottom: 10px;
+    }
+
+    .footer-header p {
+      font-size: 14px;
+      color: #7A8B80;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: linear-gradient(145deg, #2D5A4A 0%, #3A6B58 100%);
+      color: #FFFFFF;
+      text-decoration: none;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 16px rgba(45, 90, 74, 0.3);
+    }
+
+    .footer-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(45, 90, 74, 0.4);
+    }
+
+    .footer-link .icon {
+      font-size: 18px;
+    }
+
+    .footer-link.instagram {
+      background: linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%);
+      box-shadow: 0 6px 16px rgba(225, 48, 108, 0.35);
+    }
+
+    .footer-link.instagram:hover {
+      box-shadow: 0 8px 24px rgba(225, 48, 108, 0.45);
+    }
+
+    .footer-link.whatsapp {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      box-shadow: 0 6px 16px rgba(37, 211, 102, 0.35);
+    }
+
+    .footer-link.whatsapp:hover {
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+    }
+
+    .footer-disclaimer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+      line-height: 1.6;
+    }
+
+    /* ===== ATTACHMENTS SECTION ===== */
+    .attachments-section {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 36px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-light);
+    }
+
+    .attachments-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .attachments-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .attachments-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .attachments-subtitle {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .attachment-card {
+      background: var(--surface-alt);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-light);
+    }
+
+    .attachment-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .attachment-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .attachment-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .attachment-name {
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 15px;
+    }
+
+    .attachment-size {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .attachment-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .attachment-download:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(45, 90, 74, 0.3);
+    }
+
+    .attachment-preview {
+      margin-top: 16px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .attachment-preview iframe {
+      width: 100%;
+      height: 300px;
+      border: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 16px;
+      }
+      .header {
+        padding: 32px 24px;
+      }
+      .header h1 {
+        font-size: 28px;
+      }
+      .section {
+        padding: 24px;
+      }
+      .client-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+      .resumen-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .objetivo-meta {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .footer-links {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .account-links {
+        flex-direction: column;
+      }
+      .recommend-box {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeIn 0.4s ease-out;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Plan Financiero Personal</h1>
-      <div class="subtitle">${data.profesion} | ${data.edad} años | Perfil ${data.perfilRiesgo}</div>
-      <div class="meta">Generado el ${fecha}</div>
+      <div class="header-content">
+        <h1>Tu Plan Financiero</h1>
+        <div class="subtitle">${data.profesion} | ${data.edad} años | Perfil ${data.perfilRiesgo}</div>
+        <div class="meta">Generado el ${fecha}</div>
+      </div>
+    </div>
+
+    <!-- Account Section -->
+    <div class="account-section">
+      <div class="account-header">
+        <span class="icon">🔐</span>
+        <h2>Asegurate de tener tu cuenta</h2>
+      </div>
+      <p class="account-intro">
+        Antes de empezar a invertir, necesitas tener una cuenta en una plataforma habilitada. 
+        Estas son las plataformas recomendadas para ejecutar tu plan:
+      </p>
+      <div class="account-links">
+        ${platformLinksHTML}
+      </div>
+    </div>
+
+    <!-- Sección de Bienvenida -->
+    <div class="welcome-section">
+      <div class="welcome-header">
+        <span class="welcome-emoji">👋</span>
+        <h2 class="welcome-title">Bienvenido a tu Hoja de Ruta</h2>
+      </div>
+      <p class="welcome-text">
+        Este documento es tu <strong>guía personalizada</strong> para alcanzar tus objetivos financieros. 
+        Aquí encontrarás una estrategia diseñada específicamente para vos, considerando tu edad, 
+        perfil de riesgo y metas a ${data.horizonteMeses} meses.
+      </p>
+      <ul class="welcome-list">
+        <li><strong>Que incluye este plan:</strong> Una cartera diversificada, beneficios fiscales y una estrategia clara.</li>
+        <li><strong>Como usarlo:</strong> Revisá cada sección, anotá tus dudas y consultá con tu asesor.</li>
+        <li><strong>Que esperar:</strong> Este plan está pensado para crecer con vos, ajustalo según cambien tus necesidades.</li>
+      </ul>
+    </div>
+
+    <div class="client-cards">
+      <div class="client-card">
+        <div class="label">Edad</div>
+        <div class="value">${data.edad} años</div>
+      </div>
+      <div class="client-card">
+        <div class="label">${data.tipoAporte === 'unico' ? 'Aporte' : 'Aporte Mensual'}</div>
+        <div class="value">USD ${data.aporteMensual.toLocaleString()}</div>
+      </div>
+      <div class="client-card">
+        <div class="label">Horizonte</div>
+        <div class="value">${data.horizonteMeses} meses</div>
+      </div>
+      <div class="client-card">
+        <div class="label">Meta Financiera</div>
+        <div class="value accent">USD ${montoObjetivo.toLocaleString()}</div>
+      </div>
     </div>
 
     <!-- Sección 1: Estrategia Principal -->
     <div class="section">
-      <h2 class="section-title">🏦 Estrategia Principal</h2>
-      
-      <div class="objetivo-box">
-        <h3>Objetivo Inicial</h3>
-        <p><strong>${data.objetivo}</strong></p>
-        <p style="margin-top: 10px;">
-          Meta financiera: <span class="highlight">USD ${montoObjetivo.toLocaleString()}</span> 
-          en <span class="highlight">${data.horizonteMeses} meses</span> 
-          con aportes mensuales de <span class="highlight">USD ${data.aporteMensual.toLocaleString()}</span>
-        </p>
+      <div class="section-header">
+        <div class="section-icon">🏦</div>
+        <div>
+          <h2 class="section-title">Tu Estrategia Principal</h2>
+          <p class="section-subtitle">El punto de partida de tu camino financiero</p>
+        </div>
       </div>
 
-      <h4 style="color: ${COLORS.cactusMedium}; margin-bottom: 15px;">Instrumentos Recomendados</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Liquidez</th>
-            <th>Riesgo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Balanz Ahorro USD</td>
-            <td>Fondo Común de Inversión</td>
-            <td>24-48 hs</td>
-            <td><span class="instrument-badge badge-conservador">Bajo</span></td>
-          </tr>
-          <tr>
-            <td>FCI Dólar Linked</td>
-            <td>Fondo Común de Inversión</td>
-            <td>24-48 hs</td>
-            <td><span class="instrument-badge badge-conservador">Bajo-Medio</span></td>
-          </tr>
-          <tr>
-            <td>FCI CER</td>
-            <td>Fondo Común de Inversión</td>
-            <td>24-48 hs</td>
-            <td><span class="instrument-badge badge-moderado">Medio</span></td>
-          </tr>
-          <tr>
-            <td>Cauciones Bursátiles</td>
-            <td>Instrumento de Renta Fija</td>
-            <td>1-7 días</td>
-            <td><span class="instrument-badge badge-conservador">Bajo</span></td>
-          </tr>
-          <tr>
-            <td>CEDEARs (ETFs USA)</td>
-            <td>Renta Variable Internacional</td>
-            <td>48 hs (T+2)</td>
-            <td><span class="instrument-badge badge-agresivo">Medio-Alto</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="objetivo-box">
+        <h3>🎯 Tu Objetivo</h3>
+        <p class="objetivo-text">${data.objetivo}</p>
+        <div class="objetivo-meta">
+          <div class="objetivo-meta-item">
+            <span class="label">Meta financiera:</span>
+            <span class="value">USD ${montoObjetivo.toLocaleString()}</span>
+          </div>
+          <div class="objetivo-meta-item">
+            <span class="label">Horizonte:</span>
+            <span class="value">${data.horizonteMeses} meses</span>
+          </div>
+          <div class="objetivo-meta-item">
+            <span class="label">${data.tipoAporte === 'unico' ? 'Aporte:' : 'Aporte mensual:'}</span>
+            <span class="value">${contributionText}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${data.perfilRiesgo}</strong>, 
+        diseñamos una cartera que balancea crecimiento y protección. Tu edad de ${data.edad} años 
+        te permite aprovechar el poder del interés compuesto a largo plazo.
+      </div>
 
       <div class="definition-box">
-        <strong>💡 Término clave:</strong> <strong>Dólar MEP</strong> - Es la cotización del dólar obtenida mediante operaciones bursátiles en Argentina. Permite acceder a dólares financieros de forma legal, operando con bonos o CEDEARs. Es ideal para inversores que buscan dolarizar sus ahorros sin restricciones.
+        <span class="term">📚 Término Clave del Mes</span>
+        <p class="definition">El interés compuesto es cuando tus ganancias generan más ganancias. Es como una bola de nieve que crece con el tiempo. En Argentina, empezarlo joven es una gran ventaja.</p>
       </div>
+
+      ${recommendBoxHTML}
     </div>
 
     <!-- Sección 2: Asignación Estratégica -->
     <div class="section">
-      <h2 class="section-title">📊 Asignación Estratégica</h2>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Horizonte</th>
-            <th>% Cartera</th>
-            <th>Sector</th>
-            <th>Objetivo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Corto (0-12m)</td>
-            <td>40%</td>
-            <td>Liquidez y Renta Fija</td>
-            <td>Fondo de emergencia + preservación</td>
-          </tr>
-          <tr>
-            <td>Medio (12-24m)</td>
-            <td>35%</td>
-            <td>Renta Fija Indexada</td>
-            <td>Protección inflacionaria</td>
-          </tr>
-          <tr>
-            <td>Largo (24-36m)</td>
-            <td>20%</td>
-            <td>Renta Variable</td>
-            <td>Crecimiento de capital</td>
-          </tr>
-          <tr>
-            <td>Estratégico</td>
-            <td>5%</td>
-            <td>Oportunidades</td>
-            <td>Flexibilidad táctica</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="section-header">
+        <div class="section-icon">📊</div>
+        <div>
+          <h2 class="section-title">Tu Asignación Estratégica</h2>
+          <p class="section-subtitle">Cómo distribuir tus inversiones según el horizonte temporal</p>
+        </div>
+      </div>
 
-      <ul>
-        <li><strong>Liquidez y Renta Fija (40%):</strong> Fondos de dinero y cauciones para disponibilidad inmediata. Prioriza seguridad y liquidez sobre rentabilidad. Ideal para el fondo de emergencia.</li>
-        <li><strong>Renta Fija Indexada (35%):</strong> Instrumentos atados a CER (inflación) o dólar. Protege el poder adquisitivo a mediano plazo. Menor volatilidad que renta variable.</li>
-        <li><strong>Renta Variable (20%):</strong> CEDEARs de ETFs diversificados (SPY, QQQ). Mayor potencial de crecimiento. Volatilidad esperada pero con horizonte de inversión largo.</li>
-        <li><strong>Oportunidades (5%):</strong> Reserva táctica para aprovechar oportunidades de mercado. Flexibilidad ante movimientos inesperados.</li>
-      </ul>
+      <div class="info-box">
+        💡 <strong>Qué significa esto:</strong> No todo tu dinero debe estar invertido igual. 
+        Dividimos tu cartera en "horizontes" según cuándo podrías necesitar cada parte. 
+        El <strong>corto plazo</strong> es para tu fondo de emergencia, el <strong>largo plazo</strong> busca crecimiento.
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Horizonte</th>
+              <th>% Cartera</th>
+              <th>Sector</th>
+              <th>Objetivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(data.asignacionEstrategica || []).map(asig => `
+            <tr>
+              <td><strong>${asig.horizonte}</strong></td>
+              <td>${asig.porcentaje}%</td>
+              <td>${asig.sector}</td>
+              <td>${asig.objetivo}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="progress-container">
+        <h4 style="font-size: 14px; color: var(--text-dark); margin-bottom: 16px; font-weight: 600;">📈 Distribución Visual</h4>
+        ${(data.asignacionEstrategica || []).map((asig, idx) => `
+        <div class="progress-item">
+          <div class="progress-header">
+            <span>${asig.horizonte}</span>
+            <span><strong>${asig.porcentaje}%</strong></span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${asig.porcentaje}%"></div>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">${asig.sector} - ${asig.objetivo}</p>
+        </div>`).join('')}
+      </div>
     </div>
 
     <!-- Sección 3: Cartera Sugerida -->
     <div class="section">
-      <h2 class="section-title">🧱 Cartera Sugerida</h2>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Instrumento</th>
-            <th>Tipo</th>
-            <th>Asignación</th>
-            <th>Moneda</th>
-            <th>Objetivo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Balanz Ahorro USD</td>
-            <td>FCI Money Market</td>
-            <td>25%</td>
-            <td>USD</td>
-            <td>Liquidez inmediata</td>
-          </tr>
-          <tr>
-            <td>FCI Dólar Linked</td>
-            <td>FCI Renta Fija</td>
-            <td>15%</td>
-            <td>USD</td>
-            <td>Protección cambiaria</td>
-          </tr>
-          <tr>
-            <td>FCI CER</td>
-            <td>FCI Indexado</td>
-            <td>20%</td>
-            <td>ARS</td>
-            <td>Cobertura inflación</td>
-          </tr>
-          <tr>
-            <td>Cauciones</td>
-            <td>Renta Fija Corto</td>
-            <td>15%</td>
-            <td>ARS/USD</td>
-            <td>Rentabilidad corta</td>
-          </tr>
-          <tr>
-            <td>CEDEAR SPY (S&P500)</td>
-            <td>ETF Internacional</td>
-            <td>10%</td>
-            <td>USD</td>
-            <td>Diversificación global</td>
-          </tr>
-          <tr>
-            <td>CEDEAR QQQ (Nasdaq100)</td>
-            <td>ETF Tecnología</td>
-            <td>10%</td>
-            <td>USD</td>
-            <td>Crecimiento tech</td>
-          </tr>
-          <tr>
-            <td>CEDEAR KO (Coca-Cola)</td>
-            <td>Acción Dividendos</td>
-            <td>5%</td>
-            <td>USD</td>
-            <td>Ingreso pasivo</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="section-header">
+        <div class="section-icon">🧱</div>
+        <div>
+          <h2 class="section-title">Tu Cartera de Inversiones</h2>
+          <p class="section-subtitle">Los instrumentos específicos que recomendamos</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        💡 <strong>Cómo leer esto:</strong> Cada tarjeta representa un instrumento financiero. 
+        El porcentaje indica cuánto de tu cartera debería estar ahí. 
+        <strong>USD</strong> significa que está en dólares, <strong>ARS</strong> en pesos.
+      </div>
+
+      <div class="cards-grid">
+        ${(data.instruments || []).map(inst => `
+        <div class="instrument-card">
+          <div class="header">
+            <span class="name">${inst.nombre}</span>
+            <span class="badge badge-moneda">${inst.moneda}</span>
+          </div>
+          <p class="type">${inst.tipo}</p>
+          <div class="allocation">
+            <div class="allocation-bar">
+              <div class="allocation-fill" style="width: ${inst.asignacion}%"></div>
+            </div>
+            <span class="allocation-value">${inst.asignacion}%</span>
+          </div>
+          <p class="objetivo">${inst.objetivo}</p>
+        </div>`).join('')}
+      </div>
 
       <div class="resumen-cartera">
-        <h4 style="margin-bottom: 10px;">📈 Resumen de la Cartera</h4>
-        <p><strong>Exposición USD:</strong> 65% | <strong>Exposición ARS:</strong> 35%</p>
-        <p style="margin-top: 5px;"><strong>Renta Fija:</strong> 75% | <strong>Renta Variable:</strong> 25%</p>
-        <p style="margin-top: 5px;"><strong>Liquidez promedio:</strong> 24-48 horas</p>
+        <h4>📈 Resumen de tu Cartera</h4>
+        <div class="resumen-grid">
+          <div class="resumen-item">
+            <div class="label">Exposición USD</div>
+            <div class="value">${data.instruments?.filter(i => i.moneda === 'USD').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+          </div>
+          <div class="resumen-item">
+            <div class="label">Exposición ARS</div>
+            <div class="value">${data.instruments?.filter(i => i.moneda === 'ARS').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+          </div>
+          <div class="resumen-item">
+            <div class="label">Mixto</div>
+            <div class="value">${data.instruments?.filter(i => i.moneda === 'Mix').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+          </div>
+        </div>
+        <div class="resumen-grid" style="margin-top: 16px;">
+          <div class="resumen-item">
+            <div class="label">Renta Fija</div>
+            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Renta')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+          </div>
+          <div class="resumen-item">
+            <div class="label">Renta Variable</div>
+            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Equity')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+          </div>
+          <div class="resumen-item">
+            <div class="label">Liquidez</div>
+            <div class="value">24-48hs</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Sección 4: ONs en USD -->
     <div class="section">
-      <h2 class="section-title">🏷️ Obligaciones Negociables en USD</h2>
-      
-      <p style="margin-bottom: 15px;">Instrumentos de renta fija corporativa en dólares para inversores con perfil ${data.perfilRiesgo}:</p>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Emisor</th>
-            <th>Cupón</th>
-            <th>Vencimiento</th>
-            <th>ISIN</th>
-            <th>Moneda</th>
-            <th>Pago</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>YPF S.A.</td>
-            <td>7.50%</td>
-            <td>2027</td>
-            <td>ARSEYP7D2800</td>
-            <td>USD</td>
-            <td>Semestral</td>
-          </tr>
-          <tr>
-            <td>Pampa Energía</td>
-            <td>6.875%</td>
-            <td>2028</td>
-            <td>USG9184LAW19</td>
-            <td>USD</td>
-            <td>Semestral</td>
-          </tr>
-          <tr>
-            <td>Central Puerto</td>
-            <td>6.50%</td>
-            <td>2027</td>
-            <td>ARGENT8P2705</td>
-            <td>USD</td>
-            <td>Semestral</td>
-          </tr>
-          <tr>
-            <td>TGS (Transportadora)</td>
-            <td>7.00%</td>
-            <td>2028</td>
-            <td>US87264AAS68</td>
-            <td>USD</td>
-            <td>Semestral</td>
-          </tr>
-          <tr>
-            <td>IRSA Inversiones</td>
-            <td>7.25%</td>
-            <td>2026</td>
-            <td>US44982LAA67</td>
-            <td>USD</td>
-            <td>Semestral</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="section-header">
+        <div class="section-icon">🏷️</div>
+        <div>
+          <h2 class="section-title">Obligaciones Negociables en USD</h2>
+          <p class="section-subtitle">Renta fija corporativa en dólares</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        💡 <strong>Qué son las ONs:</strong> Son préstamos que le hacés a empresas grandes. 
+        Ellas te pagan intereses (cupón) y te devuelven el capital al vencimiento. 
+        Es una forma de <strong>ahorrar en dólares con renta</strong>.
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Emisor</th>
+              <th>Cupón</th>
+              <th>Vencimiento</th>
+              <th>Ticker</th>
+              <th>Moneda</th>
+              <th>Pago</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(data.obligacionesNegociables || []).map(on => `
+            <tr>
+              <td><strong>${on.emisor}</strong></td>
+              <td>${on.cupon}</td>
+              <td>${on.vencimiento}</td>
+              <td><span class="badge badge-moneda">${on.ticker}</span></td>
+              <td><span class="badge badge-moneda">${on.moneda}</span></td>
+              <td>${on.pago}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
 
       <div class="definition-box">
-        <strong>💡 Nota:</strong> Las ONs en USD son una excelente alternativa para dolarizar carteras con renta fija. Ofrecen cupones regulares y capital en moneda dura. Requieren cuenta comitente en BYMA.
+        <span class="term">📌 Consejo Práctico</span>
+        <p class="definition">Para invertir en ONs necesitás una cuenta comitente en BYMA. Podés operarlas a través de tu agente de bolsa o ALyC. Las ONs en USD son ideales para dolarizar carteras con renta fija.</p>
       </div>
     </div>
 
     <!-- Sección 5: Beneficio Fiscal -->
     <div class="section">
-      <h2 class="section-title">🧾 Beneficio Fiscal Argentina</h2>
-      
-      <ul>
-        <li><strong>FCI sin impuesto a la ganancia:</strong> Los fondos comunes de inversión no tributan impuesto a las ganancias mientras los fondos permanezcan invertidos. Solo se tributa al rescate.</li>
-        <li><strong>Exención hasta $9.8M ARS:</strong> Los primeros $9,808,275 ARS de ganancias anuales están exentos de impuesto a las ganancias (2024). Monto actualizado anualmente por inflación.</li>
-        <li><strong>CEDEARs y Bienes Personales:</strong> Los CEDEARs están exentos del impuesto a los Bienes Personales. Ideal para planificación patrimonial de largo plazo.</li>
-        <li><strong>Cauciones y percepción:</strong> Las cauciones en USD vía MEP no tienen percepción de impuestos. Liquidez eficiente sin costos fiscales adicionales.</li>
-        <li><strong>Blanqueo fiscal 2024:</strong> Oportunidad de regularizar activos con beneficios fiscales excepcionales. Consultar con contador para casos específicos.</li>
+      <div class="section-header">
+        <div class="section-icon">🧾</div>
+        <div>
+          <h2 class="section-title">Beneficios Fiscales</h2>
+          <p class="section-subtitle">Cómo optimizar tus impuestos en Argentina</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        💡 <strong>Por qué importa esto:</strong> Invertir inteligentemente no solo genera ganancias, 
+        sino que también puede <strong>reducir tu carga impositiva</strong>. Estos son los beneficios 
+        fiscales que podés aprovechar con esta cartera.
+      </div>
+
+      <ul class="beneficios-list">
+        ${(data.beneficiosFiscales || []).map(b => `
+        <li>
+          <span class="icon">✓</span>
+          <div class="content">${b}</div>
+        </li>`).join('')}
       </ul>
+
+      ${recommendBoxHTML}
     </div>
 
-    <!-- Sección 6: Educación y Riesgos -->
+    <!-- Sección 6: Riesgos y Mitigación -->
     <div class="section">
-      <h2 class="section-title">📚 Educación y Riesgos</h2>
-      
-      <h4 style="color: ${COLORS.cactusMedium}; margin-bottom: 15px;">Riesgos Identificados y Mitigación</h4>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Riesgo</th>
-            <th>Nivel</th>
-            <th>Mitigación</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Riesgo Cambiario</td>
-            <td><span class="instrument-badge badge-moderado">Medio</span></td>
-            <td>Diversificación USD/ARS, uso de dólar MEP</td>
-          </tr>
-          <tr>
-            <td>Riesgo Inflacionario</td>
-            <td><span class="instrument-badge badge-agresivo">Alto</span></td>
-            <td>FCI CER, activos atados a inflación</td>
-          </tr>
-          <tr>
-            <td>Riesgo de Mercado</td>
-            <td><span class="instrument-badge badge-moderado">Medio</span></td>
-            <td>Horizonte de inversión de ${data.horizonteMeses} meses, diversificación</td>
-          </tr>
-          <tr>
-            <td>Riesgo de Liquidez</td>
-            <td><span class="instrument-badge badge-conservador">Bajo</span></td>
-            <td>Instrumentos con liquidez 24-48hs, fondo de emergencia</td>
-          </tr>
-          <tr>
-            <td>Riesgo Político/Económico</td>
-            <td><span class="instrument-badge badge-moderado">Medio</span></td>
-            <td>Exposición internacional vía CEDEARs, diversificación geográfica</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="section-header">
+        <div class="section-icon">📚</div>
+        <div>
+          <h2 class="section-title">Riesgos y Mitigación</h2>
+          <p class="section-subtitle">Conocer los riesgos es el primer paso para gestionarlos</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        💡 <strong>Por qué hablamos de riesgos:</strong> Toda inversión tiene riesgos, pero saber cuáles son 
+        nos permite <strong>mitigarlos inteligentemente</strong>. No se trata de evitar riesgos, sino de 
+        gestionarlos de forma consciente.
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Riesgo</th>
+              <th>Nivel</th>
+              <th>Estrategia de Mitigación</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(data.riesgos || []).map(r => `
+            <tr>
+              <td><strong>${r.riesgo}</strong></td>
+              <td><span class="badge badge-${r.nivel.toLowerCase()}">${r.nivel}</span></td>
+              <td>${r.mitigacion}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
 
       <div class="consejo-box">
-        <h4>🎯 Consejo Final</h4>
-        <p style="font-size: 16px; margin-top: 10px;">
-          A tus ${data.edad} años y con un perfil <strong>${data.perfilRiesgo}</strong>, tienes la ventaja del tiempo. 
-          La constancia en los aportes de USD ${data.aporteMensual}/mes durante ${data.horizonteMeses} meses te permitirá 
-          construir un patrimonio sólido. Recuerda: <em>el mejor momento para empezar fue ayer, el segundo mejor momento es hoy.</em>
-        </p>
-        <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">
-          Gastos principales identificados: ${data.gastosPrincipales}
-        </p>
-        ${data.observaciones ? `<p style="margin-top: 10px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${data.observaciones}</p>` : ''}
+        <h4>💡 Consejo de tu Asesor</h4>
+        <p>${data.consejoFinal || data.usarConsejoIA ? `Empezar a invertir joven es la mejor decisión financiera que podés tomar. No busques la perfección, buscá la consistencia. Con tiempo y disciplina, incluso aportes pequeños pueden crecer significativamente.` : ''}
+        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${data.observaciones}</p>` : ''}</p>
+        <div class="consejo-footer">Recordá revisar tu plan cada 6 meses para ajustarlo según tus necesidades cambiantes.</div>
       </div>
     </div>
 
+    <!-- Footer con Links -->
     <div class="footer">
-      <p>Plan financiero generado automáticamente | ${fecha}</p>
-      <p>Este documento es orientativo y no constituye asesoramiento financiero personalizado.</p>
+      <div class="footer-header">
+        <h4>📞 Contactá a tu Asesor</h4>
+        <p>Seguime en redes para tips financieros</p>
+      </div>
+
+      ${showRecomendaciones ? `
+      <div class="recommend-box" style="margin-bottom: 24px;">
+        <span class="icon">🌟</span>
+        <p>
+          Si este plan te pareció útil, <strong>compartilo</strong> Recomendá a <strong>${asesorNombre}</strong> con amigos y familiares. 
+          Las referencias nos ayudan a seguir creciendo y llevando planificación financiera a más personas.
+        </p>
+      </div>` : ''}
+
+      <div class="footer-links">
+        ${socialLinksHTML}
+      </div>
+      <div class="footer-disclaimer">
+        <p>Plan financiero generado el ${fecha}</p>
+        <p>Este documento es orientativo y no constituye asesoramiento financiero personalizado. Consultá con un profesional antes de tomar decisiones de inversión.</p>
+        <p style="margin-top: 12px;">${webUrl}</p>
+      </div>
     </div>
   </div>
 </body>

@@ -228,46 +228,57 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, p
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
-  const [mobilePanel, setMobilePanel] = useState<'form' | 'preview'>('form')
+  const [mobilePanel, setMobilePanel] = useState<"form" | "preview">("form")
   const [showMobileSettings, setShowMobileSettings] = useState(false)
+  
+  // Financial Planning States
+  const [wizardStep, setWizardStep] = useState(0)
+  const [ingresosMensuales, setIngresosMensuales] = useState(1000)
+  const [gastosMensuales, setGastosMensuales] = useState(700)
+  const [fondoEmergenciaMeses, setFondoEmergenciaMeses] = useState(6)
+  const [fondoEmergenciaActual, setFondoEmergenciaActual] = useState(0)
+  const [metasVida, setMetasVida] = useState([{ id: "1", descripcion: "Comprar casa", monto: 50000, plazo: 60 }])
+  const [proyeccionRetiro, setProyeccionRetiro] = useState("")
+  const [patrimonioActivos, setPatrimonioActivos] = useState(0)
+  const [patrimonioDeudas, setPatrimonioDeudas] = useState(0)
 
   const [edad, setEdad] = useState(24)
-  const [profesion, setProfesion] = useState('Estudiante')
-  const [objetivo, setObjetivo] = useState('Fondo de emergencia')
+  const [profesion, setProfesion] = useState("Estudiante")
+  const [objetivo, setObjetivo] = useState("Fondo de emergencia")
   const [aporteMensual, setAporteMensual] = useState(300)
-  const [perfilRiesgo, setPerfilRiesgo] = useState('Moderado-Conservador')
+  const [perfilRiesgo, setPerfilRiesgo] = useState("Moderado-Conservador")
   const [horizonteMeses, setHorizonteMeses] = useState(36)
-  const [gastosPrincipales, setGastosPrincipales] = useState('')
-  const [observaciones, setObservaciones] = useState('')
+  const [gastosPrincipales, setGastosPrincipales] = useState("")
+  const [observaciones, setObservaciones] = useState("")
 
   const [asignacionEstrategica, setAsignacionEstrategica] = useState(defaultAsignacionEstrategica)
   const [instruments, setInstruments] = useState(defaultInstruments)
   const [obligacionesNegociables, setObligacionesNegociables] = useState(defaultObligacionesNegociables)
   const [riesgos, setRiesgos] = useState(defaultRiesgos)
   const [beneficiosFiscales, setBeneficiosFiscales] = useState(defaultBeneficiosFiscales)
-  const [terminoFinanciero, setTerminoFinanciero] = useState('')
+  const [terminoFinanciero, setTerminoFinanciero] = useState("")
   const [usarTerminoIA, setUsarTerminoIA] = useState(true)
-  const [consejoFinal, setConsejoFinal] = useState('')
+  const [consejoFinal, setConsejoFinal] = useState("")
   const [usarConsejoIA, setUsarConsejoIA] = useState(true)
   const [platformLinks, setPlatformLinks] = useState(defaultPlatformLinks)
   const [socialLinks, setSocialLinks] = useState(defaultSocialLinks)
-  const [asesorNombre, setAsesorNombre] = useState('')
+  const [asesorNombre, setAsesorNombre] = useState("")
   const [asesorRecomendacion, setAsesorRecomendacion] = useState(true)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
 
-  const [generatedHTML, setGeneratedHTML] = useState('')
-  const [editableHTML, setEditableHTML] = useState('')
+  const [generatedHTML, setGeneratedHTML] = useState("")
+  const [editableHTML, setEditableHTML] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview')
+  const [viewMode, setViewMode] = useState<"preview" | "edit">("preview")
   const [configSaved, setConfigSaved] = useState(false)
-  const [activeSection, setActiveSection] = useState('cliente')
+  const [activeSection, setActiveSection] = useState("cliente")
   const [isLibraryOpen, setIsLibraryOpen] = useState(false)
 
   // Library state
   const [portfolioLibrary, setPortfolioLibrary] = useState<SavedPortfolio[]>([])
-  const [saveName, setSaveName] = useState('')
+  const [saveName, setSaveName] = useState("")
 
   const previewRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -275,227 +286,114 @@ export default function Home() {
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   const [isLoaded, setIsLoaded] = useState(false)
   useEffect(() => {
     const stored = getStoredConfig()
     if (stored) {
-      if (stored.edad !== undefined) setEdad(stored.edad)
-      if (stored.profesion) setProfesion(stored.profesion)
-      if (stored.objetivo) setObjetivo(stored.objetivo)
-      if (stored.aporteMensual !== undefined) setAporteMensual(stored.aporteMensual)
-      if (stored.perfilRiesgo) setPerfilRiesgo(stored.perfilRiesgo)
-      if (stored.horizonteMeses !== undefined) setHorizonteMeses(stored.horizonteMeses)
-      if (stored.gastosPrincipales) setGastosPrincipales(stored.gastosPrincipales)
-      if (stored.asignacionEstrategica) setAsignacionEstrategica(stored.asignacionEstrategica)
-      if (stored.instruments) setInstruments(stored.instruments)
-      if (stored.obligacionesNegociables) setObligacionesNegociables(stored.obligacionesNegociables)
-      if (stored.riesgos) setRiesgos(stored.riesgos)
-      if (stored.beneficiosFiscales) setBeneficiosFiscales(stored.beneficiosFiscales)
-      if (stored.terminoFinanciero !== undefined) setTerminoFinanciero(stored.terminoFinanciero)
-      if (stored.usarTerminoIA !== undefined) setUsarTerminoIA(stored.usarTerminoIA)
-      if (stored.consejoFinal !== undefined) setConsejoFinal(stored.consejoFinal)
-      if (stored.usarConsejoIA !== undefined) setUsarConsejoIA(stored.usarConsejoIA)
-      if (stored.platformLinks) setPlatformLinks(stored.platformLinks)
-      if (stored.socialLinks) setSocialLinks(stored.socialLinks)
-      if (stored.asesorNombre !== undefined) setAsesorNombre(stored.asesorNombre)
-      if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
+      setTimeout(() => {
+        if (stored.edad !== undefined) setEdad(stored.edad)
+        if (stored.profesion) setProfesion(stored.profesion)
+        if (stored.objetivo) setObjetivo(stored.objetivo)
+        if (stored.aporteMensual !== undefined) setAporteMensual(stored.aporteMensual)
+        if (stored.perfilRiesgo) setPerfilRiesgo(stored.perfilRiesgo)
+        if (stored.horizonteMeses !== undefined) setHorizonteMeses(stored.horizonteMeses)
+        if (stored.gastosPrincipales) setGastosPrincipales(stored.gastosPrincipales)
+        if (stored.ingresosMensuales !== undefined) setIngresosMensuales(stored.ingresosMensuales)
+        if (stored.gastosMensuales !== undefined) setGastosMensuales(stored.gastosMensuales)
+        if (stored.fondoEmergenciaMeses !== undefined) setFondoEmergenciaMeses(stored.fondoEmergenciaMeses)
+        if (stored.fondoEmergenciaActual !== undefined) setFondoEmergenciaActual(stored.fondoEmergenciaActual)
+        if (stored.metasVida) setMetasVida(stored.metasVida)
+        if (stored.proyeccionRetiro) setProyeccionRetiro(stored.proyeccionRetiro)
+        if (stored.patrimonioActivos !== undefined) setPatrimonioActivos(stored.patrimonioActivos)
+        if (stored.patrimonioDeudas !== undefined) setPatrimonioDeudas(stored.patrimonioDeudas)
+        if (stored.asignacionEstrategica) setAsignacionEstrategica(stored.asignacionEstrategica)
+        if (stored.instruments) setInstruments(stored.instruments)
+        if (stored.obligacionesNegociables) setObligacionesNegociables(stored.obligacionesNegociables)
+        if (stored.riesgos) setRiesgos(stored.riesgos)
+        if (stored.beneficiosFiscales) setBeneficiosFiscales(stored.beneficiosFiscales)
+        if (stored.terminoFinanciero !== undefined) setTerminoFinanciero(stored.terminoFinanciero)
+        if (stored.usarTerminoIA !== undefined) setUsarTerminoIA(stored.usarTerminoIA)
+        if (stored.consejoFinal !== undefined) setConsejoFinal(stored.consejoFinal)
+        if (stored.usarConsejoIA !== undefined) setUsarConsejoIA(stored.usarConsejoIA)
+        if (stored.platformLinks) setPlatformLinks(stored.platformLinks)
+        if (stored.socialLinks) setSocialLinks(stored.socialLinks)
+        if (stored.asesorNombre !== undefined) setAsesorNombre(stored.asesorNombre)
+        if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
+      }, 0);
     }
 
-    // Load library
     try {
         const lib = localStorage.getItem(LIBRARY_KEY)
-        if (lib) setPortfolioLibrary(JSON.parse(lib))
+        if (lib) {
+            const parsed = JSON.parse(lib);
+            setTimeout(() => setPortfolioLibrary(parsed), 0);
+        }
     } catch (e) {}
 
-    setIsLoaded(true)
+    setTimeout(() => setIsLoaded(true), 0);
   }, [])
 
   useEffect(() => {
     if (!isLoaded) return
     const timer = setTimeout(() => {
-      saveConfig({ edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
+      saveConfig({ edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
       setConfigSaved(true)
       setTimeout(() => setConfigSaved(false), 2000)
     }, 1000)
     return () => clearTimeout(timer)
-  }, [isLoaded, edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
+  }, [isLoaded, edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
 
   const handleResetConfig = useCallback(() => {
     setEdad(24)
-    setProfesion('Estudiante')
-    setObjetivo('Fondo de emergencia')
+    setProfesion("Estudiante")
+    setObjetivo("Fondo de emergencia")
     setAporteMensual(300)
-    setPerfilRiesgo('Moderado-Conservador')
+    setPerfilRiesgo("Moderado-Conservador")
     setHorizonteMeses(36)
-    setGastosPrincipales('')
+    setGastosPrincipales("")
+    setIngresosMensuales(1000)
+    setGastosMensuales(700)
+    setFondoEmergenciaMeses(6)
+    setFondoEmergenciaActual(0)
+    setMetasVida([{ id: "1", descripcion: "Comprar casa", monto: 50000, plazo: 60 }])
+    setProyeccionRetiro("")
+    setPatrimonioActivos(0)
+    setPatrimonioDeudas(0)
     setAsignacionEstrategica(defaultAsignacionEstrategica)
     setInstruments(defaultInstruments)
     setObligacionesNegociables(defaultObligacionesNegociables)
     setRiesgos(defaultRiesgos)
     setBeneficiosFiscales(defaultBeneficiosFiscales)
-    setTerminoFinanciero('')
+    setTerminoFinanciero("")
     setUsarTerminoIA(true)
-    setConsejoFinal('')
+    setConsejoFinal("")
     setUsarConsejoIA(true)
     setPlatformLinks(defaultPlatformLinks)
     setSocialLinks(defaultSocialLinks)
-    setAsesorNombre('')
+    setAsesorNombre("")
     setAsesorRecomendacion(true)
     localStorage.removeItem(STORAGE_KEY)
   }, [])
-
-  const applyTemplate = (template: typeof OFFICIAL_TEMPLATES[0]) => {
-    const newInstruments = template.instruments.map((inst: any) => ({
-      nombre: inst.name,
-      tipo: inst.type,
-      asignacion: inst.weight,
-      moneda: inst.currency,
-      objetivo: inst.objective,
-      locked: false
-    }));
-
-    const newStrategic = defaultAsignacionEstrategica.map(item => {
-      let pct = item.porcentaje;
-      if (item.horizonte.includes('Corto')) pct = template.strategicAllocation.short;
-      if (item.horizonte.includes('Medio')) pct = template.strategicAllocation.medium;
-      if (item.horizonte.includes('Largo')) pct = template.strategicAllocation.long;
-      if (item.horizonte.includes('Estrategico')) pct = template.strategicAllocation.strategic;
-      return { ...item, porcentaje: pct };
-    });
-
-    setPerfilRiesgo(template.riskProfile);
-    setInstruments(newInstruments);
-    setAsignacionEstrategica(newStrategic);
-    toast.success(`Plantilla "${template.name}" aplicada`);
-    setIsLibraryOpen(false);
-  };
-
-  const handleSaveToLibrary = () => {
-    if (!saveName) return;
-    const newEntry: SavedPortfolio = {
-        id: crypto.randomUUID(),
-        name: saveName,
-        date: new Date().toLocaleString(),
-        data: { edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA }
-    }
-    const updated = [...portfolioLibrary, newEntry]
-    setPortfolioLibrary(updated)
-    localStorage.setItem(LIBRARY_KEY, JSON.stringify(updated))
-    setSaveName('')
-    toast.success('Cartera guardada en tu biblioteca')
-  }
-
-  const handleLoadFromLibrary = (id: string) => {
-    const entry = portfolioLibrary.find(p => p.id === id)
-    if (!entry) return;
-    const d = entry.data
-    if (d.edad !== undefined) setEdad(d.edad)
-    if (d.profesion) setProfesion(d.profesion)
-    if (d.objetivo) setObjetivo(d.objetivo)
-    if (d.aporteMensual !== undefined) setAporteMensual(d.aporteMensual)
-    if (d.perfilRiesgo) setPerfilRiesgo(d.perfilRiesgo)
-    if (d.horizonteMeses !== undefined) setHorizonteMeses(d.horizonteMeses)
-    if (d.gastosPrincipales) setGastosPrincipales(d.gastosPrincipales)
-    if (d.asignacionEstrategica) setAsignacionEstrategica(d.asignacionEstrategica)
-    if (d.instruments) setInstruments(d.instruments)
-    if (d.obligacionesNegociables) setObligacionesNegociables(d.obligacionesNegociables)
-    if (d.riesgos) setRiesgos(d.riesgos)
-    if (d.beneficiosFiscales) setBeneficiosFiscales(d.beneficiosFiscales)
-    if (d.terminoFinanciero !== undefined) setTerminoFinanciero(d.terminoFinanciero)
-    if (d.usarTerminoIA !== undefined) setUsarTerminoIA(d.usarTerminoIA)
-    if (d.consejoFinal !== undefined) setConsejoFinal(d.consejoFinal)
-    if (d.usarConsejoIA !== undefined) setUsarConsejoIA(d.usarConsejoIA)
-    toast.success(`Cartera "${entry.name}" cargada`)
-  }
-
-  const handleDeleteFromLibrary = (id: string) => {
-    const updated = portfolioLibrary.filter(p => p.id !== id)
-    setPortfolioLibrary(updated)
-    localStorage.setItem(LIBRARY_KEY, JSON.stringify(updated))
-  }
-
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
-    Array.from(files).forEach(file => {
-      if (file.type !== 'application/pdf') { alert('Solo archivos PDF'); return }
-      if (file.size > 10 * 1024 * 1024) { alert('Max 10MB'); return }
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const data = event.target?.result as string
-        setAttachedFiles(prev => [...prev, { name: file.name, type: file.type, data, size: file.size }])
-      }
-      reader.readAsDataURL(file)
-    })
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }, [])
-
-  const totalAsignacion = instruments.reduce((sum, i) => sum + i.asignacion, 0)
-  const totalAsignacionEstrategica = asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0)
-  const metaCalculada = aporteMensual * horizonteMeses
-  const formatNumber = (num: number) => num.toLocaleString('es-AR')
-  const exposicionUSD = instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0)
-  const exposicionARS = instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0)
-
-  const handleGeneratePlan = async () => {
-    setIsLoading(true)
-    try {
-      const formData = { edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, observaciones, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, attachedFiles }
-      const response = await fetch('/api/generate-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
-      const data = await response.json()
-      if (data.html) { setGeneratedHTML(data.html); setEditableHTML(data.html); setViewMode('preview'); if (isMobile) setMobilePanel('preview') }
-    } catch (error) { console.error('Error:', error) } finally { setIsLoading(false) }
-  }
-
-  const handleCopyToClipboard = async () => {
-    try { await navigator.clipboard.writeText(editableHTML); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch {}
-  }
-
-  const handleDownloadHTML = () => {
-    const blob = new Blob([editableHTML], { type: 'text/html' })
-    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `plan-${edad}anos.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-  }
-
-  const handleDownloadPDF = async () => {
-    if (!previewRef.current) return
-    setIsDownloadingPdf(true)
-    try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
-      const iframe = previewRef.current.querySelector('iframe')
-      if (!iframe || !iframe.contentDocument) throw new Error('No iframe')
-
-      const originalHeight = iframe.style.height;
-      iframe.style.height = iframe.contentDocument.documentElement.scrollHeight + "px";
-      const content = iframe.contentDocument.body
-
-      const canvas = await html2canvas(content, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#FFFFFF',
-        logging: false,
-        windowWidth: 850
-      })
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95)
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const imgWidth = 210, pageHeight = 297, imgHeight = (canvas.height * imgWidth) / canvas.width
-      let heightLeft = imgHeight, position = 0
-
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight
-      while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight }
-
-      pdf.save(`plan-${profesion.replace(/\s+/g, '_')}-${edad}.pdf`)
-      iframe.style.height = originalHeight;
-    } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
-  }
-
   const editorProps = {
-    isMobile, activeSection, setActiveSection, edad, setEdad, aporteMensual, setAporteMensual, horizonteMeses, setHorizonteMeses, profesion, setProfesion, objetivo, setObjetivo, perfilRiesgo, setPerfilRiesgo, gastosPrincipales, setGastosPrincipales, attachedFiles, setAttachedFiles, handleFileUpload, fileInputRef, instruments, setInstruments, asignacionEstrategica, setAsignacionEstrategica, exposicionUSD, exposicionARS, totalAsignacion, totalAsignacionEstrategica, adjustWeights, normalizeWeights, obligacionesNegociables, setObligacionesNegociables, riesgos, setRiesgos, beneficiosFiscales, setBeneficiosFiscales, usarTerminoIA, setUsarTerminoIA, terminoFinanciero, setTerminoFinanciero, usarConsejoIA, setUsarConsejoIA, consejoFinal, setConsejoFinal, metaCalculada, formatNumber
+    isMobile, activeSection, setActiveSection, wizardStep, setWizardStep,
+    ingresosMensuales, setIngresosMensuales, gastosMensuales, setGastosMensuales,
+    fondoEmergenciaMeses, setFondoEmergenciaMeses, fondoEmergenciaActual, setFondoEmergenciaActual,
+    metasVida, setMetasVida, proyeccionRetiro, setProyeccionRetiro,
+    patrimonioActivos, setPatrimonioActivos, patrimonioDeudas, setPatrimonioDeudas,
+    edad, setEdad, aporteMensual, setAporteMensual, horizonteMeses, setHorizonteMeses,
+    profesion, setProfesion, objetivo, setObjetivo, perfilRiesgo, setPerfilRiesgo,
+    gastosPrincipales, setGastosPrincipales, attachedFiles, setAttachedFiles,
+    handleFileUpload, fileInputRef, instruments, setInstruments,
+    asignacionEstrategica, setAsignacionEstrategica, exposicionUSD, exposicionARS,
+    totalAsignacion, totalAsignacionEstrategica, adjustWeights, normalizeWeights,
+    obligacionesNegociables, setObligacionesNegociables, riesgos, setRiesgos,
+    beneficiosFiscales, setBeneficiosFiscales, usarTerminoIA, setUsarTerminoIA,
+    terminoFinanciero, setTerminoFinanciero, usarConsejoIA, setUsarConsejoIA,
+    consejoFinal, setConsejoFinal, metaCalculada, formatNumber
   }
 
   const previewProps = {
@@ -592,9 +490,13 @@ export default function Home() {
             <ResizablePanel defaultSize={30} minSize={25} maxSize={45}>
               <div className="h-full bg-white flex flex-col overflow-hidden border-r border-[#E8E6E0]">
                 <PortfolioEditor {...editorProps} />
-                <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                  <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-12 text-base font-semibold rounded-xl shadow-lg shadow-[#2D5A4A]/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                    {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Plan Maestro</>}
+                <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0] flex-shrink-0">
+                  <Button
+                    onClick={handleGeneratePlan}
+                    disabled={isLoading}
+                    className="w-full bg-[#C4846C] hover:bg-[#A36D59] h-12 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
+                  >
+                    {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar y Generar PDF</>}
                   </Button>
                 </div>
               </div>
@@ -609,8 +511,8 @@ export default function Home() {
             <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioEditor {...editorProps} />
               <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#2D5A4A] hover:bg-[#3D7A5F] h-14 text-base font-bold rounded-xl shadow-lg shadow-[#2D5A4A]/20">
-                  {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Plan</>}
+                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#C4846C] hover:bg-[#A36D59] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
+                  {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar Plan</>}
                 </Button>
               </div>
             </div>

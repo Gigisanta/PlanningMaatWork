@@ -230,7 +230,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<"form" | "preview">("form")
   const [showMobileSettings, setShowMobileSettings] = useState(false)
-
+  
   // Financial Planning States
   const [wizardStep, setWizardStep] = useState(0)
   const [ingresosMensuales, setIngresosMensuales] = useState(1000)
@@ -264,6 +264,8 @@ export default function Home() {
   const [socialLinks, setSocialLinks] = useState(defaultSocialLinks)
   const [asesorNombre, setAsesorNombre] = useState("")
   const [asesorRecomendacion, setAsesorRecomendacion] = useState(true)
+  const [webUrl, setWebUrl] = useState("cactuswealth.com.ar")
+  const [tipoAporte, setTipoAporte] = useState<'mensual' | 'unico' | 'semanal' | 'quincenal'>('mensual')
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
 
   const [generatedHTML, setGeneratedHTML] = useState("")
@@ -318,14 +320,14 @@ export default function Home() {
         if (stored.terminoFinanciero !== undefined) setTerminoFinanciero(stored.terminoFinanciero)
         if (stored.usarTerminoIA !== undefined) setUsarTerminoIA(stored.usarTerminoIA)
         if (stored.consejoFinal !== undefined) setConsejoFinal(stored.consejoFinal)
-        if (stored.usarConsejoIA !== undefined) setUsarConsejoIA(stored.usarConsejoIA)
         if (stored.platformLinks) setPlatformLinks(stored.platformLinks)
         if (stored.socialLinks) setSocialLinks(stored.socialLinks)
         if (stored.asesorNombre !== undefined) setAsesorNombre(stored.asesorNombre)
         if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
+        if (stored.webUrl !== undefined) setWebUrl(stored.webUrl)
+        if (stored.tipoAporte !== undefined) setTipoAporte(stored.tipoAporte)
       }, 0);
     }
-
     try {
         const lib = localStorage.getItem(LIBRARY_KEY)
         if (lib) {
@@ -340,13 +342,7 @@ export default function Home() {
   useEffect(() => {
     if (!isLoaded) return
     const timer = setTimeout(() => {
-      saveConfig({ edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
-      setConfigSaved(true)
-      setTimeout(() => setConfigSaved(false), 2000)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [isLoaded, edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
-
+      saveConfig({ edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, webUrl, tipoAporte })
   const handleResetConfig = useCallback(() => {
     setEdad(24)
     setProfesion("Estudiante")
@@ -373,11 +369,11 @@ export default function Home() {
     setConsejoFinal("")
     setUsarConsejoIA(true)
     setPlatformLinks(defaultPlatformLinks)
-    setSocialLinks(defaultSocialLinks)
     setAsesorNombre("")
     setAsesorRecomendacion(true)
+    setWebUrl("cactuswealth.com.ar")
+    setTipoAporte('mensual')
     localStorage.removeItem(STORAGE_KEY)
-  }, [])
   const editorProps = {
     isMobile, activeSection, setActiveSection, wizardStep, setWizardStep,
     ingresosMensuales, setIngresosMensuales, gastosMensuales, setGastosMensuales,
