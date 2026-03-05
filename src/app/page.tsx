@@ -140,7 +140,7 @@ const defaultBeneficiosFiscales = [
 ]
 
 const defaultPlatformLinks: ConfigurableLink[] = [
-  { name: 'IOL invertironline', url: 'https://www.invertironline.com/', icon: 'link' },
+  { name: 'Cocos Capital', url: 'https://cocos.capital/', icon: 'link' },
   { name: 'Balanz', url: 'https://balanz.com/', icon: 'link' }
 ]
 
