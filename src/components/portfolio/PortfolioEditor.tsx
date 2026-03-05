@@ -58,6 +58,8 @@ interface PortfolioEditorProps {
   // Cliente
   edad: number
   setEdad: (v: number) => void
+  aporteInicial: number
+  setAporteInicial: (v: number) => void
   aporteMensual: number
   setAporteMensual: (v: number) => void
   horizonteMeses: number
@@ -119,6 +121,7 @@ export function PortfolioEditor({
   activeSection,
   setActiveSection,
   edad, setEdad,
+  aporteInicial, setAporteInicial,
   aporteMensual, setAporteMensual,
   horizonteMeses, setHorizonteMeses,
   profesion, setProfesion,
@@ -214,6 +217,10 @@ export function PortfolioEditor({
               <div>
                 <Label className={labelClass}>Edad</Label>
                 <Input type="number" value={edad} onChange={(e) => setEdad(parseInt(e.target.value) || 0)} className={`${inputClass} mt-1`} />
+              </div>
+              <div>
+                <Label className={labelClass}>Aporte Inicial</Label>
+                <Input type="number" value={aporteInicial} onChange={(e) => setAporteInicial(parseInt(e.target.value) || 0)} className={`${inputClass} mt-1`} />
               </div>
               <div>
                 <Label className={labelClass}>Aporte USD</Label>

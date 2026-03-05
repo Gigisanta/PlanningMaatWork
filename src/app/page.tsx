@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Popover,
@@ -139,8 +140,8 @@ const defaultBeneficiosFiscales = [
 ]
 
 const defaultPlatformLinks: ConfigurableLink[] = [
-  { name: 'IOL invertironline', url: 'https://www.invertironline.com/' },
-  { name: 'Balanz', url: 'https://balanz.com/' }
+  { name: 'IOL invertironline', url: 'https://www.invertironline.com/', icon: 'link' },
+  { name: 'Balanz', url: 'https://balanz.com/', icon: 'link' }
 ]
 
 const defaultSocialLinks: ConfigurableLink[] = [
@@ -197,7 +198,7 @@ function normalizeWeights<T>(items: T[], key: keyof T): T[] {
   return newItems
 }
 
-function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, platformLinks, setPlatformLinks, socialLinks, setSocialLinks, asesorRecomendacion, setAsesorRecomendacion, onReset, configSaved }: any) {
+function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, asesorTelefono, setAsesorTelefono, asesorMensajePredefinido, setAsesorMensajePredefinido, platformLinks, setPlatformLinks, socialLinks, setSocialLinks, asesorRecomendacion, setAsesorRecomendacion, onReset, configSaved }: any) {
   if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in slide-in-from-bottom duration-300">
@@ -212,6 +213,8 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, p
         </div>
         <div className="space-y-4">
           <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Tu Nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} className="h-12 text-base rounded-xl" /></div>
+          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54 9 11 1234-5678" className="h-12 text-base rounded-xl" /></div>
+          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-base rounded-xl min-h-[80px] p-3" /></div>
           <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Plataformas de Inversión</Label><div className="space-y-2">{platformLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-1 rounded-xl" placeholder="Nombre" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
           <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Redes Sociales</Label><div className="space-y-2">{socialLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><div className="flex items-center gap-2 flex-1">{link.icon === 'instagram' ? <Instagram className="w-5 h-5 text-[#E1306C] flex-shrink-0" /> : <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-11 text-base rounded-xl" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
           <div className="flex items-center gap-3 py-2"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="w-5 h-5 rounded text-[#3D7A5F] accent-[#3D7A5F]" /><Label className="text-base">Incluir recomendaciones</Label></div>
@@ -243,6 +246,7 @@ export default function Home() {
   const [patrimonioDeudas, setPatrimonioDeudas] = useState(0)
 
   const [edad, setEdad] = useState(24)
+  const [aporteInicial, setAporteInicial] = useState(0)
   const [profesion, setProfesion] = useState("Estudiante")
   const [objetivo, setObjetivo] = useState("Fondo de emergencia")
   const [aporteMensual, setAporteMensual] = useState(300)
@@ -264,6 +268,8 @@ export default function Home() {
   const [socialLinks, setSocialLinks] = useState(defaultSocialLinks)
   const [asesorNombre, setAsesorNombre] = useState("")
   const [asesorRecomendacion, setAsesorRecomendacion] = useState(true)
+  const [asesorTelefono, setAsesorTelefono] = useState("")
+  const [asesorMensajePredefinido, setAsesorMensajePredefinido] = useState("¡Hola! Te recomiendo a mi asesor financiero.")
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
 
   const [generatedHTML, setGeneratedHTML] = useState("")
@@ -280,19 +286,19 @@ export default function Home() {
   const [portfolioLibrary, setPortfolioLibrary] = useState<SavedPortfolio[]>([])
   const [saveName, setSaveName] = useState("")
 
-  const previewRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null as any)
+  const fileInputRef = useRef<HTMLInputElement>(null as any)
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
-    setAttachedFiles(prev => [...prev, ...Array.from(files).map(file => ({ name: file.name, size: file.size, type: file.type }))])
+    setAttachedFiles(prev => [...prev, ...Array.from(files).map(file => ({ name: file.name, size: file.size, type: file.type, data: "" }))])
   }
   const exposicionUSD = instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0)
   const exposicionARS = instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0)
   const totalAsignacion = instruments.reduce((sum, i) => sum + i.asignacion, 0)
   const totalAsignacionEstrategica = asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0)
-  const metaCalculada = aporteMensual * horizonteMeses
+  const metaCalculada = aporteInicial + (aporteMensual * horizonteMeses)
   const formatNumber = (num: number) => num.toLocaleString('es-AR')
 
   const applyTemplate = (template: typeof OFFICIAL_TEMPLATES[0]) => {
@@ -327,7 +333,7 @@ export default function Home() {
         id: crypto.randomUUID(),
         name: saveName,
         date: new Date().toLocaleString(),
-        data: { edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA }
+        data: { edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA }
     }
     const updated = [...portfolioLibrary, newEntry]
     setPortfolioLibrary(updated)
@@ -368,7 +374,7 @@ export default function Home() {
   const handleGeneratePlan = async () => {
     setIsLoading(true)
     try {
-      const formData = { edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, observaciones, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, attachedFiles }
+      const formData = { edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, observaciones, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, asesorTelefono, asesorMensajePredefinido, attachedFiles }
       const response = await fetch('/api/generate-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
       const data = await response.json()
       if (data.html) { setGeneratedHTML(data.html); setEditableHTML(data.html); setViewMode('preview'); if (isMobile) setMobilePanel('preview') }
@@ -396,7 +402,7 @@ export default function Home() {
       iframe.style.height = iframe.contentDocument.documentElement.scrollHeight + "px";
       const content = iframe.contentDocument.body
 
-      const canvas = await html2canvas(content, {
+            const canvas = await html2canvas(content, {
         scale: 3,
         useCORS: true,
         allowTaint: true,
@@ -410,8 +416,36 @@ export default function Home() {
       const imgWidth = 210, pageHeight = 297, imgHeight = (canvas.height * imgWidth) / canvas.width
       let heightLeft = imgHeight, position = 0
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight
-      while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight }
+      // Function to add WhatsApp link to a page
+      const addWhatsAppLink = (pdfInstance: any) => {
+          if (!asesorTelefono && !asesorMensajePredefinido) return;
+          const msg = asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${asesorTelefono || ''}).`;
+          const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+          pdfInstance.setFontSize(10);
+          pdfInstance.setTextColor(37, 211, 102); // WhatsApp green
+          const text = "Recomendar asesor 💬";
+          const x = 160;
+          const y = 285;
+          pdfInstance.textWithLink(text, x, y, { url });
+
+          // Add a subtle underline
+          pdfInstance.setDrawColor(37, 211, 102);
+          pdfInstance.setLineWidth(0.2);
+          pdfInstance.line(x, y + 1, x + 35, y + 1);
+      };
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      addWhatsAppLink(pdf);
+      heightLeft -= pageHeight
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        addWhatsAppLink(pdf);
+        heightLeft -= pageHeight
+      }
 
       pdf.save(`plan-${profesion.replace(/\\s+/g, '_')}-${edad}.pdf`)
       iframe.style.height = originalHeight;
@@ -434,6 +468,7 @@ export default function Home() {
     if (stored) {
       setTimeout(() => {
         if (stored.edad !== undefined) setEdad(stored.edad)
+        if (stored.aporteInicial !== undefined) setAporteInicial(stored.aporteInicial)
         if (stored.profesion) setProfesion(stored.profesion)
         if (stored.objetivo) setObjetivo(stored.objetivo)
         if (stored.aporteMensual !== undefined) setAporteMensual(stored.aporteMensual)
@@ -461,6 +496,8 @@ export default function Home() {
         if (stored.socialLinks) setSocialLinks(stored.socialLinks)
         if (stored.asesorNombre !== undefined) setAsesorNombre(stored.asesorNombre)
         if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
+        if (stored.asesorTelefono !== undefined) setAsesorTelefono(stored.asesorTelefono)
+        if (stored.asesorMensajePredefinido !== undefined) setAsesorMensajePredefinido(stored.asesorMensajePredefinido)
       }, 0);
     }
 
@@ -478,15 +515,16 @@ export default function Home() {
   useEffect(() => {
     if (!isLoaded) return
     const timer = setTimeout(() => {
-      saveConfig({ edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion })
+      saveConfig({ edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, asesorTelefono, asesorMensajePredefinido })
       setConfigSaved(true)
       setTimeout(() => setConfigSaved(false), 2000)
     }, 1000)
     return () => clearTimeout(timer)
-  }, [isLoaded, edad, profesion, objetivo, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
+  }, [isLoaded, edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
 
   const handleResetConfig = useCallback(() => {
     setEdad(24)
+    setAporteInicial(0)
     setProfesion("Estudiante")
     setObjetivo("Fondo de emergencia")
     setAporteMensual(300)
@@ -514,6 +552,8 @@ export default function Home() {
     setSocialLinks(defaultSocialLinks)
     setAsesorNombre("")
     setAsesorRecomendacion(true)
+    setAsesorTelefono("")
+    setAsesorMensajePredefinido("¡Hola! Te recomiendo a mi asesor financiero.")
     localStorage.removeItem(STORAGE_KEY)
   }, [])
   const editorProps = {
@@ -522,7 +562,7 @@ export default function Home() {
     fondoEmergenciaMeses, setFondoEmergenciaMeses, fondoEmergenciaActual, setFondoEmergenciaActual,
     metasVida, setMetasVida, proyeccionRetiro, setProyeccionRetiro,
     patrimonioActivos, setPatrimonioActivos, patrimonioDeudas, setPatrimonioDeudas,
-    edad, setEdad, aporteMensual, setAporteMensual, horizonteMeses, setHorizonteMeses,
+    edad, setEdad, aporteInicial, setAporteInicial, aporteMensual, setAporteMensual, horizonteMeses, setHorizonteMeses,
     profesion, setProfesion, objetivo, setObjetivo, perfilRiesgo, setPerfilRiesgo,
     gastosPrincipales, setGastosPrincipales, attachedFiles, setAttachedFiles,
     handleFileUpload, fileInputRef, instruments, setInstruments,
@@ -611,6 +651,8 @@ export default function Home() {
                   <div className="space-y-3 p-1">
                     <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
                     <div><Label className="text-xs text-[#3D7A5F]">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" /></div>
+                    <div><Label className="text-xs text-[#3D7A5F]">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54911..." className="h-8 text-sm mt-1" /></div>
+                    <div><Label className="text-xs text-[#3D7A5F]">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-sm mt-1 min-h-[60px] p-2" /></div>
                     <div><Label className="text-xs text-[#3D7A5F]">Plataformas</Label>{platformLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
                     <div><Label className="text-xs text-[#3D7A5F]">Redes</Label>{socialLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><div className="flex items-center gap-1 w-24">{link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
                     <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[#3D7A5F]" /><Label className="text-xs">Incluir recomendaciones</Label></div>
@@ -677,7 +719,7 @@ export default function Home() {
         </div>
       )}
 
-      <MobileSettingsSheet isOpen={showMobileSettings} onClose={() => setShowMobileSettings(false)} asesorNombre={asesorNombre} setAsesorNombre={setAsesorNombre} platformLinks={platformLinks} setPlatformLinks={setPlatformLinks} socialLinks={socialLinks} setSocialLinks={setSocialLinks} asesorRecomendacion={asesorRecomendacion} setAsesorRecomendacion={setAsesorRecomendacion} onReset={handleResetConfig} configSaved={configSaved} />
+      <MobileSettingsSheet isOpen={showMobileSettings} onClose={() => setShowMobileSettings(false)} asesorNombre={asesorNombre} setAsesorNombre={setAsesorNombre} asesorTelefono={asesorTelefono} setAsesorTelefono={setAsesorTelefono} asesorMensajePredefinido={asesorMensajePredefinido} setAsesorMensajePredefinido={setAsesorMensajePredefinido} platformLinks={platformLinks} setPlatformLinks={setPlatformLinks} socialLinks={socialLinks} setSocialLinks={setSocialLinks} asesorRecomendacion={asesorRecomendacion} setAsesorRecomendacion={setAsesorRecomendacion} onReset={handleResetConfig} configSaved={configSaved} />
 
       <style jsx global>{`
         * { scroll-behavior: smooth; }

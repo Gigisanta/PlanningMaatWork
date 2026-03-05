@@ -77,6 +77,7 @@ interface PortfolioState {
   profesion: string;
   objetivo: string;
   perfilRiesgo: PerfilRiesgo;
+  aporteInicial: number;
   
   // Salud Financiera
   ingresosMensuales: number;
@@ -108,6 +109,8 @@ interface PortfolioState {
   
   // Configuración adicional
   webUrl?: string;
+  asesorTelefono?: string;
+  asesorMensajePredefinido?: string;
   tipoAporte?: TipoAporte;
   asesorNombre?: string;
   asesorRecomendacion?: boolean;
@@ -134,6 +137,7 @@ interface PortfolioState {
 interface PortfolioActions {
   // Setters - Cliente
   setEdad: (edad: number) => void;
+  setAporteInicial: (aporte: number) => void;
   setProfesion: (profesion: string) => void;
   setObjetivo: (objetivo: string) => void;
   setPerfilRiesgo: (perfilRiesgo: PerfilRiesgo) => void;
@@ -167,6 +171,8 @@ interface PortfolioActions {
   
   // Setters - Configuración adicional
   setWebUrl: (webUrl?: string) => void;
+  setAsesorTelefono: (telefono?: string) => void;
+  setAsesorMensajePredefinido: (mensaje?: string) => void;
   setTipoAporte: (tipo?: TipoAporte) => void;
   setAsesorNombre: (nombre?: string) => void;
   setAsesorRecomendacion: (recomendacion: boolean) => void;
@@ -222,6 +228,7 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   
   // Cliente
   edad: 30,
+  aporteInicial: 0,
   profesion: '',
   objetivo: '',
   perfilRiesgo: 'Moderado',
@@ -256,16 +263,17 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   
   // Configuración adicional
   webUrl: undefined,
-  tipoAporte: 'mensual',
+  asesorTelefono: undefined,
+  asesorMensajePredefinido: undefined,
   asesorNombre: undefined,
   asesorRecomendacion: false,
   platformLinks: undefined,
   socialLinks: undefined,
   
   // Biblioteca
-  portfolioLibrary: undefined,
+  portfolioLibrary: [] as any[],
   isLibraryOpen: false,
-  saveName: undefined,
+  saveName: "",
   
   // UI
   activeSection: 'cliente',
@@ -283,6 +291,7 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   // ============================================================
   
   setEdad: (edad) => set({ edad }),
+  setAporteInicial: (aporteInicial) => set({ aporteInicial }),
   setProfesion: (profesion) => set({ profesion }),
   setObjetivo: (objetivo) => set({ objetivo }),
   setPerfilRiesgo: (perfilRiesgo) => set({ perfilRiesgo }),
@@ -331,6 +340,8 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   // ============================================================
   
   setWebUrl: (webUrl) => set({ webUrl }),
+  setAsesorTelefono: (telefono) => set({ asesorTelefono: telefono }),
+  setAsesorMensajePredefinido: (mensaje) => set({ asesorMensajePredefinido: mensaje }),
   setTipoAporte: (tipo) => set({ tipoAporte: tipo }),
   setAsesorNombre: (nombre) => set({ asesorNombre: nombre }),
   setAsesorRecomendacion: (recomendacion) => set({ asesorRecomendacion: recomendacion }),
@@ -379,6 +390,7 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
     const state = usePortfolioStore.getState();
     const configToSave = {
       edad: state.edad,
+      aporteInicial: state.aporteInicial,
       profesion: state.profesion,
       objetivo: state.objetivo,
       perfilRiesgo: state.perfilRiesgo,
@@ -403,6 +415,8 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
       riesgos: state.riesgos,
       beneficiosFiscales: state.beneficiosFiscales,
       webUrl: state.webUrl,
+      asesorTelefono: state.asesorTelefono,
+      asesorMensajePredefinido: state.asesorMensajePredefinido,
       tipoAporte: state.tipoAporte,
       asesorNombre: state.asesorNombre,
       asesorRecomendacion: state.asesorRecomendacion,
@@ -416,8 +430,8 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
     
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
-      setConfigSaved(true);
-      setTimeout(() => setConfigSaved(false), 2000);
+      usePortfolioStore.getState().setConfigSaved(true);
+      setTimeout(() => usePortfolioStore.getState().setConfigSaved(false), 2000);
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
@@ -426,6 +440,7 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   resetConfig: () => {
     set({
       edad: 30,
+  aporteInicial: 0,
       profesion: '',
       objetivo: '',
       perfilRiesgo: 'Moderado',
@@ -450,14 +465,16 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
       riesgos: [],
       beneficiosFiscales: [],
       webUrl: undefined,
+  asesorTelefono: undefined,
+  asesorMensajePredefinido: undefined,
       tipoAporte: 'mensual',
       asesorNombre: undefined,
       asesorRecomendacion: false,
       platformLinks: undefined,
       socialLinks: undefined,
-      portfolioLibrary: undefined,
+      portfolioLibrary: [] as any[],
       isLibraryOpen: false,
-      saveName: undefined,
+      saveName: "",
       activeSection: 'cliente',
       generatedHTML: '',
       editableHTML: '',
@@ -513,8 +530,7 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
         isLoading: false,
       });
       
-      setEditableHTML(data.html);
-      setGeneratedHTML(data.html);
+      set({ editableHTML: data.html, generatedHTML: data.html });
     } catch (error) {
       console.error('Error generating PDF:', error);
       set({ isLoading: false });

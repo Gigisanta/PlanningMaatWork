@@ -1,3 +1,4 @@
+import { PerfilRiesgo, Instrument } from '@/stores/portfolio-store';
 // ============================================================
 // PLANTILLAS OFICIALES
 // ============================================================
