@@ -1,3 +1,5 @@
+import { PortfolioPreview } from '@/components/portfolio/PortfolioPreview'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { usePortfolioStore } from '@/stores/portfolio-store'
@@ -280,7 +282,6 @@ describe('PDF Generation', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(testState),
     })
-    })
     
     expect(fetchSpy).toHaveBeenCalledWith(
       '/api/generate-plan',
@@ -370,7 +371,6 @@ describe('PortfolioEditor: Step 3', () => {
           <input type="text" value={objetivo} onChange={setObjetivo} />
         </div>
       </div>
-    </div>
     )
   })
 
@@ -386,7 +386,6 @@ describe('PortfolioEditor: Step 3', () => {
           <input type="number" value={gastosMensuales} onChange={setGastosMensuales} />
         </div>
       </div>
-    </div>
     )
   })
 
@@ -436,8 +435,5 @@ describe('Dialog Wrapper Component', () => {
 // END OF TESTS
 // ============================================================
 
-describe('Integration Test Suite: Zustand Store with Components', () => {
-  afterAll(() => {
-    usePortfolioStore.persistHydration = true
-  })
+
 })
