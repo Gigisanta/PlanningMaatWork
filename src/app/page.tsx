@@ -412,7 +412,7 @@ export default function Home() {
     if (!previewRef.current) return
     setIsDownloadingPdf(true)
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
+      const [{ default: html2pdf }] = await Promise.all([import('html2pdf.js')])
       const iframe = previewRef.current.querySelector('iframe')
       if (!iframe || !iframe.contentDocument) throw new Error('No iframe')
 
@@ -420,52 +420,56 @@ export default function Home() {
       iframe.style.height = iframe.contentDocument.documentElement.scrollHeight + "px";
       const content = iframe.contentDocument.body
 
-            const canvas = await html2canvas(content, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#FFFFFF',
-        logging: false,
-        windowWidth: 850
-      })
+      let waContainer = null;
+      if (asesorTelefono || asesorMensajePredefinido) {
+        waContainer = iframe.contentDocument.createElement('div');
+        waContainer.style.marginTop = '20px';
+        waContainer.style.paddingTop = '10px';
+        waContainer.style.borderTop = '1px solid #eaeaea';
+        waContainer.style.textAlign = 'right';
+        waContainer.style.pageBreakInside = 'avoid';
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95)
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const imgWidth = 210, pageHeight = 297, imgHeight = (canvas.height * imgWidth) / canvas.width
-      let heightLeft = imgHeight, position = 0
+        const msg = asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${asesorTelefono || ''}).`;
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
-      // Function to add WhatsApp link to a page
-      const addWhatsAppLink = (pdfInstance: any) => {
-          if (!asesorTelefono && !asesorMensajePredefinido) return;
-          const msg = asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${asesorTelefono || ''}).`;
-          const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        const waLink = iframe.contentDocument.createElement('a');
+        waLink.href = url;
+        waLink.target = '_blank';
+        waLink.style.color = '#25D366';
+        waLink.style.textDecoration = 'none';
+        waLink.style.fontSize = '12px';
+        waLink.style.display = 'inline-block';
+        waLink.style.fontFamily = 'sans-serif';
+        waLink.innerHTML = 'Recomendar asesor 💬';
 
-          pdfInstance.setFontSize(10);
-          pdfInstance.setTextColor(37, 211, 102); // WhatsApp green
-          const text = "Recomendar asesor 💬";
-          const x = 160;
-          const y = 285;
-          pdfInstance.textWithLink(text, x, y, { url });
+        const hr = iframe.contentDocument.createElement('div');
+        hr.style.height = '1px';
+        hr.style.width = '120px';
+        hr.style.backgroundColor = '#25D366';
+        hr.style.marginTop = '2px';
+        hr.style.display = 'inline-block';
 
-          // Add a subtle underline
-          pdfInstance.setDrawColor(37, 211, 102);
-          pdfInstance.setLineWidth(0.2);
-          pdfInstance.line(x, y + 1, x + 35, y + 1);
-      };
+        waContainer.appendChild(waLink);
+        waContainer.appendChild(iframe.contentDocument.createElement('br'));
+        waContainer.appendChild(hr);
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      addWhatsAppLink(pdf);
-      heightLeft -= pageHeight
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        addWhatsAppLink(pdf);
-        heightLeft -= pageHeight
+        content.appendChild(waContainer);
       }
 
-      pdf.save(`plan-${profesion.replace(/\\s+/g, '_')}-${edad}.pdf`)
+      const opt = {
+        margin:       10,
+        filename:     `plan-${profesion.replace(/\s+/g, '_')}-${edad}.pdf`,
+        image:        { type: 'jpeg' as 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, allowTaint: true, logging: false, windowWidth: 850 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as 'portrait' | 'landscape' },
+        pagebreak:    { mode: ['css', 'legacy'] }
+      };
+
+      await html2pdf().set(opt).from(content).save();
+
+      if (waContainer) {
+        content.removeChild(waContainer);
+      }
       iframe.style.height = originalHeight;
     } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
   }
