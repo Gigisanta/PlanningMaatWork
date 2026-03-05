@@ -25,12 +25,15 @@ export interface PlanData {
   profesion: string;
   objetivo: string;
   aporteMensual: number;
+  aporteInicial?: number;
   perfilRiesgo: string;
   horizonteMeses: number;
   gastosPrincipales: string;
   observaciones?: string;
   // New configuration fields
   webUrl?: string;
+  asesorTelefono?: string;
+  asesorMensajePredefinido?: string;
   tipoAporte?: 'mensual' | 'unico' | 'semanal' | 'quincenal';
   asesorNombre?: string;
   asesorRecomendacion?: boolean;
@@ -66,7 +69,7 @@ export function generatePlanHTML(data: PlanData): string {
 
   // Calculate contribution based on type
   let contributionText = '';
-  let montoObjetivo = data.aporteMensual * data.horizonteMeses;
+  let montoObjetivo = (data.aporteInicial || 0) + (data.aporteMensual * data.horizonteMeses);
   
   switch (data.tipoAporte) {
     case 'unico':
@@ -75,15 +78,15 @@ export function generatePlanHTML(data: PlanData): string {
       break;
     case 'semanal':
       contributionText = `Aporte semanal de USD ${data.aporteMensual.toLocaleString()}`;
-      montoObjetivo = data.aporteMensual * 4 * (data.horizonteMeses / 4);
+      montoObjetivo = (data.aporteInicial || 0) + data.aporteMensual * 4 * (data.horizonteMeses / 4);
       break;
     case 'quincenal':
       contributionText = `Aporte quincenal de USD ${data.aporteMensual.toLocaleString()}`;
-      montoObjetivo = data.aporteMensual * 2 * (data.horizonteMeses / 2);
+      montoObjetivo = (data.aporteInicial || 0) + data.aporteMensual * 2 * (data.horizonteMeses / 2);
       break;
     default: // mensual
       contributionText = `Aporte mensual de USD ${data.aporteMensual.toLocaleString()}`;
-      montoObjetivo = data.aporteMensual * data.horizonteMeses;
+      montoObjetivo = (data.aporteInicial || 0) + data.aporteMensual * data.horizonteMeses;
   }
 
   const webUrl = data.webUrl || 'cactuswealth.com.ar';
@@ -109,6 +112,19 @@ export function generatePlanHTML(data: PlanData): string {
       ${link.name}
     </a>`;
   }).join('\n    ');
+
+
+  // WhatsApp Share URL
+  const whatsappMsg = data.asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${data.asesorTelefono || ''}).`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMsg)}`;
+
+  // Floating button HTML
+  const floatingWhatsappHTML = `
+    <a href="${whatsappUrl}" target="_blank" class="floating-whatsapp">
+      <span>Recomendar asesor</span>
+      <span class="wapp-icon">🔗</span>
+    </a>
+  `;
 
   // Recommendation box HTML
   const recommendBoxHTML = showRecomendaciones ? `
@@ -1177,6 +1193,38 @@ export function generatePlanHTML(data: PlanData): string {
       }
     }
 
+
+    /* ===== FLOATING WHATSAPP BUTTON ===== */
+    .floating-whatsapp {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #FFFFFF;
+      padding: 10px 16px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid #E8E6E0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    .floating-whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      border-color: #25D366;
+    }
+    .floating-whatsapp span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1F2D26;
+    }
+    .floating-whatsapp .wapp-icon {
+      font-size: 18px;
+    }
+
     /* ===== ANIMATIONS ===== */
     @keyframes fadeIn {
       from {
@@ -1242,6 +1290,10 @@ export function generatePlanHTML(data: PlanData): string {
         <div class="label">Edad</div>
         <div class="value">${data.edad} años</div>
       </div>
+            <div class="client-card">
+        <div class="label">Aporte Inicial</div>
+        <div class="value">USD ${(data.aporteInicial || 0).toLocaleString()}</div>
+      </div>
       <div class="client-card">
         <div class="label">${data.tipoAporte === 'unico' ? 'Aporte' : 'Aporte Mensual'}</div>
         <div class="value">USD ${data.aporteMensual.toLocaleString()}</div>
@@ -1270,6 +1322,11 @@ export function generatePlanHTML(data: PlanData): string {
         <h3>🎯 Tu Objetivo</h3>
         <p class="objetivo-text">${data.objetivo}</p>
         <div class="objetivo-meta">
+          ${(data.aporteInicial && data.aporteInicial > 0) ? `
+          <div class="objetivo-meta-item">
+            <span class="label">Aporte inicial:</span>
+            <span class="value">USD ${data.aporteInicial.toLocaleString()}</span>
+          </div>` : ''}
           <div class="objetivo-meta-item">
             <span class="label">Meta financiera:</span>
             <span class="value">USD ${montoObjetivo.toLocaleString()}</span>
@@ -1565,6 +1622,7 @@ export function generatePlanHTML(data: PlanData): string {
       </div>
     </div>
   </div>
+  ${floatingWhatsappHTML}
 </body>
 </html>`;
 }
