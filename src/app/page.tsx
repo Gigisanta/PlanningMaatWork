@@ -412,62 +412,172 @@ export default function Home() {
     if (!previewRef.current) return
     setIsDownloadingPdf(true)
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = html2pdfModule.default;
+      const { PDFDocument, StandardFonts, rgb, PDFString } = await import('pdf-lib');
+
       const iframe = previewRef.current.querySelector('iframe')
       if (!iframe || !iframe.contentDocument) throw new Error('No iframe')
 
+      // Use html2pdf on the iframe content body
+      const content = iframe.contentDocument.body;
+
+      // Ensure some layout stability
       const originalHeight = iframe.style.height;
       iframe.style.height = iframe.contentDocument.documentElement.scrollHeight + "px";
-      const content = iframe.contentDocument.body
 
-            const canvas = await html2canvas(content, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#FFFFFF',
-        logging: false,
-        windowWidth: 850
-      })
+      // html2canvas (used by html2pdf) doesn't support 'lab()' or 'oklch()' color functions.
+      // We must sanitize the computed styles of elements that have these before passing to html2pdf.
+      // Easiest is to replace root variables if they contain it, or just use a regex replace on the raw HTML
+      // but since the browser computes it, we can just replace the textContent of the cloned node or style tags
+      const style = document.createElement('style');
+      style.textContent = `
+        * {
+          background-color: transparent; /* allow inheritance */
+        }
+        body { background-color: #FAFAF8 !important; }
+      `;
+      content.appendChild(style);
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95)
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const imgWidth = 210, pageHeight = 297, imgHeight = (canvas.height * imgWidth) / canvas.width
-      let heightLeft = imgHeight, position = 0
-
-      // Function to add WhatsApp link to a page
-      const addWhatsAppLink = (pdfInstance: any) => {
-          if (!asesorTelefono && !asesorMensajePredefinido) return;
-          const msg = asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${asesorTelefono || ''}).`;
-          const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-
-          pdfInstance.setFontSize(10);
-          pdfInstance.setTextColor(37, 211, 102); // WhatsApp green
-          const text = "Recomendar asesor 💬";
-          const x = 160;
-          const y = 285;
-          pdfInstance.textWithLink(text, x, y, { url });
-
-          // Add a subtle underline
-          pdfInstance.setDrawColor(37, 211, 102);
-          pdfInstance.setLineWidth(0.2);
-          pdfInstance.line(x, y + 1, x + 35, y + 1);
+      const opt = {
+        margin:       0,
+        filename:     `plan-${profesion.replace(/\s+/g, '_')}-${edad}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  {
+          scale: 1.5,
+          useCORS: true,
+          logging: false,
+          onclone: (clonedDoc: any) => {
+            const elements = clonedDoc.querySelectorAll('*');
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                const computed = clonedDoc.defaultView?.getComputedStyle(el);
+                if (!computed) continue;
+                if (computed.backgroundColor && (computed.backgroundColor.includes('lab') || computed.backgroundColor.includes('oklch'))) {
+                    el.style.backgroundColor = '#ffffff';
+                }
+                if (computed.color && (computed.color.includes('lab') || computed.color.includes('oklch'))) {
+                    el.style.color = '#000000';
+                }
+                if (computed.borderColor && (computed.borderColor.includes('lab') || computed.borderColor.includes('oklch'))) {
+                    el.style.borderColor = '#e5e7eb';
+                }
+            }
+          }
+        },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['css', 'legacy'] }
       };
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      addWhatsAppLink(pdf);
-      heightLeft -= pageHeight
+      // Generate the primary PDF as Blob/ArrayBuffer
+      console.log("Generating primary PDF...");
+      const pdfBlob = await html2pdf().set(opt).from(content).outputPdf('blob');
+      const arrayBuffer = await pdfBlob.arrayBuffer();
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        addWhatsAppLink(pdf);
-        heightLeft -= pageHeight
+      console.log("Loading primary PDF into pdf-lib...");
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+      // Add WhatsApp Link
+      if (asesorTelefono || asesorMensajePredefinido) {
+        const msg = asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${asesorTelefono || ''}).`;
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+        const pages = pdfDoc.getPages();
+        const customFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        for (const page of pages) {
+          const { width, height } = page.getSize();
+
+          const text = "Recomendar asesor";
+          const textSize = 10;
+          const textWidth = customFont.widthOfTextAtSize(text, textSize);
+
+          const x = 160;
+          const y = 15; // Bottom of page
+
+          page.drawText(text, {
+            x,
+            y,
+            size: textSize,
+            font: customFont,
+            color: rgb(37/255, 211/255, 102/255), // WhatsApp green
+          });
+
+          const linkAnnotation = pdfDoc.context.obj({
+            Type: 'Annot',
+            Subtype: 'Link',
+            Rect: [x, y, x + textWidth, y + textSize],
+            Border: [0, 0, 0],
+            C: [0, 0, 0],
+            A: {
+              Type: 'Action',
+              S: 'URI',
+              URI: PDFString.of(url),
+            },
+          });
+
+          const linkRef = pdfDoc.context.register(linkAnnotation);
+          let annots = page.node.get(pdfDoc.context.obj('Annots'));
+          if (!annots) {
+             annots = pdfDoc.context.obj([]);
+             page.node.set(pdfDoc.context.obj('Annots'), annots);
+          }
+          if (annots && typeof annots.push === 'function') {
+              annots.push(linkRef);
+          }
+        }
       }
 
-      pdf.save(`plan-${profesion.replace(/\\s+/g, '_')}-${edad}.pdf`)
+      // Merge attached PDFs
+      if (attachedFiles && attachedFiles.length > 0) {
+        console.log("Merging attached files...");
+        for (const file of attachedFiles) {
+          if (file.type === 'application/pdf' && file.data) {
+            try {
+              // Extract base64 part if it's a data URI
+              let base64Data = file.data;
+              if (file.data.startsWith('data:')) {
+                base64Data = file.data.split(',')[1];
+              }
+
+              if (!base64Data) continue;
+
+              const attachedPdfBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+              const attachedPdfDoc = await PDFDocument.load(attachedPdfBytes);
+
+              const copiedPages = await pdfDoc.copyPages(attachedPdfDoc, attachedPdfDoc.getPageIndices());
+              copiedPages.forEach((page) => {
+                pdfDoc.addPage(page);
+              });
+              console.log(`Merged ${file.name}`);
+            } catch (err) {
+              console.error(`Error merging attached PDF ${file.name}:`, err);
+            }
+          }
+        }
+      }
+
+      console.log("Saving final PDF...");
+      const finalPdfBytes = await pdfDoc.save();
+      const finalBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
+      const finalUrl = URL.createObjectURL(finalBlob);
+
+      const a = document.createElement('a');
+      a.href = finalUrl;
+      a.download = opt.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(finalUrl);
+
       iframe.style.height = originalHeight;
-    } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
+
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar PDF');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
   }
 
 
