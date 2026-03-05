@@ -58,6 +58,7 @@ export interface PlanData {
   proyeccionRetiro?: string;
   patrimonioActivos?: number;
   patrimonioDeudas?: number;
+  attachedFiles?: { name: string; type: string; data: string; size: number }[];
 }
 
 export function generatePlanHTML(data: PlanData): string {
@@ -1623,6 +1624,27 @@ export function generatePlanHTML(data: PlanData): string {
     </div>
   </div>
   ${floatingWhatsappHTML}
+
+  ${(data.attachedFiles && data.attachedFiles.length > 0) ? `
+  <div style="page-break-before: always;" class="html2pdf__page-break"></div>
+  <div class="page-container" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+    <div class="header" style="margin-bottom: 40px; text-align: center;">
+      <div class="header-logo" style="justify-content: center; margin-bottom: 10px;">Cactus</div>
+      <div class="header-title" style="text-align: center;">Model Portfolios</div>
+    </div>
+    <div class="content" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+      <div class="section" style="width: 100%; max-width: 600px; margin: 0 auto; box-shadow: none; border: none; background: transparent;">
+        <div class="card" style="margin-top: 40px; text-align: center; padding: 60px 40px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E8E6E0; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+          <div style="font-size: 64px; margin-bottom: 24px;">📄</div>
+          <h2 style="color: #2D5A4A; font-size: 28px; margin-bottom: 16px; font-weight: 800;">Documentos y Proyecciones</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; max-width: 400px; margin: 0 auto;">
+            A continuación se adjuntan las proyecciones detalladas y la documentación técnica relacionada con este plan financiero.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  ` : ''}
 </body>
 </html>`;
 }

@@ -20,4 +20,7 @@ const previewProps = {
   isMobile, generatedHTML, viewMode, setViewMode, editableHTML, setEditableHTML, handleCopyToClipboard, handleDownloadHTML, handleDownloadPDF, isDownloadingPdf, copied, previewRef
 }
 
-export default {};
+const syntaxTest = {
+};
+
+export default syntaxTest;
