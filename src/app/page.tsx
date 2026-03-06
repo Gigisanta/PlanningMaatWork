@@ -204,7 +204,7 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
     <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in slide-in-from-bottom duration-300">
       <div className="p-4 border-b border-[#E8E6E0] flex items-center justify-between bg-[#F5F4F0]">
         <h2 className="text-lg font-bold text-[#2D5A4A]">Configuración</h2>
-        <Button variant="ghost" size="icon" onClick={onClose}><X className="w-6 h-6" /></Button>
+        <Button variant="ghost" size="icon" aria-label="Cerrar configuración" onClick={onClose}><X className="w-6 h-6" /></Button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <div className="flex items-center justify-between p-4 bg-[#F5F4F0] rounded-2xl">
@@ -644,7 +644,7 @@ export default function Home() {
                                                     <h4 className="font-semibold text-sm text-[#1F2D26]">{item.name}</h4>
                                                     <p className="text-[9px] text-[#7A8B80]">{item.date}</p>
                                                 </div>
-                                                <Button variant="ghost" size="sm" onClick={() => handleDeleteFromLibrary(item.id)} className="text-red-400 opacity-0 group-hover:opacity-100 h-8 w-8 p-0"><Trash2 className="w-3.5 h-3.5"/></Button>
+                                                <Button variant="ghost" size="sm" aria-label="Eliminar de biblioteca" onClick={() => handleDeleteFromLibrary(item.id)} className="text-red-400 opacity-0 group-hover:opacity-100 h-8 w-8 p-0"><Trash2 className="w-3.5 h-3.5"/></Button>
                                             </div>
                                         ))
                                     }
@@ -665,10 +665,10 @@ export default function Home() {
             {!isMobile && <div className={`flex items-center text-xs transition-opacity duration-500 ${configSaved ? 'opacity-100' : 'opacity-40'} text-[#8BC4A8]`}><Check className="w-3 h-3 mr-1" />Auto-guardado</div>}
 
             {isMobile ? (
-              <Button variant="outline" size="icon" onClick={() => setShowMobileSettings(true)} className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-10 w-10"><Settings className="w-5 h-5" /></Button>
+              <Button variant="outline" size="icon" aria-label="Abrir configuración" onClick={() => setShowMobileSettings(true)} className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-10 w-10"><Settings className="w-5 h-5" /></Button>
             ) : (
               <Popover>
-                <PopoverTrigger asChild><Button variant="outline" size="icon" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 w-9"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
+                <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label="Abrir configuración" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 w-9"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
                 <PopoverContent className="w-80 bg-white border-[#E8E6E0] shadow-xl rounded-xl" align="end">
                   <div className="space-y-3 p-1">
                     <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
