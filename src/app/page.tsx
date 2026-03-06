@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -312,12 +312,12 @@ export default function Home() {
 
     setAttachedFiles(prev => [...prev, ...newFiles])
   }
-  const exposicionUSD = instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0)
-  const exposicionARS = instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0)
-  const totalAsignacion = instruments.reduce((sum, i) => sum + i.asignacion, 0)
-  const totalAsignacionEstrategica = asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0)
-  const metaCalculada = aporteInicial + (aporteMensual * horizonteMeses)
-  const formatNumber = (num: number) => num.toLocaleString('es-AR')
+  const exposicionUSD = useMemo(() => instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0), [instruments])
+  const exposicionARS = useMemo(() => instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0), [instruments])
+  const totalAsignacion = useMemo(() => instruments.reduce((sum, i) => sum + i.asignacion, 0), [instruments])
+  const totalAsignacionEstrategica = useMemo(() => asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0), [asignacionEstrategica])
+  const metaCalculada = useMemo(() => aporteInicial + (aporteMensual * horizonteMeses), [aporteInicial, aporteMensual, horizonteMeses])
+  const formatNumber = useCallback((num: number) => num.toLocaleString('es-AR'), [])
 
   const applyTemplate = (template: typeof OFFICIAL_TEMPLATES[0]) => {
     const newInstruments = template.instruments.map((inst: any) => ({
