@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { AllocationChart } from "./Charts"
 import {
   User,
@@ -176,6 +177,8 @@ export function PortfolioEditor({
     setWizardStep(prev);
     setActiveSection(steps[prev].section);
   }
+
+  const chartData = useMemo(() => instruments.map(i => ({ name: i.nombre, value: i.asignacion })), [instruments]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -375,7 +378,7 @@ export function PortfolioEditor({
             <div className="bg-[#F5F4F0] rounded-2xl p-4 mb-4 border border-[#E8E6E0]">
                 <div className="flex flex-col md:flex-row items-center gap-4">
                     <div className="w-full md:w-1/3 h-32 flex items-center justify-center">
-                        <AllocationChart data={instruments.map(i => ({ name: i.nombre, value: i.asignacion }))} />
+                        <AllocationChart data={chartData} />
                     </div>
                     <div className="flex-1 w-full grid grid-cols-2 gap-2">
                         <div className="p-3 bg-white rounded-xl shadow-sm border border-[#E8E6E0] text-center">

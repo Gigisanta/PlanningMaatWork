@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface ChartProps {
@@ -8,8 +8,8 @@ interface ChartProps {
 
 const DEFAULT_COLORS = ['#1A3C34', '#C4846C', '#3D7A5F', '#D9A58B', '#5A9E7F', '#F0DFD5'];
 
-export function AllocationChart({ data, colors = DEFAULT_COLORS }: ChartProps) {
-  const filteredData = data.filter(d => d.value > 0);
+export const AllocationChart = React.memo(function AllocationChart({ data, colors = DEFAULT_COLORS }: ChartProps) {
+  const filteredData = useMemo(() => data.filter(d => d.value > 0), [data]);
 
   return (
     <div className="w-full h-[200px]">
@@ -35,4 +35,4 @@ export function AllocationChart({ data, colors = DEFAULT_COLORS }: ChartProps) {
       </ResponsiveContainer>
     </div>
   );
-}
+});
