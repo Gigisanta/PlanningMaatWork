@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Eye,
   Edit3,
@@ -27,7 +28,8 @@ interface PortfolioPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
 }
 
-export function PortfolioPreview({
+// ⚡ Bolt: Memoize the heavy PortfolioPreview (contains iframe) to prevent it from re-rendering on every form keystroke
+export const PortfolioPreview = React.memo(function PortfolioPreview({
   isMobile,
   generatedHTML,
   viewMode,
@@ -136,4 +138,4 @@ export function PortfolioPreview({
       </div>
     </div>
   )
-}
+});
