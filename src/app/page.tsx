@@ -312,9 +312,18 @@ export default function Home() {
 
     setAttachedFiles(prev => [...prev, ...newFiles])
   }
-  const exposicionUSD = useMemo(() => instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0), [instruments])
-  const exposicionARS = useMemo(() => instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0), [instruments])
-  const totalAsignacion = useMemo(() => instruments.reduce((sum, i) => sum + i.asignacion, 0), [instruments])
+  // ⚡ Bolt: Consolidate multiple array iterations into a single reduce pass (O(3n) -> O(n))
+  const { exposicionUSD, exposicionARS, totalAsignacion } = useMemo(() => {
+    return instruments.reduce((acc, i) => {
+      acc.totalAsignacion += i.asignacion;
+      if (i.moneda.includes('USD')) {
+        acc.exposicionUSD += i.asignacion;
+      } else if (i.moneda === 'ARS') {
+        acc.exposicionARS += i.asignacion;
+      }
+      return acc;
+    }, { exposicionUSD: 0, exposicionARS: 0, totalAsignacion: 0 });
+  }, [instruments]);
   const totalAsignacionEstrategica = useMemo(() => asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0), [asignacionEstrategica])
   const metaCalculada = useMemo(() => aporteInicial + (aporteMensual * horizonteMeses), [aporteInicial, aporteMensual, horizonteMeses])
   const formatNumber = useCallback((num: number) => num.toLocaleString('es-AR'), [])
@@ -399,16 +408,19 @@ export default function Home() {
     } catch (error) { console.error('Error:', error) } finally { setIsLoading(false) }
   }
 
-  const handleCopyToClipboard = async () => {
+  // ⚡ Bolt: Memoized handler to maintain stable reference for React.memo()
+  const handleCopyToClipboard = useCallback(async () => {
     try { await navigator.clipboard.writeText(editableHTML); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch {}
-  }
+  }, [editableHTML]);
 
-  const handleDownloadHTML = () => {
+  // ⚡ Bolt: Memoized handler to maintain stable reference for React.memo()
+  const handleDownloadHTML = useCallback(() => {
     const blob = new Blob([editableHTML], { type: 'text/html' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `plan-${edad}anos.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-  }
+  }, [editableHTML, edad]);
 
-  const handleDownloadPDF = async () => {
+  // ⚡ Bolt: Memoized handler to maintain stable reference for React.memo()
+  const handleDownloadPDF = useCallback(async () => {
     if (!previewRef.current) return
     setIsDownloadingPdf(true)
     try {
@@ -472,7 +484,7 @@ export default function Home() {
       }
       iframe.style.height = originalHeight;
     } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
-  }
+  }, [asesorTelefono, asesorMensajePredefinido, asesorNombre, profesion, edad, previewRef])
 
 
 

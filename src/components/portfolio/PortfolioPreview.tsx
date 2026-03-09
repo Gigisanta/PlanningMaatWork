@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import React from 'react'
 
 interface PortfolioPreviewProps {
   isMobile: boolean
@@ -27,7 +28,7 @@ interface PortfolioPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
 }
 
-export function PortfolioPreview({
+export const PortfolioPreview = React.memo(function PortfolioPreview({
   isMobile,
   generatedHTML,
   viewMode,
@@ -41,6 +42,8 @@ export function PortfolioPreview({
   copied,
   previewRef
 }: PortfolioPreviewProps) {
+  // ⚡ Bolt: Wrapped PortfolioPreview in React.memo() to prevent expensive <iframe> re-renders
+  // when the parent updates but these props haven't changed.
   return (
     <div className="h-full flex flex-col bg-[#F5F4F0] overflow-hidden">
       {/* Header preview */}
@@ -136,4 +139,4 @@ export function PortfolioPreview({
       </div>
     </div>
   )
-}
+})
