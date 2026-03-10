@@ -193,6 +193,8 @@ export function PortfolioEditor({
                 setActiveSection(step.section);
               }}
               className="relative z-10 flex flex-col items-center gap-1.5 group"
+              aria-current={wizardStep === idx ? "step" : undefined}
+              aria-label={`Paso ${idx + 1}: ${step.label}`}
             >
               <div className={`
                 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black transition-all
