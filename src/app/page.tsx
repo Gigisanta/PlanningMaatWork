@@ -399,16 +399,17 @@ export default function Home() {
     } catch (error) { console.error('Error:', error) } finally { setIsLoading(false) }
   }
 
-  const handleCopyToClipboard = async () => {
+  // ⚡ Bolt: Memoize PortfolioPreview callbacks to prevent heavy iframe re-renders during form input
+  const handleCopyToClipboard = useCallback(async () => {
     try { await navigator.clipboard.writeText(editableHTML); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch {}
-  }
+  }, [editableHTML]);
 
-  const handleDownloadHTML = () => {
+  const handleDownloadHTML = useCallback(() => {
     const blob = new Blob([editableHTML], { type: 'text/html' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `plan-${edad}anos.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-  }
+  }, [editableHTML, edad]);
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = useCallback(async () => {
     if (!previewRef.current) return
     setIsDownloadingPdf(true)
     try {
@@ -472,7 +473,7 @@ export default function Home() {
       }
       iframe.style.height = originalHeight;
     } catch (error) { console.error('Error al generar PDF:', error); alert('Error al generar PDF') } finally { setIsDownloadingPdf(false) }
-  }
+  }, [asesorTelefono, asesorMensajePredefinido, asesorNombre, profesion, edad]);
 
 
 
