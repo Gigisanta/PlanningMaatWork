@@ -193,6 +193,8 @@ export function PortfolioEditor({
                 setActiveSection(step.section);
               }}
               className="relative z-10 flex flex-col items-center gap-1.5 group"
+              aria-current={wizardStep === idx ? "step" : undefined}
+              aria-label={`Paso ${idx + 1}: ${step.label}`}
             >
               <div className={`
                 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black transition-all
@@ -279,7 +281,7 @@ export function PortfolioEditor({
                   {attachedFiles.map((file, i) => (
                     <div key={i} className={`flex items-center justify-between ${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl ${isMobile ? '' : 'rounded'} text-sm group`}>
                       <div className="flex items-center gap-2 truncate"><FileText className="w-4 h-4 text-[#C4846C] flex-shrink-0" /><span className="truncate">{file.name}</span></div>
-                      <Button variant="ghost" size="sm" onClick={() => setAttachedFiles((prev: any) => prev.filter((_: any, j: number) => j !== i))} className={`${isMobile ? 'h-10 w-10' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}><X className="w-4 h-4" /></Button>
+                      <Button aria-label="Eliminar documento" title="Eliminar documento" variant="ghost" size="sm" onClick={() => setAttachedFiles((prev: any) => prev.filter((_: any, j: number) => j !== i))} className={`${isMobile ? 'h-10 w-10' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}><X className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -343,7 +345,7 @@ export function PortfolioEditor({
             <div className="space-y-3">
               {metasVida.map((meta: any, i: number) => (
                 <div key={meta.id} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm relative group transition-all hover:border-[#3D7A5F]/30">
-                  <Button variant="ghost" size="sm" onClick={() => setMetasVida(metasVida.filter((m: any) => m.id !== meta.id))} className="absolute top-2 right-2 h-7 w-7 text-red-300 opacity-0 group-hover:opacity-100"><X className="w-4 h-4" /></Button>
+                  <Button aria-label="Eliminar meta" title="Eliminar meta" variant="ghost" size="sm" onClick={() => setMetasVida(metasVida.filter((m: any) => m.id !== meta.id))} className="absolute top-2 right-2 h-7 w-7 text-red-300 opacity-0 group-hover:opacity-100"><X className="w-4 h-4" /></Button>
                   <Input value={meta.descripcion} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].descripcion = e.target.value; setMetasVida(newMetas); }} className="h-8 text-sm font-bold border-none p-0 bg-transparent mb-2" placeholder="Nombre de la meta" />
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-[#F5F4F0] p-2 rounded-xl">
@@ -430,7 +432,7 @@ export function PortfolioEditor({
                   <div key={i} className={`p-4 bg-white rounded-2xl group relative border ${totalAsignacion !== 100 && !inst.locked ? 'border-amber-200' : 'border-[#E8E6E0]'} shadow-sm hover:shadow-md transition-shadow`}>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="sm" onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`h-9 w-9 rounded-full ${inst.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
+                            <Button aria-label={inst.locked ? "Desbloquear instrumento" : "Bloquear instrumento"} title={inst.locked ? "Desbloquear instrumento" : "Bloquear instrumento"} variant="ghost" size="sm" onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`h-9 w-9 rounded-full ${inst.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
                             <div className="relative">
                                 <Input type="number" value={inst.asignacion} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setInstruments(adjustWeights(instruments, i, newVal, 'asignacion')); }} className="w-20 h-10 text-lg font-black text-center rounded-xl bg-[#F5F4F0] border-none focus-visible:ring-2 focus-visible:ring-[#2D5A4A]" />
                                 <Percent className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A8B80] pointer-events-none" />
@@ -438,7 +440,7 @@ export function PortfolioEditor({
                         </div>
                         <div className="flex items-center gap-2">
                              <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}><SelectTrigger className="w-24 h-9 rounded-xl font-bold text-xs bg-[#F5F4F0] border-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="Mix">Mix</SelectItem></SelectContent></Select>
-                             <Button variant="ghost" size="sm" onClick={() => setInstruments((prev: any) => prev.filter((_: any, j: number) => j !== i))} className="h-9 w-9 rounded-full text-red-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="w-4.5 h-4.5" /></Button>
+                             <Button aria-label="Eliminar instrumento" title="Eliminar instrumento" variant="ghost" size="sm" onClick={() => setInstruments((prev: any) => prev.filter((_: any, j: number) => j !== i))} className="h-9 w-9 rounded-full text-red-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="w-4.5 h-4.5" /></Button>
                         </div>
                     </div>
 
@@ -479,7 +481,7 @@ export function PortfolioEditor({
               <div className="space-y-2">
                 {asignacionEstrategica.map((asig, i) => (
                   <div key={i} className={`flex items-center gap-3 p-3 bg-white rounded-2xl border ${totalAsignacionEstrategica !== 100 ? 'border-amber-100' : 'border-[#E8E6E0]'} shadow-sm transition-all`}>
-                    <Button variant="ghost" size="sm" onClick={() => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setAsignacionEstrategica(arr); }} className={`h-8 w-8 rounded-full ${asig.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
+                    <Button aria-label={asig.locked ? "Desbloquear asignación" : "Bloquear asignación"} title={asig.locked ? "Desbloquear asignación" : "Bloquear asignación"} variant="ghost" size="sm" onClick={() => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setAsignacionEstrategica(arr); }} className={`h-8 w-8 rounded-full ${asig.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
                     <span className="text-sm flex-1 truncate font-bold text-[#4A5B50]">{asig.horizonte}</span>
                     <div className="relative">
                         <Input type="number" value={asig.porcentaje} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje')); }} className="w-18 h-9 text-base font-black text-center rounded-xl bg-[#F5F4F0] border-none" />
@@ -503,7 +505,7 @@ export function PortfolioEditor({
                   <div className="space-y-3">
                     {obligacionesNegociables.map((on, i) => (
                       <div key={i} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm relative group">
-                        <Button variant="ghost" size="sm" onClick={() => setObligacionesNegociables((prev: any) => prev.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 h-7 w-7 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-4 h-4"/></Button>
+                        <Button aria-label="Eliminar obligación negociable" title="Eliminar obligación negociable" variant="ghost" size="sm" onClick={() => setObligacionesNegociables((prev: any) => prev.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 h-7 w-7 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-4 h-4"/></Button>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative col-span-2">
                                 <Label className="text-[9px] font-black uppercase text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-white">Emisor</Label>
@@ -547,7 +549,7 @@ export function PortfolioEditor({
                     {beneficiosFiscales.map((b, i) => (
                       <div key={i} className="flex gap-2 group">
                           <Textarea value={b} onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} className="text-sm font-medium min-h-[60px] p-3 rounded-2xl border-[#E8E6E0] focus:border-[#3D7A5F] flex-1 bg-white shadow-sm" />
-                          <Button variant="ghost" size="sm" onClick={() => setBeneficiosFiscales((prev: string[]) => prev.filter((_, j) => j !== i))} className="h-auto px-2 text-red-300 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4"/></Button>
+                          <Button aria-label="Eliminar beneficio fiscal" title="Eliminar beneficio fiscal" variant="ghost" size="sm" onClick={() => setBeneficiosFiscales((prev: string[]) => prev.filter((_, j) => j !== i))} className="h-auto px-2 text-red-300 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4"/></Button>
                       </div>
                     ))}
                   </div>
