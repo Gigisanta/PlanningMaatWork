@@ -113,6 +113,7 @@ export function PortfolioPreview({
                     srcDoc={editableHTML}
                     title="Preview"
                     className="w-full h-full bg-[#FAFAF8]"
+                    sandbox="allow-same-origin allow-popups"
                   />
                 </div>
               ) : (
