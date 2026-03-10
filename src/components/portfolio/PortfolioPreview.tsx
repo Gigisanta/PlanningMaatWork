@@ -109,10 +109,12 @@ export function PortfolioPreview({
             {generatedHTML ? (
               viewMode === 'preview' ? (
                 <div className="bg-white rounded-2xl shadow-xl border border-[#E8E6E0] overflow-hidden h-full min-h-[800px]">
+                  {/* SECURITY: sandbox attribute without 'allow-scripts' prevents XSS in user-editable HTML while allow-same-origin permits PDF generation to access the DOM */}
                   <iframe
                     srcDoc={editableHTML}
                     title="Preview"
                     className="w-full h-full bg-[#FAFAF8]"
+                    sandbox="allow-same-origin allow-popups"
                   />
                 </div>
               ) : (
