@@ -312,9 +312,16 @@ export default function Home() {
 
     setAttachedFiles(prev => [...prev, ...newFiles])
   }
-  const exposicionUSD = useMemo(() => instruments.filter(i => i.moneda.includes('USD')).reduce((sum, i) => sum + i.asignacion, 0), [instruments])
-  const exposicionARS = useMemo(() => instruments.filter(i => i.moneda === 'ARS').reduce((sum, i) => sum + i.asignacion, 0), [instruments])
-  const totalAsignacion = useMemo(() => instruments.reduce((sum, i) => sum + i.asignacion, 0), [instruments])
+  // ⚡ Bolt: Consolidated 3 separate array passes (2x filter + 3x reduce) into a single O(N) reduce pass
+  // Reduces unnecessary iterations over the instruments array when calculating portfolio exposures.
+  const { exposicionUSD, exposicionARS, totalAsignacion } = useMemo(() => {
+    return instruments.reduce((acc, i) => {
+      acc.totalAsignacion += i.asignacion;
+      if (i.moneda.includes('USD')) acc.exposicionUSD += i.asignacion;
+      if (i.moneda === 'ARS') acc.exposicionARS += i.asignacion;
+      return acc;
+    }, { exposicionUSD: 0, exposicionARS: 0, totalAsignacion: 0 });
+  }, [instruments]);
   const totalAsignacionEstrategica = useMemo(() => asignacionEstrategica.reduce((sum, a) => sum + a.porcentaje, 0), [asignacionEstrategica])
   const metaCalculada = useMemo(() => aporteInicial + (aporteMensual * horizonteMeses), [aporteInicial, aporteMensual, horizonteMeses])
   const formatNumber = useCallback((num: number) => num.toLocaleString('es-AR'), [])
