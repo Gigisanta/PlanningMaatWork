@@ -20,6 +20,36 @@ const COLORS = {
   text: '#333333',
 };
 
+function escapeHtml(unsafe: string | number | undefined | null): string {
+  if (unsafe == null) return '';
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function safeUrl(url: string | undefined | null): string {
+  if (!url) return '#';
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:' || parsed.protocol === 'tel:') {
+      return escapeHtml(url);
+    }
+  } catch (e) {
+    // If not a valid absolute URL, check if it looks like a safe relative URL or a plain web domain (which we could prepend with https://)
+    if (url.startsWith('/') || url.startsWith('#') || url.startsWith('?')) {
+      return escapeHtml(url);
+    }
+    // Simple heuristic for domains without protocol
+    if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(url) && !url.includes(':')) {
+      return escapeHtml(`https://${url}`);
+    }
+  }
+  return '#'; // Fallback for unsafe URLs like javascript:
+}
+
 export interface PlanData {
   edad: number;
   profesion: string;
@@ -90,15 +120,15 @@ export function generatePlanHTML(data: PlanData): string {
       montoObjetivo = (data.aporteInicial || 0) + data.aporteMensual * data.horizonteMeses;
   }
 
-  const webUrl = data.webUrl || 'cactuswealth.com.ar';
-  const asesorNombre = data.asesorNombre || 'Giolivo Santarelli';
+  const webUrl = escapeHtml(data.webUrl || 'cactuswealth.com.ar');
+  const asesorNombre = escapeHtml(data.asesorNombre || 'Giolivo Santarelli');
   const showRecomendaciones = data.asesorRecomendacion !== false;
 
   // Platform links
   const platformLinksHTML = (data.platformLinks || []).map(link => 
-    `<a href="${link.url}" target="_blank" class="account-link">
+    `<a href="${safeUrl(link.url)}" target="_blank" class="account-link">
       <span class="link-icon">🔗</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`
   ).join('\n    ');
 
@@ -108,9 +138,9 @@ export function generatePlanHTML(data: PlanData): string {
     const isWhatsapp = link.icon === 'whatsapp' || link.name.toLowerCase().includes('whatsapp');
     const className = isInstagram ? 'footer-link instagram' : (isWhatsapp ? 'footer-link whatsapp' : 'footer-link');
     const icon = isInstagram ? '📸' : (isWhatsapp ? '💬' : '🔗');
-    return `<a href="${link.url}" target="_blank" class="${className}">
+    return `<a href="${safeUrl(link.url)}" target="_blank" class="${className}">
       <span class="icon">${icon}</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`;
   }).join('\n    ');
 
@@ -121,7 +151,7 @@ export function generatePlanHTML(data: PlanData): string {
 
   // Floating button HTML
   const floatingWhatsappHTML = `
-    <a href="${whatsappUrl}" target="_blank" class="floating-whatsapp">
+    <a href="${safeUrl(whatsappUrl)}" target="_blank" class="floating-whatsapp">
       <span>Recomendar asesor</span>
       <span class="wapp-icon">🔗</span>
     </a>
@@ -142,7 +172,7 @@ export function generatePlanHTML(data: PlanData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plan Financiero - ${data.profesion}</title>
+  <title>Plan Financiero - ${escapeHtml(data.profesion)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1248,8 +1278,8 @@ export function generatePlanHTML(data: PlanData): string {
     <div class="header">
       <div class="header-content">
         <h1>Tu Plan Financiero</h1>
-        <div class="subtitle">${data.profesion} | ${data.edad} años | Perfil ${data.perfilRiesgo}</div>
-        <div class="meta">Generado el ${fecha}</div>
+        <div class="subtitle">${escapeHtml(data.profesion)} | ${escapeHtml(data.edad)} años | Perfil ${escapeHtml(data.perfilRiesgo)}</div>
+        <div class="meta">Generado el ${escapeHtml(fecha)}</div>
       </div>
     </div>
 
@@ -1277,7 +1307,7 @@ export function generatePlanHTML(data: PlanData): string {
       <p class="welcome-text">
         Este documento es tu <strong>guía personalizada</strong> para alcanzar tus objetivos financieros. 
         Aquí encontrarás una estrategia diseñada específicamente para vos, considerando tu edad, 
-        perfil de riesgo y metas a ${data.horizonteMeses} meses.
+        perfil de riesgo y metas a ${escapeHtml(data.horizonteMeses)} meses.
       </p>
       <ul class="welcome-list">
         <li><strong>Que incluye este plan:</strong> Una cartera diversificada, beneficios fiscales y una estrategia clara.</li>
@@ -1289,23 +1319,23 @@ export function generatePlanHTML(data: PlanData): string {
     <div class="client-cards">
       <div class="client-card">
         <div class="label">Edad</div>
-        <div class="value">${data.edad} años</div>
+        <div class="value">${escapeHtml(data.edad)} años</div>
       </div>
             <div class="client-card">
         <div class="label">Aporte Inicial</div>
         <div class="value">USD ${(data.aporteInicial || 0).toLocaleString()}</div>
       </div>
       <div class="client-card">
-        <div class="label">${data.tipoAporte === 'unico' ? 'Aporte' : 'Aporte Mensual'}</div>
-        <div class="value">USD ${data.aporteMensual.toLocaleString()}</div>
+        <div class="label">${escapeHtml(data.tipoAporte === 'unico' ? 'Aporte' : 'Aporte Mensual')}</div>
+        <div class="value">USD ${escapeHtml(data.aporteMensual.toLocaleString())}</div>
       </div>
       <div class="client-card">
         <div class="label">Horizonte</div>
-        <div class="value">${data.horizonteMeses} meses</div>
+        <div class="value">${escapeHtml(data.horizonteMeses)} meses</div>
       </div>
       <div class="client-card">
         <div class="label">Meta Financiera</div>
-        <div class="value accent">USD ${montoObjetivo.toLocaleString()}</div>
+        <div class="value accent">USD ${escapeHtml(montoObjetivo.toLocaleString())}</div>
       </div>
     </div>
 
@@ -1321,31 +1351,31 @@ export function generatePlanHTML(data: PlanData): string {
 
       <div class="objetivo-box">
         <h3>🎯 Tu Objetivo</h3>
-        <p class="objetivo-text">${data.objetivo}</p>
+        <p class="objetivo-text">${escapeHtml(data.objetivo)}</p>
         <div class="objetivo-meta">
           ${(data.aporteInicial && data.aporteInicial > 0) ? `
           <div class="objetivo-meta-item">
             <span class="label">Aporte inicial:</span>
-            <span class="value">USD ${data.aporteInicial.toLocaleString()}</span>
+            <span class="value">USD ${escapeHtml(data.aporteInicial.toLocaleString())}</span>
           </div>` : ''}
           <div class="objetivo-meta-item">
             <span class="label">Meta financiera:</span>
-            <span class="value">USD ${montoObjetivo.toLocaleString()}</span>
+            <span class="value">USD ${escapeHtml(montoObjetivo.toLocaleString())}</span>
           </div>
           <div class="objetivo-meta-item">
             <span class="label">Horizonte:</span>
-            <span class="value">${data.horizonteMeses} meses</span>
+            <span class="value">${escapeHtml(data.horizonteMeses)} meses</span>
           </div>
           <div class="objetivo-meta-item">
-            <span class="label">${data.tipoAporte === 'unico' ? 'Aporte:' : 'Aporte mensual:'}</span>
-            <span class="value">${contributionText}</span>
+            <span class="label">${escapeHtml(data.tipoAporte === 'unico' ? 'Aporte:' : 'Aporte mensual:')}</span>
+            <span class="value">${escapeHtml(contributionText)}</span>
           </div>
         </div>
       </div>
 
       <div class="info-box">
-        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${data.perfilRiesgo}</strong>, 
-        diseñamos una cartera que balancea crecimiento y protección. Tu edad de ${data.edad} años 
+        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${escapeHtml(data.perfilRiesgo)}</strong>,
+        diseñamos una cartera que balancea crecimiento y protección. Tu edad de ${escapeHtml(data.edad)} años
         te permite aprovechar el poder del interés compuesto a largo plazo.
       </div>
 
@@ -1386,10 +1416,10 @@ export function generatePlanHTML(data: PlanData): string {
           <tbody>
             ${(data.asignacionEstrategica || []).map(asig => `
             <tr>
-              <td><strong>${asig.horizonte}</strong></td>
-              <td>${asig.porcentaje}%</td>
-              <td>${asig.sector}</td>
-              <td>${asig.objetivo}</td>
+              <td><strong>${escapeHtml(asig.horizonte)}</strong></td>
+              <td>${escapeHtml(asig.porcentaje)}%</td>
+              <td>${escapeHtml(asig.sector)}</td>
+              <td>${escapeHtml(asig.objetivo)}</td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -1400,13 +1430,13 @@ export function generatePlanHTML(data: PlanData): string {
         ${(data.asignacionEstrategica || []).map((asig, idx) => `
         <div class="progress-item">
           <div class="progress-header">
-            <span>${asig.horizonte}</span>
-            <span><strong>${asig.porcentaje}%</strong></span>
+            <span>${escapeHtml(asig.horizonte)}</span>
+            <span><strong>${escapeHtml(asig.porcentaje)}%</strong></span>
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: ${asig.porcentaje}%"></div>
+            <div class="progress-fill" style="width: ${escapeHtml(asig.porcentaje)}%"></div>
           </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">${asig.sector} - ${asig.objetivo}</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">${escapeHtml(asig.sector)} - ${escapeHtml(asig.objetivo)}</p>
         </div>`).join('')}
       </div>
     </div>
@@ -1431,17 +1461,17 @@ export function generatePlanHTML(data: PlanData): string {
         ${(data.instruments || []).map(inst => `
         <div class="instrument-card">
           <div class="header">
-            <span class="name">${inst.nombre}</span>
-            <span class="badge badge-moneda">${inst.moneda}</span>
+            <span class="name">${escapeHtml(inst.nombre)}</span>
+            <span class="badge badge-moneda">${escapeHtml(inst.moneda)}</span>
           </div>
-          <p class="type">${inst.tipo}</p>
+          <p class="type">${escapeHtml(inst.tipo)}</p>
           <div class="allocation">
             <div class="allocation-bar">
-              <div class="allocation-fill" style="width: ${inst.asignacion}%"></div>
+              <div class="allocation-fill" style="width: ${escapeHtml(inst.asignacion)}%"></div>
             </div>
-            <span class="allocation-value">${inst.asignacion}%</span>
+            <span class="allocation-value">${escapeHtml(inst.asignacion)}%</span>
           </div>
-          <p class="objetivo">${inst.objetivo}</p>
+          <p class="objetivo">${escapeHtml(inst.objetivo)}</p>
         </div>`).join('')}
       </div>
 
@@ -1450,25 +1480,25 @@ export function generatePlanHTML(data: PlanData): string {
         <div class="resumen-grid">
           <div class="resumen-item">
             <div class="label">Exposición USD</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'USD').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${escapeHtml(data.instruments?.filter(i => i.moneda === 'USD').reduce((s, i) => s + i.asignacion, 0) || 0)}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Exposición ARS</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'ARS').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${escapeHtml(data.instruments?.filter(i => i.moneda === 'ARS').reduce((s, i) => s + i.asignacion, 0) || 0)}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Mixto</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'Mix').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${escapeHtml(data.instruments?.filter(i => i.moneda === 'Mix').reduce((s, i) => s + i.asignacion, 0) || 0)}%</div>
           </div>
         </div>
         <div class="resumen-grid" style="margin-top: 16px;">
           <div class="resumen-item">
             <div class="label">Renta Fija</div>
-            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Renta')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${escapeHtml(data.instruments?.filter(i => i.tipo.includes('Renta')).reduce((s, i) => s + i.asignacion, 0) || 0)}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Renta Variable</div>
-            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Equity')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${escapeHtml(data.instruments?.filter(i => i.tipo.includes('Equity')).reduce((s, i) => s + i.asignacion, 0) || 0)}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Liquidez</div>
@@ -1509,12 +1539,12 @@ export function generatePlanHTML(data: PlanData): string {
           <tbody>
             ${(data.obligacionesNegociables || []).map(on => `
             <tr>
-              <td><strong>${on.emisor}</strong></td>
-              <td>${on.cupon}</td>
-              <td>${on.vencimiento}</td>
-              <td><span class="badge badge-moneda">${on.ticker}</span></td>
-              <td><span class="badge badge-moneda">${on.moneda}</span></td>
-              <td>${on.pago}</td>
+              <td><strong>${escapeHtml(on.emisor)}</strong></td>
+              <td>${escapeHtml(on.cupon)}</td>
+              <td>${escapeHtml(on.vencimiento)}</td>
+              <td><span class="badge badge-moneda">${escapeHtml(on.ticker)}</span></td>
+              <td><span class="badge badge-moneda">${escapeHtml(on.moneda)}</span></td>
+              <td>${escapeHtml(on.pago)}</td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -1546,7 +1576,7 @@ export function generatePlanHTML(data: PlanData): string {
         ${(data.beneficiosFiscales || []).map(b => `
         <li>
           <span class="icon">✓</span>
-          <div class="content">${b}</div>
+          <div class="content">${escapeHtml(b)}</div>
         </li>`).join('')}
       </ul>
 
@@ -1581,9 +1611,9 @@ export function generatePlanHTML(data: PlanData): string {
           <tbody>
             ${(data.riesgos || []).map(r => `
             <tr>
-              <td><strong>${r.riesgo}</strong></td>
-              <td><span class="badge badge-${r.nivel.toLowerCase()}">${r.nivel}</span></td>
-              <td>${r.mitigacion}</td>
+              <td><strong>${escapeHtml(r.riesgo)}</strong></td>
+              <td><span class="badge badge-${escapeHtml(r.nivel).toLowerCase()}">${escapeHtml(r.nivel)}</span></td>
+              <td>${escapeHtml(r.mitigacion)}</td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -1592,7 +1622,7 @@ export function generatePlanHTML(data: PlanData): string {
       <div class="consejo-box">
         <h4>💡 Consejo de tu Asesor</h4>
         <p>${data.consejoFinal || data.usarConsejoIA ? `Empezar a invertir joven es la mejor decisión financiera que podés tomar. No busques la perfección, buscá la consistencia. Con tiempo y disciplina, incluso aportes pequeños pueden crecer significativamente.` : ''}
-        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${data.observaciones}</p>` : ''}</p>
+        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${escapeHtml(data.observaciones)}</p>` : ''}</p>
         <div class="consejo-footer">Recordá revisar tu plan cada 6 meses para ajustarlo según tus necesidades cambiantes.</div>
       </div>
     </div>
@@ -1617,7 +1647,7 @@ export function generatePlanHTML(data: PlanData): string {
         ${socialLinksHTML}
       </div>
       <div class="footer-disclaimer">
-        <p>Plan financiero generado el ${fecha}</p>
+        <p>Plan financiero generado el ${escapeHtml(fecha)}</p>
         <p>Este documento es orientativo y no constituye asesoramiento financiero personalizado. Consultá con un profesional antes de tomar decisiones de inversión.</p>
         <p style="margin-top: 12px;">${webUrl}</p>
       </div>
