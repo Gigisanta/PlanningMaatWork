@@ -117,6 +117,11 @@ interface PortfolioState {
   platformLinks?: { name: string; url: string }[];
   socialLinks?: { name: string; url: string; icon?: string }[];
   
+  // Branding
+  colorPrincipal?: string;
+  colorAcento?: string;
+  logoUrl?: string;
+
   // Biblioteca
   portfolioLibrary: any[];
   isLibraryOpen: boolean;
@@ -179,6 +184,11 @@ interface PortfolioActions {
   setPlatformLinks: (links?: { name: string; url: string }[]) => void;
   setSocialLinks: (links?: { name: string; url: string; icon?: string }[]) => void;
   
+  // Setters - Branding
+  setColorPrincipal: (color?: string) => void;
+  setColorAcento: (color?: string) => void;
+  setLogoUrl: (url?: string) => void;
+
   // Setters - Biblioteca
   setPortfolioLibrary: (library: any[]) => void;
   setIsLibraryOpen: (open: boolean) => void;
@@ -269,6 +279,10 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   asesorRecomendacion: false,
   platformLinks: undefined,
   socialLinks: undefined,
+  // Branding
+  colorPrincipal: undefined,
+  colorAcento: undefined,
+  logoUrl: undefined,
   
   // Biblioteca
   portfolioLibrary: [] as any[],
@@ -348,6 +362,11 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
   setPlatformLinks: (links) => set({ platformLinks: links }),
   setSocialLinks: (links) => set({ socialLinks: links }),
   
+  // Branding
+  setColorPrincipal: (colorPrincipal) => set({ colorPrincipal }),
+  setColorAcento: (colorAcento) => set({ colorAcento }),
+  setLogoUrl: (logoUrl) => set({ logoUrl }),
+
   // ============================================================
   // SETTERS - BIBLIOTECA
   // ============================================================
@@ -422,6 +441,9 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
       asesorRecomendacion: state.asesorRecomendacion,
       platformLinks: state.platformLinks,
       socialLinks: state.socialLinks,
+      colorPrincipal: state.colorPrincipal,
+      colorAcento: state.colorAcento,
+      logoUrl: state.logoUrl,
       activeSection: state.activeSection,
       generatedHTML: state.generatedHTML,
       editableHTML: state.editableHTML,
@@ -472,6 +494,10 @@ export const usePortfolioStore = create<PortfolioState & PortfolioActions>((set)
       asesorRecomendacion: false,
       platformLinks: undefined,
       socialLinks: undefined,
+  // Branding
+  colorPrincipal: undefined,
+  colorAcento: undefined,
+  logoUrl: undefined,
       portfolioLibrary: [] as any[],
       isLibraryOpen: false,
       saveName: "",

@@ -104,6 +104,13 @@ interface PortfolioEditorProps {
   consejoFinal: string
   setConsejoFinal: (v: string) => void
   // Meta
+  // Branding
+  colorPrincipal: string
+  setColorPrincipal: (v: string) => void
+  colorAcento: string
+  setColorAcento: (v: string) => void
+  logoUrl: string
+  setLogoUrl: (v: string) => void
   metaCalculada: number
   formatNumber: (n: number) => string
 }
@@ -144,7 +151,10 @@ export function PortfolioEditor({
   terminoFinanciero, setTerminoFinanciero,
   usarConsejoIA, setUsarConsejoIA,
   consejoFinal, setConsejoFinal,
-  metaCalculada, formatNumber
+  metaCalculada, formatNumber,
+  colorPrincipal, setColorPrincipal,
+  colorAcento, setColorAcento,
+  logoUrl, setLogoUrl
 }: PortfolioEditorProps) {
 
   const steps = [
@@ -165,7 +175,7 @@ export function PortfolioEditor({
 
   const inputClass = isMobile ? "h-12 text-base rounded-xl px-4" : "h-8 text-sm"
   const textareaClass = isMobile ? "text-base rounded-xl p-4 min-h-[100px]" : "text-sm min-h-[50px]"
-  const labelClass = isMobile ? "text-sm font-medium text-[#3D7A5F] mb-2 block" : "text-[10px] text-[#7A8B80] uppercase tracking-wide"
+  const labelClass = isMobile ? "text-sm font-medium text-[var(--primary-light)] mb-2 block" : "text-[10px] text-[#7A8B80] uppercase tracking-wide"
 
   const nextStep = () => {
     const next = Math.min(steps.length - 1, wizardStep + 1);
@@ -199,15 +209,15 @@ export function PortfolioEditor({
               <div className={`
                 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black transition-all
                 ${wizardStep === idx
-                  ? 'bg-[#2D5A4A] text-white scale-110 shadow-lg shadow-[#2D5A4A]/20'
+                  ? 'bg-[var(--primary)] text-white scale-110 shadow-lg shadow-[var(--primary)]/20'
                   : wizardStep > idx
-                    ? 'bg-[#3D7A5F] text-white'
-                    : 'bg-white text-[#7A8B80] border border-[#E8E6E0] group-hover:border-[#3D7A5F]'
+                    ? 'bg-[var(--primary-light)] text-white'
+                    : 'bg-white text-[#7A8B80] border border-[#E8E6E0] group-hover:border-[var(--primary-light)]'
                 }
               `}>
                 {wizardStep > idx ? "✓" : idx + 1}
               </div>
-              <span className={`text-[9px] font-black uppercase tracking-tighter ${wizardStep === idx ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
+              <span className={`text-[9px] font-black uppercase tracking-tighter ${wizardStep === idx ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
                 {step.label}
               </span>
             </button>
@@ -265,7 +275,7 @@ export function PortfolioEditor({
               <div className={`p-4 bg-gradient-to-r from-[#F5F4F0] to-white rounded-xl border border-[#E8E6E0] ${isMobile ? '' : 'p-3 rounded-lg'}`}>
                 <div className="flex justify-between items-center">
                   <span className={`${isMobile ? 'text-sm' : 'text-xs'} font-medium text-[#1F2D26]`}>Meta</span>
-                  <span className={`${isMobile ? 'text-2xl' : 'text-lg'} font-bold text-[#C4846C]`}>USD {formatNumber(metaCalculada)}</span>
+                  <span className={`${isMobile ? 'text-2xl' : 'text-lg'} font-bold text-[var(--accent)]`}>USD {formatNumber(metaCalculada)}</span>
                 </div>
                 <p className={`${isMobile ? 'text-xs' : 'text-[10px]'} text-[#5A9E7F] mt-1`}>{horizonteMeses} meses × USD {formatNumber(aporteMensual)}</p>
               </div>
@@ -280,7 +290,7 @@ export function PortfolioEditor({
                 <div className="mt-3 space-y-2">
                   {attachedFiles.map((file, i) => (
                     <div key={i} className={`flex items-center justify-between ${isMobile ? 'p-3' : 'p-2'} bg-[#F5F4F0] rounded-xl ${isMobile ? '' : 'rounded'} text-sm group`}>
-                      <div className="flex items-center gap-2 truncate"><FileText className="w-4 h-4 text-[#C4846C] flex-shrink-0" /><span className="truncate">{file.name}</span></div>
+                      <div className="flex items-center gap-2 truncate"><FileText className="w-4 h-4 text-[var(--accent)] flex-shrink-0" /><span className="truncate">{file.name}</span></div>
                       <Button variant="ghost" size="sm" aria-label="Eliminar documento PDF" onClick={() => setAttachedFiles((prev: any) => prev.filter((_: any, j: number) => j !== i))} className={`${isMobile ? 'h-10 w-10' : 'h-5 w-5 p-0 opacity-0 group-hover:opacity-100'}`}><X className="w-4 h-4" /></Button>
                     </div>
                   ))}
@@ -307,7 +317,7 @@ export function PortfolioEditor({
               <div className="flex items-center gap-4 mt-2">
                 <Input type="number" value={fondoEmergenciaMeses} onChange={(e) => setFondoEmergenciaMeses(parseInt(e.target.value) || 0)} className="w-20 h-10 text-center font-bold" />
                 <div className="flex-1 h-2 bg-[#F5F4F0] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#3D7A5F] transition-all" style={{ width: `${Math.min(100, (fondoEmergenciaActual / (gastosMensuales * fondoEmergenciaMeses || 1)) * 100)}%` }}></div>
+                  <div className="h-full bg-[var(--primary-light)] transition-all" style={{ width: `${Math.min(100, (fondoEmergenciaActual / (gastosMensuales * fondoEmergenciaMeses || 1)) * 100)}%` }}></div>
                 </div>
               </div>
               <p className="text-[10px] text-[#7A8B80] mt-2">Objetivo: USD {(gastosMensuales * fondoEmergenciaMeses).toLocaleString()}</p>
@@ -330,7 +340,7 @@ export function PortfolioEditor({
                 </div>
                 <div className="mt-3 pt-3 border-t border-white/50 flex justify-between items-center">
                     <span className="text-xs font-bold text-[#1F2D26]">Total Neto</span>
-                    <span className="text-sm font-black text-[#2D5A4A]">USD {(patrimonioActivos - patrimonioDeudas).toLocaleString()}</span>
+                    <span className="text-sm font-black text-[var(--primary)]">USD {(patrimonioActivos - patrimonioDeudas).toLocaleString()}</span>
                 </div>
             </div>
           </div>
@@ -340,11 +350,11 @@ export function PortfolioEditor({
           <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <Label className={labelClass}>Metas de Vida</Label>
-                <Button variant="ghost" size="sm" onClick={() => setMetasVida([...metasVida, { id: Date.now().toString(), descripcion: "", monto: 0, plazo: 12 }])} className="h-7 text-[10px] font-bold text-[#3D7A5F]"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
+                <Button variant="ghost" size="sm" onClick={() => setMetasVida([...metasVida, { id: Date.now().toString(), descripcion: "", monto: 0, plazo: 12 }])} className="h-7 text-[10px] font-bold text-[var(--primary-light)]"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
             </div>
             <div className="space-y-3">
               {metasVida.map((meta: any, i: number) => (
-                <div key={meta.id} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm relative group transition-all hover:border-[#3D7A5F]/30">
+                <div key={meta.id} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm relative group transition-all hover:border-[var(--primary-light)]/30">
                   <Button variant="ghost" size="sm" aria-label="Eliminar meta de vida" onClick={() => setMetasVida(metasVida.filter((m: any) => m.id !== meta.id))} className="absolute top-2 right-2 h-7 w-7 text-red-300 opacity-0 group-hover:opacity-100"><X className="w-4 h-4" /></Button>
                   <Input value={meta.descripcion} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].descripcion = e.target.value; setMetasVida(newMetas); }} className="h-8 text-sm font-bold border-none p-0 bg-transparent mb-2" placeholder="Nombre de la meta" />
                   <div className="grid grid-cols-2 gap-3">
@@ -360,7 +370,7 @@ export function PortfolioEditor({
                 </div>
               ))}
             </div>
-            <div className="p-5 bg-gradient-to-br from-[#2D5A4A] to-[#3D7A5F] rounded-3xl border border-[#2D5A4A] shadow-xl text-white relative overflow-hidden">
+            <div className="p-5 bg-gradient-to-br from-[#2D5A4A] to-[#3D7A5F] rounded-3xl border border-[var(--primary)] shadow-xl text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-16 h-16" /></div>
                 <Label className="text-[10px] font-black uppercase tracking-widest text-[#8BC4A8] mb-4 block">Plan de Retiro Estructurado</Label>
                 <div className="space-y-4 relative z-10">
@@ -385,13 +395,13 @@ export function PortfolioEditor({
                     <div className="flex-1 w-full grid grid-cols-2 gap-2">
                         <div className="p-3 bg-white rounded-xl shadow-sm border border-[#E8E6E0] text-center">
                             <p className="text-[10px] text-[#7A8B80] uppercase tracking-wider font-bold mb-1">Dólares</p>
-                            <p className="text-xl font-black text-[#3D7A5F]">{exposicionUSD}%</p>
+                            <p className="text-xl font-black text-[var(--primary-light)]">{exposicionUSD}%</p>
                         </div>
                         <div className="p-3 bg-white rounded-xl shadow-sm border border-[#E8E6E0] text-center">
                             <p className="text-[10px] text-[#7A8B80] uppercase tracking-wider font-bold mb-1">Pesos</p>
-                            <p className="text-xl font-black text-[#C4846C]">{exposicionARS}%</p>
+                            <p className="text-xl font-black text-[var(--accent)]">{exposicionARS}%</p>
                         </div>
-                        <div className="p-3 bg-[#2D5A4A] rounded-xl shadow-md border border-[#2D5A4A] text-center col-span-2 group relative cursor-pointer active:scale-95 transition-transform" onClick={() => setInstruments(normalizeWeights(instruments, "asignacion"))}>
+                        <div className="p-3 bg-[var(--primary)] rounded-xl shadow-md border border-[var(--primary)] text-center col-span-2 group relative cursor-pointer active:scale-95 transition-transform" onClick={() => setInstruments(normalizeWeights(instruments, "asignacion"))}>
                             <p className="text-[10px] text-[#8BC4A8] uppercase tracking-wider font-bold mb-1">Asignación Total</p>
                             <p className={`text-2xl font-black ${totalAsignacion !== 100 ? "text-red-300" : "text-white"}`}>{totalAsignacion}%</p>
                             {totalAsignacion !== 100 && <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl"><Sparkles className="w-5 h-5 text-white animate-pulse" /></div>}
@@ -422,9 +432,9 @@ export function PortfolioEditor({
                           locked: false
                       }));
                       setInstruments(normalizeWeights(newInstruments, 'asignacion'));
-                  }} className="h-8 text-[10px] font-bold text-[#3D7A5F] uppercase hover:bg-white flex items-center gap-1"><Sparkles className="w-3 h-3" /> Sugerir</Button>
+                  }} className="h-8 text-[10px] font-bold text-[var(--primary-light)] uppercase hover:bg-white flex items-center gap-1"><Sparkles className="w-3 h-3" /> Sugerir</Button>
                   <Button variant="ghost" size="sm" onClick={() => { const perItem = Math.floor(100 / (instruments.length || 1)); const base = instruments.map(inst => ({ ...inst, asignacion: perItem, locked: false })); setInstruments(normalizeWeights(base, 'asignacion')); }} className="h-8 text-[10px] font-bold text-[#7A8B80] uppercase hover:bg-white">Igualar</Button>
-                  <Button variant="outline" size="sm" onClick={() => setInstruments((prev: any) => { const currentTotal = prev.reduce((s: any, i: any) => s + i.asignacion, 0); const remaining = Math.max(0, 100 - currentTotal); return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }]; })} className="h-8 text-[10px] font-bold text-[#3D7A5F] uppercase border-[#3D7A5F]/20 hover:bg-[#3D7A5F] hover:text-white transition-all"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
+                  <Button variant="outline" size="sm" onClick={() => setInstruments((prev: any) => { const currentTotal = prev.reduce((s: any, i: any) => s + i.asignacion, 0); const remaining = Math.max(0, 100 - currentTotal); return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }]; })} className="h-8 text-[10px] font-bold text-[var(--primary-light)] uppercase border-[var(--primary-light)]/20 hover:bg-[var(--primary-light)] hover:text-white transition-all"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
                 </div>
               </div>
               <div className="space-y-4 overflow-y-auto pr-1 pb-4" style={{ maxHeight: isMobile ? '450px' : '400px' }}>
@@ -432,7 +442,7 @@ export function PortfolioEditor({
                   <div key={i} className={`p-4 bg-white rounded-2xl group relative border ${totalAsignacion !== 100 && !inst.locked ? 'border-amber-200' : 'border-[#E8E6E0]'} shadow-sm hover:shadow-md transition-shadow`}>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="sm" aria-label={inst.locked ? "Desbloquear asignación" : "Bloquear asignación"} onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`h-9 w-9 rounded-full ${inst.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
+                            <Button variant="ghost" size="sm" aria-label={inst.locked ? "Desbloquear asignación" : "Bloquear asignación"} onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`h-9 w-9 rounded-full ${inst.locked ? 'bg-amber-50 text-[var(--accent)]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
                             <div className="relative">
                                 <Input type="number" value={inst.asignacion} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setInstruments(adjustWeights(instruments, i, newVal, 'asignacion')); }} className="w-20 h-10 text-lg font-black text-center rounded-xl bg-[#F5F4F0] border-none focus-visible:ring-2 focus-visible:ring-[#2D5A4A]" />
                                 <Percent className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A8B80] pointer-events-none" />
@@ -446,8 +456,8 @@ export function PortfolioEditor({
 
                     <div className="space-y-3">
                         <div className="relative">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-[#3D7A5F] absolute -top-2 left-3 px-1.5 bg-white z-10">Instrumento</Label>
-                            <Input value={inst.nombre} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} className="h-11 text-base font-semibold rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F] focus:ring-0" placeholder="Ej: FCI Renta Variable" />
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-[var(--primary-light)] absolute -top-2 left-3 px-1.5 bg-white z-10">Instrumento</Label>
+                            <Input value={inst.nombre} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} className="h-11 text-base font-semibold rounded-xl border-[#E8E6E0] focus:border-[var(--primary-light)] focus:ring-0" placeholder="Ej: FCI Renta Variable" />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative">
@@ -467,7 +477,7 @@ export function PortfolioEditor({
                             </div>
                             <div className="relative">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-[#7A8B80] absolute -top-2 left-3 px-1.5 bg-white z-10">Objetivo</Label>
-                                <Input value={inst.objetivo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], objetivo: e.target.value }; setInstruments(arr) }} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F]" placeholder="Ej: Liquidez" />
+                                <Input value={inst.objetivo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], objetivo: e.target.value }; setInstruments(arr) }} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[var(--primary-light)]" placeholder="Ej: Liquidez" />
                             </div>
                         </div>
                     </div>
@@ -477,11 +487,11 @@ export function PortfolioEditor({
             </div>
 
             <div className="pt-6 border-t border-[#E8E6E0] mt-4">
-              <div className="flex items-center justify-between mb-4 px-1"><Label className="text-xs font-black uppercase tracking-tight text-[#1F2D26]">Asignación Estratégica</Label><Button variant="ghost" size="sm" onClick={() => setAsignacionEstrategica(normalizeWeights(asignacionEstrategica, 'porcentaje'))} className="h-8 text-[10px] font-bold text-[#3D7A5F] uppercase hover:bg-white">Balancear</Button></div>
+              <div className="flex items-center justify-between mb-4 px-1"><Label className="text-xs font-black uppercase tracking-tight text-[#1F2D26]">Asignación Estratégica</Label><Button variant="ghost" size="sm" onClick={() => setAsignacionEstrategica(normalizeWeights(asignacionEstrategica, 'porcentaje'))} className="h-8 text-[10px] font-bold text-[var(--primary-light)] uppercase hover:bg-white">Balancear</Button></div>
               <div className="space-y-2">
                 {asignacionEstrategica.map((asig, i) => (
                   <div key={i} className={`flex items-center gap-3 p-3 bg-white rounded-2xl border ${totalAsignacionEstrategica !== 100 ? 'border-amber-100' : 'border-[#E8E6E0]'} shadow-sm transition-all`}>
-                    <Button variant="ghost" size="sm" aria-label={asig.locked ? "Desbloquear asignación estratégica" : "Bloquear asignación estratégica"} onClick={() => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setAsignacionEstrategica(arr); }} className={`h-8 w-8 rounded-full ${asig.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
+                    <Button variant="ghost" size="sm" aria-label={asig.locked ? "Desbloquear asignación estratégica" : "Bloquear asignación estratégica"} onClick={() => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setAsignacionEstrategica(arr); }} className={`h-8 w-8 rounded-full ${asig.locked ? 'bg-amber-50 text-[var(--accent)]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
                     <span className="text-sm flex-1 truncate font-bold text-[#4A5B50]">{asig.horizonte}</span>
                     <div className="relative">
                         <Input type="number" value={asig.porcentaje} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje')); }} className="w-18 h-9 text-base font-black text-center rounded-xl bg-[#F5F4F0] border-none" />
@@ -500,7 +510,7 @@ export function PortfolioEditor({
                 <div>
                   <div className="flex items-center justify-between mb-4 px-1">
                     <Label className="text-xs font-black uppercase tracking-tight text-[#1F2D26]">Obligaciones Negociables</Label>
-                    <Button variant="outline" size="sm" onClick={() => setObligacionesNegociables((prev: any) => [...prev, { emisor: '', cupon: '', vencimiento: '', ticker: '', moneda: 'USD', pago: 'Semestral' }])} className="h-8 text-[10px] font-bold text-[#3D7A5F] border-[#3D7A5F]/20"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
+                    <Button variant="outline" size="sm" onClick={() => setObligacionesNegociables((prev: any) => [...prev, { emisor: '', cupon: '', vencimiento: '', ticker: '', moneda: 'USD', pago: 'Semestral' }])} className="h-8 text-[10px] font-bold text-[var(--primary-light)] border-[var(--primary-light)]/20"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
                   </div>
                   <div className="space-y-3">
                     {obligacionesNegociables.map((on, i) => (
@@ -543,25 +553,34 @@ export function PortfolioEditor({
                 <div>
                   <div className="flex items-center justify-between mb-4 px-1">
                     <Label className="text-xs font-black uppercase tracking-tight text-[#1F2D26]">Beneficios Fiscales</Label>
-                    <Button variant="ghost" size="sm" onClick={() => setBeneficiosFiscales((prev: string[]) => [...prev, ""])} className="h-8 text-[10px] font-bold text-[#3D7A5F]"><Plus className="w-3 h-3 mr-1" />Añadir</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setBeneficiosFiscales((prev: string[]) => [...prev, ""])} className="h-8 text-[10px] font-bold text-[var(--primary-light)]"><Plus className="w-3 h-3 mr-1" />Añadir</Button>
                   </div>
                   <div className="space-y-2">
                     {beneficiosFiscales.map((b, i) => (
                       <div key={i} className="flex gap-2 group">
-                          <Textarea value={b} onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} className="text-sm font-medium min-h-[60px] p-3 rounded-2xl border-[#E8E6E0] focus:border-[#3D7A5F] flex-1 bg-white shadow-sm" />
+                          <Textarea value={b} onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} className="text-sm font-medium min-h-[60px] p-3 rounded-2xl border-[#E8E6E0] focus:border-[var(--primary-light)] flex-1 bg-white shadow-sm" />
                           <Button variant="ghost" size="sm" aria-label="Eliminar beneficio fiscal" onClick={() => setBeneficiosFiscales((prev: string[]) => prev.filter((_, j) => j !== i))} className="h-auto px-2 text-red-300 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4"/></Button>
                       </div>
                     ))}
                   </div>
                 </div>
 
+                <div className="pt-6 border-t border-[#E8E6E0] mt-4 space-y-4">
+                  <Label className="text-xs font-black uppercase tracking-tight text-[#1F2D26] px-1 block">Marca y Personalización del PDF</Label>
+                  <div className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm space-y-4">
+                    <div><Label className="text-[10px] text-[#7A8B80] uppercase tracking-wide">Color Principal (Fondo, Botones)</Label><div className="flex gap-2 mt-1"><Input type="color" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 flex-1 text-sm rounded-xl uppercase font-mono" /></div></div>
+                    <div><Label className="text-[10px] text-[#7A8B80] uppercase tracking-wide">Color Acento (Destacados)</Label><div className="flex gap-2 mt-1"><Input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 flex-1 text-sm rounded-xl uppercase font-mono" /></div></div>
+                    <div><Label className="text-[10px] text-[#7A8B80] uppercase tracking-wide">Logo URL (Opcional)</Label><Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className="h-10 text-sm mt-1 rounded-xl" /></div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 pt-4">
                   <div className="p-4 bg-white rounded-3xl border-2 border-dashed border-[#E8E6E0]">
-                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" checked={usarTerminoIA} onChange={(e) => setUsarTerminoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[#3D7A5F] focus:ring-[#3D7A5F]" /><Label className="text-xs font-black uppercase text-[#1F2D26]">Término IA Autogenerado</Label></div>
+                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" checked={usarTerminoIA} onChange={(e) => setUsarTerminoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[var(--primary-light)] focus:ring-[#3D7A5F]" /><Label className="text-xs font-black uppercase text-[#1F2D26]">Término IA Autogenerado</Label></div>
                     {!usarTerminoIA && <Textarea value={terminoFinanciero} onChange={(e) => setTerminoFinanciero(e.target.value)} className="text-sm font-medium min-h-[80px] p-4 rounded-2xl border-[#E8E6E0] bg-[#F5F4F0]" placeholder="Escribe un término clave..." />}
                   </div>
                   <div className="p-4 bg-white rounded-3xl border-2 border-dashed border-[#E8E6E0]">
-                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" checked={usarConsejoIA} onChange={(e) => setUsarConsejoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[#3D7A5F] focus:ring-[#3D7A5F]" /><Label className="text-xs font-black uppercase text-[#1F2D26]">Consejo IA Autogenerado</Label></div>
+                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" checked={usarConsejoIA} onChange={(e) => setUsarConsejoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[var(--primary-light)] focus:ring-[#3D7A5F]" /><Label className="text-xs font-black uppercase text-[#1F2D26]">Consejo IA Autogenerado</Label></div>
                     {!usarConsejoIA && <Textarea value={consejoFinal} onChange={(e) => setConsejoFinal(e.target.value)} className="text-sm font-medium min-h-[80px] p-4 rounded-2xl border-[#E8E6E0] bg-[#F5F4F0]" placeholder="Escribe un consejo final..." />}
                   </div>
                 </div>
@@ -586,7 +605,7 @@ export function PortfolioEditor({
                     setActiveSection(steps[next].section);
                 }
             }}
-            className="flex-[2] h-12 bg-[#2D5A4A] hover:bg-[#3D7A5F] rounded-xl font-bold shadow-lg shadow-[#2D5A4A]/20"
+            className="flex-[2] h-12 bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl font-bold shadow-lg shadow-[var(--primary)]/20"
           >
               {wizardStep === steps.length - 1 ? "Revisar Plan" : "Continuar"}
           </Button>
