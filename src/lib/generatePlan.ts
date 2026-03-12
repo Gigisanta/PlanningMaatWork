@@ -59,6 +59,10 @@ export interface PlanData {
   patrimonioActivos?: number;
   patrimonioDeudas?: number;
   attachedFiles?: { name: string; type: string; data: string; size: number }[];
+  // Branding
+  colorPrincipal?: string;
+  colorAcento?: string;
+  logoUrl?: string;
 }
 
 export function generatePlanHTML(data: PlanData): string {
@@ -148,14 +152,14 @@ export function generatePlanHTML(data: PlanData): string {
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-dark: #2D5A4A;
-      --primary: #3D7A5F;
-      --primary-light: #5A9E7F;
-      --primary-pale: #8BC4A8;
-      --primary-muted: #B8DBC8;
-      --accent: #C4846C;
-      --accent-light: #D9A58B;
-      --accent-pale: #F0DFD5;
+      --primary-dark: ${data.colorPrincipal ? `color-mix(in srgb, ${data.colorPrincipal} 80%, black)` : "#2D5A4A"};
+      --primary: ${data.colorPrincipal || "#3D7A5F"};
+      --primary-light: ${data.colorPrincipal ? `color-mix(in srgb, ${data.colorPrincipal} 80%, white)` : "#5A9E7F"};
+      --primary-pale: ${data.colorPrincipal ? `color-mix(in srgb, ${data.colorPrincipal} 40%, white)` : "#8BC4A8"};
+      --primary-muted: ${data.colorPrincipal ? `color-mix(in srgb, ${data.colorPrincipal} 20%, white)` : "#B8DBC8"};
+      --accent: ${data.colorAcento || "#C4846C"};
+      --accent-light: ${data.colorAcento ? `color-mix(in srgb, ${data.colorAcento} 80%, white)` : "#D9A58B"};
+      --accent-pale: ${data.colorAcento ? `color-mix(in srgb, ${data.colorAcento} 30%, white)` : "#F0DFD5"};
       --background: #FAFAF8;
       --surface: #FFFFFF;
       --surface-alt: #F5F4F0;
@@ -191,7 +195,7 @@ export function generatePlanHTML(data: PlanData): string {
 
     /* ===== HEADER ===== */
     .header {
-      background: linear-gradient(145deg, #1F4A3D 0%, #2D5A4A 50%, #3A6B58 100%);
+      background: linear-gradient(145deg, var(--primary-dark) 0%, var(--primary) 100%);
       color: #FFFFFF;
       padding: 52px 44px;
       border-radius: 28px;
@@ -213,7 +217,7 @@ export function generatePlanHTML(data: PlanData): string {
     }
 
     .header::after {
-      content: '🌵';
+
       position: absolute;
       bottom: 16px;
       right: 28px;
@@ -301,7 +305,7 @@ export function generatePlanHTML(data: PlanData): string {
       align-items: center;
       gap: 10px;
       padding: 16px 30px;
-      background: linear-gradient(145deg, #2D5A4A 0%, #3D7A5F 100%);
+      background: linear-gradient(145deg, var(--primary-dark) 0%, var(--primary) 100%);
       color: #FFFFFF;
       text-decoration: none;
       border-radius: 16px;
@@ -338,7 +342,7 @@ export function generatePlanHTML(data: PlanData): string {
       top: 24px;
       bottom: 24px;
       width: 4px;
-      background: linear-gradient(180deg, #3D7A5F 0%, #5A9E7F 100%);
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
       border-radius: 4px;
     }
 
@@ -384,12 +388,12 @@ export function generatePlanHTML(data: PlanData): string {
       content: '→';
       position: absolute;
       left: 0;
-      color: #3D7A5F;
+      color: var(--primary);
       font-weight: 600;
     }
 
     .welcome-list li strong {
-      color: #2D5A4A;
+      color: var(--primary-dark);
     }
 
     /* ===== RECOMMEND BOX ===== */
@@ -416,7 +420,7 @@ export function generatePlanHTML(data: PlanData): string {
     }
 
     .recommend-box strong {
-      color: #C4846C;
+      color: var(--accent);
     }
 
     /* ===== CLIENT CARDS ===== */
@@ -445,7 +449,7 @@ export function generatePlanHTML(data: PlanData): string {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #3D7A5F;
+      color: var(--primary);
       font-weight: 600;
       margin-bottom: 10px;
     }
@@ -458,7 +462,7 @@ export function generatePlanHTML(data: PlanData): string {
     }
 
     .client-card .value.accent {
-      color: #C4846C;
+      color: var(--accent);
     }
 
     /* ===== SECTION ===== */
@@ -483,7 +487,7 @@ export function generatePlanHTML(data: PlanData): string {
     .section-icon {
       width: 52px;
       height: 52px;
-      background: linear-gradient(145deg, #2D5A4A 0%, #3D7A5F 50%, #5A9E7F 100%);
+      background: linear-gradient(145deg, var(--primary-dark) 0%, var(--primary) 100%);
       border-radius: 16px;
       display: flex;
       align-items: center;
@@ -512,7 +516,7 @@ export function generatePlanHTML(data: PlanData): string {
       padding: 30px;
       border-radius: 18px;
       margin-bottom: 26px;
-      border-left: 4px solid #C4846C;
+      border-left: 4px solid var(--accent);
       box-shadow: 0 2px 12px rgba(0,0,0,0.02);
     }
 
@@ -554,7 +558,7 @@ export function generatePlanHTML(data: PlanData): string {
     .objetivo-meta-item .value {
       font-size: 15px;
       font-weight: 600;
-      color: #C4846C;
+      color: var(--accent);
     }
 
     /* ===== INFO BOX ===== */
@@ -570,7 +574,7 @@ export function generatePlanHTML(data: PlanData): string {
     }
 
     .info-box strong {
-      color: #2D5A4A;
+      color: var(--primary-dark);
     }
 
     /* ===== TABLES ===== */
@@ -589,7 +593,7 @@ export function generatePlanHTML(data: PlanData): string {
     }
 
     th {
-      background: linear-gradient(135deg, #2D5A4A 0%, #3A6B58 100%);
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
       color: #FFFFFF;
       font-weight: 600;
       padding: 16px 20px;
@@ -772,7 +776,7 @@ export function generatePlanHTML(data: PlanData): string {
 
     /* ===== RESUMEN CARTERA ===== */
     .resumen-cartera {
-      background: linear-gradient(145deg, #1F4A3D 0%, #2D5A4A 50%, #3A6B58 100%);
+      background: linear-gradient(145deg, var(--primary-dark) 0%, var(--primary) 100%);
       color: #FFFFFF;
       padding: 32px;
       border-radius: 20px;
@@ -825,12 +829,12 @@ export function generatePlanHTML(data: PlanData): string {
       padding: 26px;
       border-radius: 16px;
       margin: 26px 0;
-      border-left: 4px solid #3D7A5F;
+      border-left: 4px solid var(--primary);
     }
 
     .definition-box .term {
       font-weight: 600;
-      color: #2D5A4A;
+      color: var(--primary-dark);
       margin-bottom: 12px;
       display: block;
       font-size: 14px;
@@ -853,7 +857,7 @@ export function generatePlanHTML(data: PlanData): string {
       margin-bottom: 14px;
       background: #F5F4F0;
       border-radius: 14px;
-      border-left: 3px solid #5A9E7F;
+      border-left: 3px solid var(--primary-light);
       display: flex;
       align-items: flex-start;
       gap: 14px;
@@ -878,7 +882,7 @@ export function generatePlanHTML(data: PlanData): string {
 
     /* ===== CONSEJO BOX ===== */
     .consejo-box {
-      background: linear-gradient(145deg, #B8765A 0%, #C4846C 40%, #D99A7B 100%);
+      background: linear-gradient(145deg, var(--accent) 0%, var(--accent-light) 100%);
       color: #FFFFFF;
       padding: 44px 48px;
       border-radius: 24px;
@@ -991,7 +995,7 @@ export function generatePlanHTML(data: PlanData): string {
       align-items: center;
       gap: 10px;
       padding: 16px 32px;
-      background: linear-gradient(145deg, #2D5A4A 0%, #3A6B58 100%);
+      background: linear-gradient(145deg, var(--primary-dark) 0%, var(--primary) 100%);
       color: #FFFFFF;
       text-decoration: none;
       border-radius: 16px;
@@ -1620,6 +1624,7 @@ export function generatePlanHTML(data: PlanData): string {
         <p>Plan financiero generado el ${fecha}</p>
         <p>Este documento es orientativo y no constituye asesoramiento financiero personalizado. Consultá con un profesional antes de tomar decisiones de inversión.</p>
         <p style="margin-top: 12px;">${webUrl}</p>
+        <p style="margin-top: 24px; font-size: 10px; font-weight: bold; color: #A0ACA5;">Powered by MaatWork</p>
       </div>
     </div>
   </div>
@@ -1629,14 +1634,14 @@ export function generatePlanHTML(data: PlanData): string {
   <div style="page-break-before: always;" class="html2pdf__page-break"></div>
   <div class="page-container" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
     <div class="header" style="margin-bottom: 40px; text-align: center;">
-      <div class="header-logo" style="justify-content: center; margin-bottom: 10px;">Cactus</div>
+      ${data.logoUrl ? `<img src="${data.logoUrl}" alt="Logo" style="max-height: 60px; margin: 0 auto; display: block; margin-bottom: 15px;" />` : `<div class="header-logo" style="justify-content: center; margin-bottom: 10px; font-weight: bold; font-size: 24px; color: var(--primary-dark);">MaatWork</div>`}
       <div class="header-title" style="text-align: center;">Model Portfolios</div>
     </div>
     <div class="content" style="flex: 1; display: flex; align-items: center; justify-content: center;">
       <div class="section" style="width: 100%; max-width: 600px; margin: 0 auto; box-shadow: none; border: none; background: transparent;">
         <div class="card" style="margin-top: 40px; text-align: center; padding: 60px 40px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E8E6E0; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
           <div style="font-size: 64px; margin-bottom: 24px;">📄</div>
-          <h2 style="color: #2D5A4A; font-size: 28px; margin-bottom: 16px; font-weight: 800;">Documentos y Proyecciones</h2>
+          <h2 style="color: var(--primary-dark); font-size: 28px; margin-bottom: 16px; font-weight: 800;">Documentos y Proyecciones</h2>
           <p style="color: #333333; font-size: 16px; line-height: 1.6; max-width: 400px; margin: 0 auto;">
             A continuación se adjuntan las proyecciones detalladas y la documentación técnica relacionada con este plan financiero.
           </p>

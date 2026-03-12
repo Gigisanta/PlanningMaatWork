@@ -198,12 +198,12 @@ function normalizeWeights<T>(items: T[], key: keyof T): T[] {
   return newItems
 }
 
-function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, asesorTelefono, setAsesorTelefono, asesorMensajePredefinido, setAsesorMensajePredefinido, platformLinks, setPlatformLinks, socialLinks, setSocialLinks, asesorRecomendacion, setAsesorRecomendacion, onReset, configSaved }: any) {
+function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, asesorTelefono, setAsesorTelefono, asesorMensajePredefinido, setAsesorMensajePredefinido, platformLinks, setPlatformLinks, socialLinks, setSocialLinks, asesorRecomendacion, setAsesorRecomendacion, colorPrincipal, setColorPrincipal, colorAcento, setColorAcento, logoUrl, setLogoUrl, onReset, configSaved }: any) {
   if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in slide-in-from-bottom duration-300">
       <div className="p-4 border-b border-[#E8E6E0] flex items-center justify-between bg-[#F5F4F0]">
-        <h2 className="text-lg font-bold text-[#2D5A4A]">Configuración</h2>
+        <h2 className="text-lg font-bold text-[var(--primary)]">Configuración</h2>
         <Button variant="ghost" size="icon" aria-label="Cerrar configuración" onClick={onClose}><X className="w-6 h-6" /></Button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -212,14 +212,22 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
           <Button variant="outline" onClick={onReset} className="text-red-500 border-red-100 hover:bg-red-50">Borrar Todo</Button>
         </div>
         <div className="space-y-4">
-          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Tu Nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} className="h-12 text-base rounded-xl" /></div>
-          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54 9 11 1234-5678" className="h-12 text-base rounded-xl" /></div>
-          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-base rounded-xl min-h-[80px] p-3" /></div>
-          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Plataformas de Inversión</Label><div className="space-y-2">{platformLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-1 rounded-xl" placeholder="Nombre" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
-          <div><Label className="text-sm font-medium text-[#3D7A5F] mb-2 block">Redes Sociales</Label><div className="space-y-2">{socialLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><div className="flex items-center gap-2 flex-1">{link.icon === 'instagram' ? <Instagram className="w-5 h-5 text-[#E1306C] flex-shrink-0" /> : <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-11 text-base rounded-xl" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
-          <div className="flex items-center gap-3 py-2"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="w-5 h-5 rounded text-[#3D7A5F] accent-[#3D7A5F]" /><Label className="text-base">Incluir recomendaciones</Label></div>
+          <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Tu Nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} className="h-12 text-base rounded-xl" /></div>
+          <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54 9 11 1234-5678" className="h-12 text-base rounded-xl" /></div>
+          <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-base rounded-xl min-h-[80px] p-3" /></div>
+          <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Plataformas de Inversión</Label><div className="space-y-2">{platformLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-1 rounded-xl" placeholder="Nombre" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
+          <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Redes Sociales</Label><div className="space-y-2">{socialLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><div className="flex items-center gap-2 flex-1">{link.icon === 'instagram' ? <Instagram className="w-5 h-5 text-[#E1306C] flex-shrink-0" /> : <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-11 text-base rounded-xl" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
+          <div className="flex items-center gap-3 py-2"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="w-5 h-5 rounded text-[var(--primary-light)] accent-[#3D7A5F]" /><Label className="text-base">Incluir recomendaciones</Label></div>
+          <div className="pt-4 border-t border-[#E8E6E0]">
+            <Label className="text-sm font-medium text-[var(--primary-light)] mb-4 block">Personalización de Marca</Label>
+            <div className="space-y-4">
+              <div><Label className="text-xs text-[#7A8B80] mb-1 block">Color Principal (Fondo, Botones)</Label><div className="flex gap-2"><Input type="color" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 flex-1 text-base rounded-xl uppercase" /></div></div>
+              <div><Label className="text-xs text-[#7A8B80] mb-1 block">Color Acento (Destacados)</Label><div className="flex gap-2"><Input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 flex-1 text-base rounded-xl uppercase" /></div></div>
+              <div><Label className="text-xs text-[#7A8B80] mb-1 block">URL Logo Asesor (Opcional)</Label><Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className="h-10 text-base rounded-xl" /></div>
+            </div>
+          </div>
         </div>
-        <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0]"><div className="flex items-center justify-center py-2 px-4 bg-[#E8F5E9] text-[#2D5A4A] rounded-xl border border-[#C8E6C9] animate-in fade-in zoom-in duration-300"><Check className="w-5 h-5 mr-2" /><span className="font-medium">Cambios guardados automáticamente</span></div><Button onClick={onClose} className="w-full h-12 mt-4 bg-[#2D5A4A] hover:bg-[#3D7A5F] rounded-xl text-base">Listo</Button></div>
+        <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0]"><div className="flex items-center justify-center py-2 px-4 bg-[#E8F5E9] text-[var(--primary)] rounded-xl border border-[#C8E6C9] animate-in fade-in zoom-in duration-300"><Check className="w-5 h-5 mr-2" /><span className="font-medium">Cambios guardados automáticamente</span></div><Button onClick={onClose} className="w-full h-12 mt-4 bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl text-base">Listo</Button></div>
       </div>
     </div>
   )
@@ -271,6 +279,11 @@ export default function Home() {
   const [asesorTelefono, setAsesorTelefono] = useState("")
   const [asesorMensajePredefinido, setAsesorMensajePredefinido] = useState("¡Hola! Te recomiendo a mi asesor financiero.")
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
+
+  // Branding
+  const [colorPrincipal, setColorPrincipal] = useState("#2D5A4A")
+  const [colorAcento, setColorAcento] = useState("#C4846C")
+  const [logoUrl, setLogoUrl] = useState("")
 
   const [generatedHTML, setGeneratedHTML] = useState("")
   const [editableHTML, setEditableHTML] = useState("")
@@ -358,7 +371,7 @@ export default function Home() {
         id: crypto.randomUUID(),
         name: saveName,
         date: new Date().toLocaleString(),
-        data: { edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA }
+        data: { edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA }, colorPrincipal, colorAcento, logoUrl
     }
     const updated = [...portfolioLibrary, newEntry]
     setPortfolioLibrary(updated)
@@ -387,6 +400,9 @@ export default function Home() {
     if (d.usarTerminoIA !== undefined) setUsarTerminoIA(d.usarTerminoIA)
     if (d.consejoFinal !== undefined) setConsejoFinal(d.consejoFinal)
     if (d.usarConsejoIA !== undefined) setUsarConsejoIA(d.usarConsejoIA)
+    if (d.colorPrincipal) setColorPrincipal(d.colorPrincipal)
+    if (d.colorAcento) setColorAcento(d.colorAcento)
+    if (d.logoUrl) setLogoUrl(d.logoUrl)
     toast.success(`Cartera "${entry.name}" cargada`)
   }
 
@@ -399,7 +415,7 @@ export default function Home() {
   const handleGeneratePlan = async () => {
     setIsLoading(true)
     try {
-      const formData = { edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, observaciones, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, asesorTelefono, asesorMensajePredefinido, attachedFiles }
+      const formData = { edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, observaciones, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, asesorTelefono, asesorMensajePredefinido, attachedFiles, colorPrincipal, colorAcento, logoUrl }
       const response = await fetch('/api/generate-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
       const data = await response.json()
       if (data.html) { setGeneratedHTML(data.html); setEditableHTML(data.html); setViewMode('preview'); if (isMobile) setMobilePanel('preview') }
@@ -528,6 +544,9 @@ export default function Home() {
         if (stored.asesorRecomendacion !== undefined) setAsesorRecomendacion(stored.asesorRecomendacion)
         if (stored.asesorTelefono !== undefined) setAsesorTelefono(stored.asesorTelefono)
         if (stored.asesorMensajePredefinido !== undefined) setAsesorMensajePredefinido(stored.asesorMensajePredefinido)
+        if (stored.colorPrincipal) setColorPrincipal(stored.colorPrincipal)
+        if (stored.colorAcento) setColorAcento(stored.colorAcento)
+        if (stored.logoUrl !== undefined) setLogoUrl(stored.logoUrl)
       }, 0);
     }
 
@@ -545,12 +564,12 @@ export default function Home() {
   useEffect(() => {
     if (!isLoaded) return
     const timer = setTimeout(() => {
-      saveConfig({ edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, asesorTelefono, asesorMensajePredefinido })
+      saveConfig({ edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, asesorTelefono, asesorMensajePredefinido, colorPrincipal, colorAcento, logoUrl })
       setConfigSaved(true)
       setTimeout(() => setConfigSaved(false), 2000)
     }, 1000)
     return () => clearTimeout(timer)
-  }, [isLoaded, edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion])
+  }, [isLoaded, edad, profesion, objetivo, aporteInicial, aporteMensual, perfilRiesgo, horizonteMeses, gastosPrincipales, ingresosMensuales, gastosMensuales, fondoEmergenciaMeses, fondoEmergenciaActual, metasVida, proyeccionRetiro, patrimonioActivos, patrimonioDeudas, asignacionEstrategica, instruments, obligacionesNegociables, riesgos, beneficiosFiscales, terminoFinanciero, usarTerminoIA, consejoFinal, usarConsejoIA, platformLinks, socialLinks, asesorNombre, asesorRecomendacion, colorPrincipal, colorAcento, logoUrl])
 
   const handleResetConfig = useCallback(() => {
     setEdad(24)
@@ -584,6 +603,9 @@ export default function Home() {
     setAsesorRecomendacion(true)
     setAsesorTelefono("")
     setAsesorMensajePredefinido("¡Hola! Te recomiendo a mi asesor financiero.")
+    setColorPrincipal("#2D5A4A")
+    setColorAcento("#C4846C")
+    setLogoUrl("")
     localStorage.removeItem(STORAGE_KEY)
   }, [])
   const editorProps = {
@@ -601,7 +623,8 @@ export default function Home() {
     obligacionesNegociables, setObligacionesNegociables, riesgos, setRiesgos,
     beneficiosFiscales, setBeneficiosFiscales, usarTerminoIA, setUsarTerminoIA,
     terminoFinanciero, setTerminoFinanciero, usarConsejoIA, setUsarConsejoIA,
-    consejoFinal, setConsejoFinal, metaCalculada, formatNumber
+    consejoFinal, setConsejoFinal, metaCalculada, formatNumber,
+    colorPrincipal, setColorPrincipal, colorAcento, setColorAcento, logoUrl, setLogoUrl
   }
 
   const previewProps = {
@@ -609,10 +632,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
-      <header className="bg-[#2D5A4A] text-white md:py-3 py-2.5 px-4 shadow-sm flex-shrink-0 sticky top-0 z-50">
+    <div className="min-h-screen bg-[#FAFAF8] flex flex-col" style={{"--primary": colorPrincipal || "#2D5A4A", "--primary-light": colorPrincipal ? `color-mix(in srgb, ${colorPrincipal} 80%, white)` : "#3D7A5F", "--primary-dark": colorPrincipal ? `color-mix(in srgb, ${colorPrincipal} 80%, black)` : "#1F4A3D", "--accent": colorAcento || "#C4846C", "--accent-light": colorAcento ? `color-mix(in srgb, ${colorAcento} 80%, white)` : "#D9A58B", "--accent-dark": colorAcento ? `color-mix(in srgb, ${colorAcento} 80%, black)` : "#A36D59"} as React.CSSProperties}>
+      <header className="bg-[var(--primary)] text-white md:py-3 py-2.5 px-4 shadow-sm flex-shrink-0 sticky top-0 z-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3"><div className="p-2 bg-white/10 rounded-xl"><TrendingUp className="w-5 h-5" /></div><div><h1 className="md:text-lg text-base font-bold">Cactus</h1><p className="text-xs text-[#8BC4A8]">Model Portfolios</p></div></div>
+          <div className="flex items-center gap-3"><div className="p-2 bg-white/10 rounded-xl"><TrendingUp className="w-5 h-5" /></div><div>{logoUrl ? <img src={logoUrl} alt="Logo" className="h-8 object-contain" /> : <div className="flex flex-col"><h1 className="md:text-lg text-base font-bold">MaatWork</h1><p className="text-[10px] opacity-80">Model Portfolios</p></div>}</div></div>
+          {!isMobile && <div className="hidden md:flex flex-col items-center justify-center opacity-60 text-[10px] font-bold tracking-widest uppercase ml-4"><span>Powered by</span><span>MaatWork</span></div>}
 
           <div className="flex items-center gap-2 md:gap-4">
             <Dialog open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
@@ -626,12 +650,12 @@ export default function Home() {
                         <div className="flex flex-1 overflow-hidden">
                             {/* Left: Official Templates */}
                             <div className="w-1/2 border-r border-[#E8E6E0] p-6 overflow-y-auto">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-[#3D7A5F] mb-4">Plantillas Oficiales</h3>
+                                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--primary-light)] mb-4">Plantillas Oficiales</h3>
                                 <div className="space-y-3">
                                     {OFFICIAL_TEMPLATES.map((tmpl, i) => (
-                                        <div key={i} onClick={() => applyTemplate(tmpl)} className="p-4 bg-white border border-[#E8E6E0] rounded-2xl hover:border-[#3D7A5F] cursor-pointer transition-all group">
+                                        <div key={i} onClick={() => applyTemplate(tmpl)} className="p-4 bg-white border border-[#E8E6E0] rounded-2xl hover:border-[var(--primary-light)] cursor-pointer transition-all group">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-10 h-10 bg-[#F5F4F0] rounded-xl flex items-center justify-center text-[#2D5A4A] group-hover:bg-[#2D5A4A] group-hover:text-white transition-colors">
+                                                <div className="w-10 h-10 bg-[#F5F4F0] rounded-xl flex items-center justify-center text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-white transition-colors">
                                                     <tmpl.icon className="w-5 h-5" />
                                                 </div>
                                                 <h4 className="font-bold text-[#1F2D26]">{tmpl.name}</h4>
@@ -643,11 +667,11 @@ export default function Home() {
                             </div>
                             {/* Right: Saved Library */}
                             <div className="w-1/2 p-6 overflow-y-auto bg-[#FAFAF8]">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-[#C4846C] mb-4">Mis Guardados</h3>
+                                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent)] mb-4">Mis Guardados</h3>
                                 <div className="space-y-3">
                                     {portfolioLibrary.length === 0 ? <p className="text-center py-8 text-[#7A8B80] text-xs">No hay carteras guardadas.</p> :
                                         portfolioLibrary.map(item => (
-                                            <div key={item.id} className="p-3 bg-white rounded-xl flex items-center justify-between border border-[#E8E6E0] hover:border-[#C4846C] transition-colors group">
+                                            <div key={item.id} className="p-3 bg-white rounded-xl flex items-center justify-between border border-[#E8E6E0] hover:border-[var(--accent)] transition-colors group">
                                                 <div className="cursor-pointer flex-1" onClick={() => handleLoadFromLibrary(item.id)}>
                                                     <h4 className="font-semibold text-sm text-[#1F2D26]">{item.name}</h4>
                                                     <p className="text-[9px] text-[#7A8B80]">{item.date}</p>
@@ -663,7 +687,7 @@ export default function Home() {
                             <Label className="text-[10px] font-bold uppercase mb-2 block text-[#7A8B80]">Guardar configuración actual</Label>
                             <div className="flex gap-2">
                                 <Input value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="Ej: Juan Perez - Moderado" className="h-10 text-sm rounded-xl"/>
-                                <Button onClick={handleSaveToLibrary} className="bg-[#2D5A4A] hover:bg-[#3D7A5F] rounded-xl px-6 font-bold shadow-lg shadow-[#2D5A4A]/20 transition-all active:scale-95"><Save className="w-4 h-4 mr-2"/>Guardar</Button>
+                                <Button onClick={handleSaveToLibrary} className="bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl px-6 font-bold shadow-lg shadow-[#2D5A4A]/20 transition-all active:scale-95"><Save className="w-4 h-4 mr-2"/>Guardar</Button>
                             </div>
                         </div>
                     </div>
@@ -679,13 +703,21 @@ export default function Home() {
                 <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label="Abrir configuración" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 w-9"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
                 <PopoverContent className="w-80 bg-white border-[#E8E6E0] shadow-xl rounded-xl" align="end">
                   <div className="space-y-3 p-1">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[#C4846C] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
-                    <div><Label className="text-xs text-[#3D7A5F]">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" /></div>
-                    <div><Label className="text-xs text-[#3D7A5F]">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54911..." className="h-8 text-sm mt-1" /></div>
-                    <div><Label className="text-xs text-[#3D7A5F]">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-sm mt-1 min-h-[60px] p-2" /></div>
-                    <div><Label className="text-xs text-[#3D7A5F]">Plataformas</Label>{platformLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
-                    <div><Label className="text-xs text-[#3D7A5F]">Redes</Label>{socialLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><div className="flex items-center gap-1 w-24">{link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
-                    <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[#3D7A5F]" /><Label className="text-xs">Incluir recomendaciones</Label></div>
+                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[var(--accent)] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
+                    <div><Label className="text-xs text-[var(--primary-light)]">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" /></div>
+                    <div><Label className="text-xs text-[var(--primary-light)]">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54911..." className="h-8 text-sm mt-1" /></div>
+                    <div><Label className="text-xs text-[var(--primary-light)]">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-sm mt-1 min-h-[60px] p-2" /></div>
+                    <div><Label className="text-xs text-[var(--primary-light)]">Plataformas</Label>{platformLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
+                    <div><Label className="text-xs text-[var(--primary-light)]">Redes</Label>{socialLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><div className="flex items-center gap-1 w-24">{link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[var(--primary-light)]" /><Label className="text-xs">Incluir recomendaciones</Label></div>
+                    <div className="pt-2 border-t border-[#F0EEE8] mt-2">
+                      <span className="font-medium text-xs text-[#1F2D26] mb-2 block">Personalización de Marca</span>
+                      <div className="space-y-2">
+                        <div><Label className="text-[10px] text-[#7A8B80]">Color Principal</Label><div className="flex gap-1"><Input type="color" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-7 w-12 p-0.5 cursor-pointer rounded" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-7 text-xs flex-1 uppercase" /></div></div>
+                        <div><Label className="text-[10px] text-[#7A8B80]">Color Acento</Label><div className="flex gap-1"><Input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-7 w-12 p-0.5 cursor-pointer rounded" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-7 text-xs flex-1 uppercase" /></div></div>
+                        <div><Label className="text-[10px] text-[#7A8B80]">Logo URL</Label><Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className="h-7 text-xs mt-0.5" /></div>
+                      </div>
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
@@ -704,14 +736,14 @@ export default function Home() {
                   <Button
                     onClick={handleGeneratePlan}
                     disabled={isLoading}
-                    className="w-full bg-[#C4846C] hover:bg-[#A36D59] h-12 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
+                    className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-12 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
                   >
                     {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar y Generar PDF</>}
                   </Button>
                 </div>
               </div>
             </ResizablePanel>
-            <ResizableHandle withHandle className="bg-[#E8E6E0] w-1.5 hover:bg-[#3D7A5F]/20 transition-colors" />
+            <ResizableHandle withHandle className="bg-[#E8E6E0] w-1.5 hover:bg-[var(--primary-light)]/20 transition-colors" />
             <ResizablePanel defaultSize={70}>
               <PortfolioPreview {...previewProps} />
             </ResizablePanel>
@@ -721,7 +753,7 @@ export default function Home() {
             <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioEditor {...editorProps} />
               <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[#C4846C] hover:bg-[#A36D59] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
+                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
                   {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar Plan</>}
                 </Button>
               </div>
@@ -736,20 +768,20 @@ export default function Home() {
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom h-[calc(64px+env(safe-area-inset-bottom,0px))]">
           <div className="flex h-16">
-            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
-              {mobilePanel === 'form' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#2D5A4A] rounded-b-full" />}
+            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+              {mobilePanel === 'form' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <ClipboardList className="w-6 h-6" /><span className="text-xs font-medium">Formulario</span>
             </button>
-            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[#2D5A4A]' : 'text-[#7A8B80]'}`}>
-              {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#2D5A4A] rounded-b-full" />}
+            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+              {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <Eye className="w-6 h-6" /><span className="text-xs font-medium">Preview</span>
-              {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[#3D7A5F] rounded-full animate-pulse" />}
+              {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[var(--primary-light)] rounded-full animate-pulse" />}
             </button>
           </div>
         </div>
       )}
 
-      <MobileSettingsSheet isOpen={showMobileSettings} onClose={() => setShowMobileSettings(false)} asesorNombre={asesorNombre} setAsesorNombre={setAsesorNombre} asesorTelefono={asesorTelefono} setAsesorTelefono={setAsesorTelefono} asesorMensajePredefinido={asesorMensajePredefinido} setAsesorMensajePredefinido={setAsesorMensajePredefinido} platformLinks={platformLinks} setPlatformLinks={setPlatformLinks} socialLinks={socialLinks} setSocialLinks={setSocialLinks} asesorRecomendacion={asesorRecomendacion} setAsesorRecomendacion={setAsesorRecomendacion} onReset={handleResetConfig} configSaved={configSaved} />
+      <MobileSettingsSheet isOpen={showMobileSettings} onClose={() => setShowMobileSettings(false)} asesorNombre={asesorNombre} setAsesorNombre={setAsesorNombre} asesorTelefono={asesorTelefono} setAsesorTelefono={setAsesorTelefono} asesorMensajePredefinido={asesorMensajePredefinido} setAsesorMensajePredefinido={setAsesorMensajePredefinido} platformLinks={platformLinks} setPlatformLinks={setPlatformLinks} socialLinks={socialLinks} setSocialLinks={setSocialLinks} asesorRecomendacion={asesorRecomendacion} setAsesorRecomendacion={setAsesorRecomendacion} colorPrincipal={colorPrincipal} setColorPrincipal={setColorPrincipal} colorAcento={colorAcento} setColorAcento={setColorAcento} logoUrl={logoUrl} setLogoUrl={setLogoUrl} onReset={handleResetConfig} configSaved={configSaved} />
 
       <style jsx global>{`
         * { scroll-behavior: smooth; }
