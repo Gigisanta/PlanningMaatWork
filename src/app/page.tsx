@@ -160,39 +160,39 @@ function saveConfig(config: any) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
 }
 
-function adjustWeights<T>(items: T[], changedIndex: number, newValue: number, key: keyof T): T[] {
+function adjustWeights<T extends { locked?: boolean }>(items: T[], changedIndex: number, newValue: number, key: keyof T): T[] {
   const newItems = [...items]
-  const item = newItems[changedIndex] as any
+  const item = newItems[changedIndex]
   const oldValue = item[key] as number
   item[key] = newValue
 
-  const unlockedItems = newItems.filter((_, i) => i !== changedIndex && !(newItems[i] as any).locked)
+  const unlockedItems = newItems.filter((_, i) => i !== changedIndex && !newItems[i].locked)
   if (unlockedItems.length === 0) return newItems
 
   const diff = newValue - oldValue
   const diffPerItem = diff / unlockedItems.length
-  unlockedItems.forEach(ui => { (ui as any)[key] = Math.max(0, (ui as any)[key] - diffPerItem) })
+  unlockedItems.forEach(ui => { (ui as unknown as Record<keyof T, number>)[key] = Math.max(0, (ui[key] as number) - diffPerItem) })
 
   return newItems
 }
 
-function normalizeWeights<T>(items: T[], key: keyof T): T[] {
+function normalizeWeights<T extends { locked?: boolean }>(items: T[], key: keyof T): T[] {
   const newItems = [...items]
   const total = newItems.reduce((sum, item) => sum + (item[key] as number), 0)
   if (total === 0) return newItems
 
   const factor = 100 / total
   newItems.forEach(item => {
-    if (!(item as any).locked) {
-        (item as any)[key] = Math.round((item[key] as number) * factor)
+    if (!item.locked) {
+        (item as unknown as Record<keyof T, number>)[key] = Math.round((item[key] as number) * factor)
     }
   })
 
   const finalTotal = newItems.reduce((sum, item) => sum + (item[key] as number), 0)
   const diff = 100 - finalTotal
   if (diff !== 0) {
-    const firstUnlocked = newItems.find(item => !(item as any).locked)
-    if (firstUnlocked) (firstUnlocked as any)[key] += diff
+    const firstUnlocked = newItems.find(item => !item.locked)
+    if (firstUnlocked) (firstUnlocked as unknown as Record<keyof T, number>)[key] += diff
   }
 
   return newItems
