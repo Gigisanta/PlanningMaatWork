@@ -52,6 +52,7 @@ import {
 } from '@/components/portfolio/types'
 import { PortfolioEditor } from '@/components/portfolio/PortfolioEditor'
 import { PortfolioPreview } from '@/components/portfolio/PortfolioPreview'
+import { PlanData } from '@/lib/generatePlan'
 import { toast } from 'sonner'
 
 // ============================================================
@@ -149,13 +150,13 @@ const defaultSocialLinks: ConfigurableLink[] = [
   { name: 'Asesoría WhatsApp', url: 'https://wa.me/', icon: 'whatsapp' }
 ]
 
-function getStoredConfig() {
+function getStoredConfig(): Partial<PlanData> | null {
   if (typeof window === 'undefined') return null
   const stored = localStorage.getItem(STORAGE_KEY)
   return stored ? JSON.parse(stored) : null
 }
 
-function saveConfig(config: any) {
+function saveConfig(config: Partial<PlanData>) {
   if (typeof window === 'undefined') return
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
 }
