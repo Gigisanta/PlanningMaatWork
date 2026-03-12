@@ -160,39 +160,39 @@ function saveConfig(config: any) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
 }
 
-function adjustWeights<T>(items: T[], changedIndex: number, newValue: number, key: keyof T): T[] {
+function adjustWeights<K extends string, T extends { locked?: boolean } & Record<K, number>>(items: T[], changedIndex: number, newValue: number, key: K): T[] {
   const newItems = [...items]
-  const item = newItems[changedIndex] as any
-  const oldValue = item[key] as number
-  item[key] = newValue
+  const item = newItems[changedIndex]
+  const oldValue = item[key]
+  item[key] = newValue as T[K]
 
-  const unlockedItems = newItems.filter((_, i) => i !== changedIndex && !(newItems[i] as any).locked)
+  const unlockedItems = newItems.filter((_, i) => i !== changedIndex && !newItems[i].locked)
   if (unlockedItems.length === 0) return newItems
 
   const diff = newValue - oldValue
   const diffPerItem = diff / unlockedItems.length
-  unlockedItems.forEach(ui => { (ui as any)[key] = Math.max(0, (ui as any)[key] - diffPerItem) })
+  unlockedItems.forEach(ui => { ui[key] = Math.max(0, ui[key] - diffPerItem) as T[K] })
 
   return newItems
 }
 
-function normalizeWeights<T>(items: T[], key: keyof T): T[] {
+function normalizeWeights<K extends string, T extends { locked?: boolean } & Record<K, number>>(items: T[], key: K): T[] {
   const newItems = [...items]
-  const total = newItems.reduce((sum, item) => sum + (item[key] as number), 0)
+  const total = newItems.reduce((sum, item) => sum + item[key], 0)
   if (total === 0) return newItems
 
   const factor = 100 / total
   newItems.forEach(item => {
-    if (!(item as any).locked) {
-        (item as any)[key] = Math.round((item[key] as number) * factor)
+    if (!item.locked) {
+        item[key] = Math.round(item[key] * factor) as T[K]
     }
   })
 
-  const finalTotal = newItems.reduce((sum, item) => sum + (item[key] as number), 0)
+  const finalTotal = newItems.reduce((sum, item) => sum + item[key], 0)
   const diff = 100 - finalTotal
   if (diff !== 0) {
-    const firstUnlocked = newItems.find(item => !(item as any).locked)
-    if (firstUnlocked) (firstUnlocked as any)[key] += diff
+    const firstUnlocked = newItems.find(item => !item.locked)
+    if (firstUnlocked) firstUnlocked[key] = (firstUnlocked[key] + diff) as T[K]
   }
 
   return newItems
