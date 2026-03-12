@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { AllocationChart } from "./Charts"
 import {
   User,
@@ -180,6 +180,71 @@ export function PortfolioEditor({
 
   const chartData = useMemo(() => instruments.map(i => ({ name: i.nombre, value: i.asignacion })), [instruments]);
 
+  // ⚡ Bolt: Memoized handlers to prevent redundant iterations and unnecessary function re-allocation inside .map loops
+  const handleMetaChange = useCallback((index: number, field: string, value: any) => {
+    setMetasVida((prev: any[]) => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], [field]: value };
+      return arr;
+    });
+  }, [setMetasVida]);
+
+  const handleInstrumentChange = useCallback((index: number, field: keyof Instrument, value: any) => {
+    setInstruments((prev: Instrument[]) => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], [field]: value };
+      return arr;
+    });
+  }, [setInstruments]);
+
+  const handleInstrumentWeightChange = useCallback((index: number, value: number) => {
+    setInstruments((prev: Instrument[]) => adjustWeights(prev, index, value, 'asignacion'));
+  }, [setInstruments, adjustWeights]);
+
+  const handleInstrumentLockToggle = useCallback((index: number) => {
+    setInstruments((prev: Instrument[]) => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], locked: !arr[index].locked };
+      return arr;
+    });
+  }, [setInstruments]);
+
+  const handleAsignacionChange = useCallback((index: number, value: number) => {
+    setAsignacionEstrategica((prev: AsignacionEstrategica[]) => adjustWeights(prev, index, value, 'porcentaje'));
+  }, [setAsignacionEstrategica, adjustWeights]);
+
+  const handleAsignacionLockToggle = useCallback((index: number) => {
+    setAsignacionEstrategica((prev: AsignacionEstrategica[]) => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], locked: !arr[index].locked };
+      return arr;
+    });
+  }, [setAsignacionEstrategica]);
+
+  const handleONChange = useCallback((index: number, field: keyof ObligacionNegociable, value: any) => {
+    setObligacionesNegociables((prev: ObligacionNegociable[]) => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], [field]: value };
+      return arr;
+    });
+  }, [setObligacionesNegociables]);
+
+  const handleRiesgoChange = useCallback((index: number, field: keyof Riesgo, value: any) => {
+    setRiesgos((prev: Riesgo[]) => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], [field]: value };
+      return arr;
+    });
+  }, [setRiesgos]);
+
+  const handleBeneficioChange = useCallback((index: number, value: string) => {
+    setBeneficiosFiscales((prev: string[]) => {
+      const arr = [...prev];
+      arr[index] = value;
+      return arr;
+    });
+  }, [setBeneficiosFiscales]);
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="bg-[#F5F4F0] border-b border-[#E8E6E0] flex-shrink-0 px-4 py-3">
@@ -346,15 +411,15 @@ export function PortfolioEditor({
               {metasVida.map((meta: any, i: number) => (
                 <div key={meta.id} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm relative group transition-all hover:border-[#3D7A5F]/30">
                   <Button variant="ghost" size="sm" aria-label="Eliminar meta de vida" onClick={() => setMetasVida(metasVida.filter((m: any) => m.id !== meta.id))} className="absolute top-2 right-2 h-7 w-7 text-red-300 opacity-0 group-hover:opacity-100"><X className="w-4 h-4" /></Button>
-                  <Input value={meta.descripcion} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].descripcion = e.target.value; setMetasVida(newMetas); }} className="h-8 text-sm font-bold border-none p-0 bg-transparent mb-2" placeholder="Nombre de la meta" />
+                  <Input value={meta.descripcion} onChange={(e) => handleMetaChange(i, 'descripcion', e.target.value)} className="h-8 text-sm font-bold border-none p-0 bg-transparent mb-2" placeholder="Nombre de la meta" />
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-[#F5F4F0] p-2 rounded-xl">
                         <span className="text-[9px] uppercase font-bold text-[#7A8B80]">Monto USD</span>
-                        <Input type="number" value={meta.monto} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].monto = parseInt(e.target.value) || 0; setMetasVida(newMetas); }} className="h-6 text-xs border-none p-0 bg-transparent font-bold" />
+                        <Input type="number" value={meta.monto} onChange={(e) => handleMetaChange(i, 'monto', parseInt(e.target.value) || 0)} className="h-6 text-xs border-none p-0 bg-transparent font-bold" />
                     </div>
                     <div className="bg-[#F5F4F0] p-2 rounded-xl">
                         <span className="text-[9px] uppercase font-bold text-[#7A8B80]">Plazo (meses)</span>
-                        <Input type="number" value={meta.plazo} onChange={(e) => { const newMetas = [...metasVida]; newMetas[i].plazo = parseInt(e.target.value) || 0; setMetasVida(newMetas); }} className="h-6 text-xs border-none p-0 bg-transparent font-bold" />
+                        <Input type="number" value={meta.plazo} onChange={(e) => handleMetaChange(i, 'plazo', parseInt(e.target.value) || 0)} className="h-6 text-xs border-none p-0 bg-transparent font-bold" />
                     </div>
                   </div>
                 </div>
@@ -432,14 +497,14 @@ export function PortfolioEditor({
                   <div key={i} className={`p-4 bg-white rounded-2xl group relative border ${totalAsignacion !== 100 && !inst.locked ? 'border-amber-200' : 'border-[#E8E6E0]'} shadow-sm hover:shadow-md transition-shadow`}>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="sm" aria-label={inst.locked ? "Desbloquear asignación" : "Bloquear asignación"} onClick={() => { const arr = [...instruments]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setInstruments(arr); }} className={`h-9 w-9 rounded-full ${inst.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
+                            <Button variant="ghost" size="sm" aria-label={inst.locked ? "Desbloquear asignación" : "Bloquear asignación"} onClick={() => handleInstrumentLockToggle(i)} className={`h-9 w-9 rounded-full ${inst.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{inst.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
                             <div className="relative">
-                                <Input type="number" value={inst.asignacion} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setInstruments(adjustWeights(instruments, i, newVal, 'asignacion')); }} className="w-20 h-10 text-lg font-black text-center rounded-xl bg-[#F5F4F0] border-none focus-visible:ring-2 focus-visible:ring-[#2D5A4A]" />
+                                <Input type="number" value={inst.asignacion} onChange={(e) => handleInstrumentWeightChange(i, parseInt(e.target.value) || 0)} className="w-20 h-10 text-lg font-black text-center rounded-xl bg-[#F5F4F0] border-none focus-visible:ring-2 focus-visible:ring-[#2D5A4A]" />
                                 <Percent className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A8B80] pointer-events-none" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                             <Select value={inst.moneda} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], moneda: v }; setInstruments(arr) }}><SelectTrigger className="w-24 h-9 rounded-xl font-bold text-xs bg-[#F5F4F0] border-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="Mix">Mix</SelectItem></SelectContent></Select>
+                             <Select value={inst.moneda} onValueChange={(v) => handleInstrumentChange(i, 'moneda', v)}><SelectTrigger className="w-24 h-9 rounded-xl font-bold text-xs bg-[#F5F4F0] border-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="ARS">ARS</SelectItem><SelectItem value="Mix">Mix</SelectItem></SelectContent></Select>
                              <Button variant="ghost" size="sm" aria-label="Eliminar instrumento" onClick={() => setInstruments((prev: any) => prev.filter((_: any, j: number) => j !== i))} className="h-9 w-9 rounded-full text-red-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="w-4.5 h-4.5" /></Button>
                         </div>
                     </div>
@@ -447,12 +512,12 @@ export function PortfolioEditor({
                     <div className="space-y-3">
                         <div className="relative">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-[#3D7A5F] absolute -top-2 left-3 px-1.5 bg-white z-10">Instrumento</Label>
-                            <Input value={inst.nombre} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], nombre: e.target.value }; setInstruments(arr) }} className="h-11 text-base font-semibold rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F] focus:ring-0" placeholder="Ej: FCI Renta Variable" />
+                            <Input value={inst.nombre} onChange={(e) => handleInstrumentChange(i, 'nombre', e.target.value)} className="h-11 text-base font-semibold rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F] focus:ring-0" placeholder="Ej: FCI Renta Variable" />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-[#7A8B80] absolute -top-2 left-3 px-1.5 bg-white z-10">Categoría</Label>
-                                <Select value={inst.tipo} onValueChange={(v) => { const arr = [...instruments]; arr[i] = { ...arr[i], tipo: v }; setInstruments(arr) }}>
+                                <Select value={inst.tipo} onValueChange={(v) => handleInstrumentChange(i, 'tipo', v)}>
                                     <SelectTrigger className="h-10 text-xs font-medium rounded-xl border-[#E8E6E0] bg-white"><SelectValue placeholder="Tipo" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="Money Market">Money Market</SelectItem>
@@ -467,7 +532,7 @@ export function PortfolioEditor({
                             </div>
                             <div className="relative">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-[#7A8B80] absolute -top-2 left-3 px-1.5 bg-white z-10">Objetivo</Label>
-                                <Input value={inst.objetivo} onChange={(e) => { const arr = [...instruments]; arr[i] = { ...arr[i], objetivo: e.target.value }; setInstruments(arr) }} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F]" placeholder="Ej: Liquidez" />
+                                <Input value={inst.objetivo} onChange={(e) => handleInstrumentChange(i, 'objetivo', e.target.value)} className="h-10 text-sm font-medium rounded-xl border-[#E8E6E0] focus:border-[#3D7A5F]" placeholder="Ej: Liquidez" />
                             </div>
                         </div>
                     </div>
@@ -481,10 +546,10 @@ export function PortfolioEditor({
               <div className="space-y-2">
                 {asignacionEstrategica.map((asig, i) => (
                   <div key={i} className={`flex items-center gap-3 p-3 bg-white rounded-2xl border ${totalAsignacionEstrategica !== 100 ? 'border-amber-100' : 'border-[#E8E6E0]'} shadow-sm transition-all`}>
-                    <Button variant="ghost" size="sm" aria-label={asig.locked ? "Desbloquear asignación estratégica" : "Bloquear asignación estratégica"} onClick={() => { const arr = [...asignacionEstrategica]; arr[i] = { ...arr[i], locked: !arr[i].locked }; setAsignacionEstrategica(arr); }} className={`h-8 w-8 rounded-full ${asig.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
+                    <Button variant="ghost" size="sm" aria-label={asig.locked ? "Desbloquear asignación estratégica" : "Bloquear asignación estratégica"} onClick={() => handleAsignacionLockToggle(i)} className={`h-8 w-8 rounded-full ${asig.locked ? 'bg-amber-50 text-[#C4846C]' : 'bg-[#F5F4F0] text-[#7A8B80]'}`}>{asig.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</Button>
                     <span className="text-sm flex-1 truncate font-bold text-[#4A5B50]">{asig.horizonte}</span>
                     <div className="relative">
-                        <Input type="number" value={asig.porcentaje} onChange={(e) => { const newVal = parseInt(e.target.value) || 0; setAsignacionEstrategica(adjustWeights(asignacionEstrategica, i, newVal, 'porcentaje')); }} className="w-18 h-9 text-base font-black text-center rounded-xl bg-[#F5F4F0] border-none" />
+                        <Input type="number" value={asig.porcentaje} onChange={(e) => handleAsignacionChange(i, parseInt(e.target.value) || 0)} className="w-18 h-9 text-base font-black text-center rounded-xl bg-[#F5F4F0] border-none" />
                         <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#7A8B80] pointer-events-none">%</span>
                     </div>
                   </div>
@@ -509,15 +574,15 @@ export function PortfolioEditor({
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative col-span-2">
                                 <Label className="text-[9px] font-black uppercase text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-white">Emisor</Label>
-                                <Input value={on.emisor} onChange={(e) => { const arr = [...obligacionesNegociables]; arr[i] = { ...arr[i], emisor: e.target.value }; setObligacionesNegociables(arr) }} className="h-9 text-sm font-bold border-none bg-[#F5F4F0] rounded-xl" placeholder="Ej: YPF" />
+                                <Input value={on.emisor} onChange={(e) => handleONChange(i, 'emisor', e.target.value)} className="h-9 text-sm font-bold border-none bg-[#F5F4F0] rounded-xl" placeholder="Ej: YPF" />
                             </div>
                             <div className="relative">
                                 <Label className="text-[9px] font-black uppercase text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-white">Cupón</Label>
-                                <Input value={on.cupon} onChange={(e) => { const arr = [...obligacionesNegociables]; arr[i] = { ...arr[i], cupon: e.target.value }; setObligacionesNegociables(arr) }} className="h-9 text-sm bg-[#F5F4F0] border-none rounded-xl" placeholder="Ej: 8%" />
+                                <Input value={on.cupon} onChange={(e) => handleONChange(i, 'cupon', e.target.value)} className="h-9 text-sm bg-[#F5F4F0] border-none rounded-xl" placeholder="Ej: 8%" />
                             </div>
                             <div className="relative">
                                 <Label className="text-[9px] font-black uppercase text-[#7A8B80] absolute -top-1.5 left-2 px-1 bg-white">Ticker</Label>
-                                <Input value={on.ticker} onChange={(e) => { const arr = [...obligacionesNegociables]; arr[i] = { ...arr[i], ticker: e.target.value }; setObligacionesNegociables(arr) }} className="h-9 text-sm bg-[#F5F4F0] border-none rounded-xl" placeholder="Ej: YPCUO" />
+                                <Input value={on.ticker} onChange={(e) => handleONChange(i, 'ticker', e.target.value)} className="h-9 text-sm bg-[#F5F4F0] border-none rounded-xl" placeholder="Ej: YPCUO" />
                             </div>
                         </div>
                       </div>
@@ -531,10 +596,10 @@ export function PortfolioEditor({
                     {riesgos.map((r, i) => (
                       <div key={i} className="p-4 bg-white rounded-2xl border border-[#E8E6E0] shadow-sm">
                         <div className="flex gap-2 mb-3">
-                            <Input value={r.riesgo} onChange={(e) => { const arr = [...riesgos]; arr[i] = { ...arr[i], riesgo: e.target.value }; setRiesgos(arr) }} className="h-9 text-sm font-bold border-none bg-[#F5F4F0] rounded-xl flex-1" placeholder="Riesgo" />
-                            <Select value={r.nivel} onValueChange={(v: 'Bajo' | 'Medio' | 'Alto') => { const arr = [...riesgos]; arr[i] = { ...arr[i], nivel: v }; setRiesgos(arr) }}><SelectTrigger className="h-9 w-24 border-none bg-[#F5F4F0] rounded-xl font-bold text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Bajo">Bajo</SelectItem><SelectItem value="Medio">Medio</SelectItem><SelectItem value="Alto">Alto</SelectItem></SelectContent></Select>
+                            <Input value={r.riesgo} onChange={(e) => handleRiesgoChange(i, 'riesgo', e.target.value)} className="h-9 text-sm font-bold border-none bg-[#F5F4F0] rounded-xl flex-1" placeholder="Riesgo" />
+                            <Select value={r.nivel} onValueChange={(v: 'Bajo' | 'Medio' | 'Alto') => handleRiesgoChange(i, 'nivel', v)}><SelectTrigger className="h-9 w-24 border-none bg-[#F5F4F0] rounded-xl font-bold text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Bajo">Bajo</SelectItem><SelectItem value="Medio">Medio</SelectItem><SelectItem value="Alto">Alto</SelectItem></SelectContent></Select>
                         </div>
-                        <Input value={r.mitigacion} onChange={(e) => { const arr = [...riesgos]; arr[i] = { ...arr[i], mitigacion: e.target.value }; setRiesgos(arr) }} className="h-9 text-xs bg-white border-[#E8E6E0] rounded-xl" placeholder="Estrategia de mitigación" />
+                        <Input value={r.mitigacion} onChange={(e) => handleRiesgoChange(i, 'mitigacion', e.target.value)} className="h-9 text-xs bg-white border-[#E8E6E0] rounded-xl" placeholder="Estrategia de mitigación" />
                       </div>
                     ))}
                   </div>
@@ -548,7 +613,7 @@ export function PortfolioEditor({
                   <div className="space-y-2">
                     {beneficiosFiscales.map((b, i) => (
                       <div key={i} className="flex gap-2 group">
-                          <Textarea value={b} onChange={(e) => { const arr = [...beneficiosFiscales]; arr[i] = e.target.value; setBeneficiosFiscales(arr) }} className="text-sm font-medium min-h-[60px] p-3 rounded-2xl border-[#E8E6E0] focus:border-[#3D7A5F] flex-1 bg-white shadow-sm" />
+                          <Textarea value={b} onChange={(e) => handleBeneficioChange(i, e.target.value)} className="text-sm font-medium min-h-[60px] p-3 rounded-2xl border-[#E8E6E0] focus:border-[#3D7A5F] flex-1 bg-white shadow-sm" />
                           <Button variant="ghost" size="sm" aria-label="Eliminar beneficio fiscal" onClick={() => setBeneficiosFiscales((prev: string[]) => prev.filter((_, j) => j !== i))} className="h-auto px-2 text-red-300 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4"/></Button>
                       </div>
                     ))}
