@@ -7,7 +7,7 @@ import {
   ConfigurableLink,
 } from '@/stores/portfolio-store';
 
-// Paleta de colores CACTUS
+// Paleta de colores de la marca
 const COLORS = {
   cactusDark: '#2D5A4A',
   cactusMedium: '#3D7A5F',
@@ -37,7 +37,7 @@ export interface PlanData {
   tipoAporte?: 'mensual' | 'unico' | 'semanal' | 'quincenal';
   asesorNombre?: string;
   asesorRecomendacion?: boolean;
-  platformLinks?: { name: string; url: string }[];
+  platformLinks?: { name: string; url: string; enabled?: boolean }[];
   socialLinks?: { name: string; url: string; icon?: string }[];
   // Portfolio data
   asignacionEstrategica?: AsignacionEstrategica[];
@@ -94,12 +94,12 @@ export function generatePlanHTML(data: PlanData): string {
       montoObjetivo = (data.aporteInicial || 0) + data.aporteMensual * data.horizonteMeses;
   }
 
-  const webUrl = data.webUrl || 'cactuswealth.com.ar';
+  const webUrl = data.webUrl || '';
   const asesorNombre = data.asesorNombre || 'Giolivo Santarelli';
   const showRecomendaciones = data.asesorRecomendacion !== false;
 
   // Platform links
-  const platformLinksHTML = (data.platformLinks || []).map(link => 
+  const platformLinksHTML = (data.platformLinks || []).filter(link => link.enabled !== false).map(link =>
     `<a href="${link.url}" target="_blank" class="account-link">
       <span class="link-icon">🔗</span>
       ${link.name}

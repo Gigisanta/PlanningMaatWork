@@ -34,6 +34,7 @@ export interface ConfigurableLink {
   name: string
   url: string
   icon: 'link' | 'instagram' | 'whatsapp'
+  enabled?: boolean
 }
 
 export interface AttachedFile {

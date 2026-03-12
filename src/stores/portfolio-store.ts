@@ -58,6 +58,7 @@ export interface ConfigurableLink {
   name: string;
   url: string;
   icon?: 'link' | 'instagram' | 'whatsapp';
+  enabled?: boolean;
 }
 
 export interface AttachedFile {
@@ -114,7 +115,7 @@ interface PortfolioState {
   tipoAporte?: TipoAporte;
   asesorNombre?: string;
   asesorRecomendacion?: boolean;
-  platformLinks?: { name: string; url: string }[];
+  platformLinks?: { name: string; url: string; enabled?: boolean }[];
   socialLinks?: { name: string; url: string; icon?: string }[];
   
   // Branding
@@ -181,7 +182,7 @@ interface PortfolioActions {
   setTipoAporte: (tipo?: TipoAporte) => void;
   setAsesorNombre: (nombre?: string) => void;
   setAsesorRecomendacion: (recomendacion: boolean) => void;
-  setPlatformLinks: (links?: { name: string; url: string }[]) => void;
+  setPlatformLinks: (links?: { name: string; url: string; enabled?: boolean }[]) => void;
   setSocialLinks: (links?: { name: string; url: string; icon?: string }[]) => void;
   
   // Setters - Branding
