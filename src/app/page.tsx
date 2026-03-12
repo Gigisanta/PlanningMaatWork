@@ -286,8 +286,8 @@ export default function Home() {
   const [portfolioLibrary, setPortfolioLibrary] = useState<SavedPortfolio[]>([])
   const [saveName, setSaveName] = useState("")
 
-  const previewRef = useRef<HTMLDivElement>(null as any)
-  const fileInputRef = useRef<HTMLInputElement>(null as any)
+  const previewRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
