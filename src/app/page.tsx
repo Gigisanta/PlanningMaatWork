@@ -327,7 +327,7 @@ export default function Home() {
   const formatNumber = useCallback((num: number) => num.toLocaleString('es-AR'), [])
 
   const applyTemplate = (template: typeof OFFICIAL_TEMPLATES[0]) => {
-    const newInstruments = template.instruments.map((inst: any) => ({
+    const newInstruments = template.instruments.map((inst) => ({
       nombre: inst.name,
       tipo: inst.type,
       asignacion: inst.weight,
