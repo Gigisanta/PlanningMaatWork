@@ -306,22 +306,35 @@ export default function Home() {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    const newFiles = await Promise.all(
-      Array.from(files).map(async (file) => {
-        return new Promise<AttachedFile>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            resolve({
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              data: e.target?.result as string || "",
-            });
-          };
-          reader.readAsDataURL(file);
-        });
-      })
-    );
+    const fileArray = Array.from(files);
+    const newFiles: AttachedFile[] = [];
+    const CHUNK_SIZE = 5;
+
+    for (let i = 0; i < fileArray.length; i += CHUNK_SIZE) {
+      const chunk = fileArray.slice(i, i + CHUNK_SIZE);
+      const chunkResults = await Promise.all(
+        chunk.map((file) => {
+          return new Promise<AttachedFile>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: (e.target?.result as string) || "",
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+      newFiles.push(...chunkResults);
+
+      // Yield to the main thread to prevent UI freezing on large uploads
+      if (i + CHUNK_SIZE < fileArray.length) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+    }
 
     setAttachedFiles(prev => [...prev, ...newFiles])
   }
