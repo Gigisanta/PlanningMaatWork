@@ -306,8 +306,15 @@ export default function Home() {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    const newFiles = await Promise.all(
-      Array.from(files).map(async (file) => {
+    const filesArray = Array.from(files)
+    const newFiles: AttachedFile[] = []
+
+    // ⚡ Bolt: Process files concurrently in small batches to prevent UI blocking and memory spikes
+    // while maintaining better IO throughput than strict sequential processing.
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < filesArray.length; i += BATCH_SIZE) {
+      const batch = filesArray.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(batch.map(file => {
         return new Promise<AttachedFile>((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) => {
@@ -320,8 +327,9 @@ export default function Home() {
           };
           reader.readAsDataURL(file);
         });
-      })
-    );
+      }));
+      newFiles.push(...batchResults);
+    }
 
     setAttachedFiles(prev => [...prev, ...newFiles])
   }
