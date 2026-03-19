@@ -5,7 +5,7 @@ interface CacheEntry {
 }
 
 const pdfCache = new Map<string, CacheEntry>();
-const CACHE_TTL = 5 * 60 * 1000;
+export const CACHE_TTL = 5 * 60 * 1000;
 
 export function getCachedPDF(data: any): string | null {
   const key = JSON.stringify(data);
