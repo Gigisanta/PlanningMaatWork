@@ -6,6 +6,7 @@ import {
   MetaVida,
   ConfigurableLink,
 } from '@/stores/portfolio-store';
+import { escapeHtml, safeUrl } from './security';
 
 // Paleta de colores CACTUS
 const COLORS = {
@@ -94,38 +95,45 @@ export function generatePlanHTML(data: PlanData): string {
       montoObjetivo = (data.aporteInicial || 0) + data.aporteMensual * data.horizonteMeses;
   }
 
-  const webUrl = data.webUrl || 'cactuswealth.com.ar';
-  const asesorNombre = data.asesorNombre || 'Giolivo Santarelli';
+  const webUrl = escapeHtml(data.webUrl) || 'cactuswealth.com.ar';
+  const asesorNombre = escapeHtml(data.asesorNombre) || 'Giolivo Santarelli';
+  const asesorTelefono = escapeHtml(data.asesorTelefono) || '';
+  const profesion = escapeHtml(data.profesion) || '';
+  const objetivo = escapeHtml(data.objetivo) || '';
+  const observaciones = escapeHtml(data.observaciones) || '';
+  const logoUrl = safeUrl(data.logoUrl);
+
   const showRecomendaciones = data.asesorRecomendacion !== false;
 
   // Platform links
   const platformLinksHTML = (data.platformLinks || []).map(link => 
-    `<a href="${link.url}" target="_blank" class="account-link">
+    `<a href="${escapeHtml(safeUrl(link.url))}" target="_blank" class="account-link">
       <span class="link-icon">🔗</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`
   ).join('\n    ');
 
   // Social links
   const socialLinksHTML = (data.socialLinks || []).map(link => {
-    const isInstagram = link.icon === 'instagram' || link.name.toLowerCase().includes('instagram');
-    const isWhatsapp = link.icon === 'whatsapp' || link.name.toLowerCase().includes('whatsapp');
+    const nameStr = link.name || '';
+    const isInstagram = link.icon === 'instagram' || nameStr.toLowerCase().includes('instagram');
+    const isWhatsapp = link.icon === 'whatsapp' || nameStr.toLowerCase().includes('whatsapp');
     const className = isInstagram ? 'footer-link instagram' : (isWhatsapp ? 'footer-link whatsapp' : 'footer-link');
     const icon = isInstagram ? '📸' : (isWhatsapp ? '💬' : '🔗');
-    return `<a href="${link.url}" target="_blank" class="${className}">
+    return `<a href="${escapeHtml(safeUrl(link.url))}" target="_blank" class="${className}">
       <span class="icon">${icon}</span>
-      ${link.name}
+      ${escapeHtml(nameStr)}
     </a>`;
   }).join('\n    ');
 
 
   // WhatsApp Share URL
-  const whatsappMsg = data.asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${asesorNombre} (Tel: ${data.asesorTelefono || ''}).`;
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMsg)}`;
+  const whatsappMsgRaw = data.asesorMensajePredefinido || `Hola, te comparto el contacto de mi asesor financiero ${data.asesorNombre || 'Giolivo Santarelli'} (Tel: ${data.asesorTelefono || ''}).`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMsgRaw)}`;
 
   // Floating button HTML
   const floatingWhatsappHTML = `
-    <a href="${whatsappUrl}" target="_blank" class="floating-whatsapp">
+    <a href="${escapeHtml(safeUrl(whatsappUrl))}" target="_blank" class="floating-whatsapp">
       <span>Recomendar asesor</span>
       <span class="wapp-icon">🔗</span>
     </a>
@@ -146,7 +154,7 @@ export function generatePlanHTML(data: PlanData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plan Financiero - ${data.profesion}</title>
+  <title>Plan Financiero - ${profesion}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1252,7 +1260,7 @@ export function generatePlanHTML(data: PlanData): string {
     <div class="header">
       <div class="header-content">
         <h1>Tu Plan Financiero</h1>
-        <div class="subtitle">${data.profesion} | ${data.edad} años | Perfil ${data.perfilRiesgo}</div>
+        <div class="subtitle">${profesion} | ${data.edad} años | Perfil ${escapeHtml(data.perfilRiesgo)}</div>
         <div class="meta">Generado el ${fecha}</div>
       </div>
     </div>
@@ -1325,7 +1333,7 @@ export function generatePlanHTML(data: PlanData): string {
 
       <div class="objetivo-box">
         <h3>🎯 Tu Objetivo</h3>
-        <p class="objetivo-text">${data.objetivo}</p>
+        <p class="objetivo-text">${objetivo}</p>
         <div class="objetivo-meta">
           ${(data.aporteInicial && data.aporteInicial > 0) ? `
           <div class="objetivo-meta-item">
@@ -1348,7 +1356,7 @@ export function generatePlanHTML(data: PlanData): string {
       </div>
 
       <div class="info-box">
-        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${data.perfilRiesgo}</strong>, 
+        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${escapeHtml(data.perfilRiesgo)}</strong>,
         diseñamos una cartera que balancea crecimiento y protección. Tu edad de ${data.edad} años 
         te permite aprovechar el poder del interés compuesto a largo plazo.
       </div>
@@ -1596,7 +1604,7 @@ export function generatePlanHTML(data: PlanData): string {
       <div class="consejo-box">
         <h4>💡 Consejo de tu Asesor</h4>
         <p>${data.consejoFinal || data.usarConsejoIA ? `Empezar a invertir joven es la mejor decisión financiera que podés tomar. No busques la perfección, buscá la consistencia. Con tiempo y disciplina, incluso aportes pequeños pueden crecer significativamente.` : ''}
-        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${data.observaciones}</p>` : ''}</p>
+        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${observaciones}</p>` : ''}</p>
         <div class="consejo-footer">Recordá revisar tu plan cada 6 meses para ajustarlo según tus necesidades cambiantes.</div>
       </div>
     </div>
@@ -1634,7 +1642,7 @@ export function generatePlanHTML(data: PlanData): string {
   <div style="page-break-before: always;" class="html2pdf__page-break"></div>
   <div class="page-container" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
     <div class="header" style="margin-bottom: 40px; text-align: center;">
-      ${data.logoUrl ? `<img src="${data.logoUrl}" alt="Logo" style="max-height: 60px; margin: 0 auto; display: block; margin-bottom: 15px;" />` : `<div class="header-logo" style="justify-content: center; margin-bottom: 10px; font-weight: bold; font-size: 24px; color: var(--primary-dark);">MaatWork</div>`}
+      ${logoUrl !== '#' && logoUrl !== '' ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" style="max-height: 60px; margin: 0 auto; display: block; margin-bottom: 15px;" />` : `<div class="header-logo" style="justify-content: center; margin-bottom: 10px; font-weight: bold; font-size: 24px; color: var(--primary-dark);">MaatWork</div>`}
       <div class="header-title" style="text-align: center;">Model Portfolios</div>
     </div>
     <div class="content" style="flex: 1; display: flex; align-items: center; justify-content: center;">
