@@ -44,8 +44,8 @@ interface OutreachLog {
 
 // Cal.com booking links (to be configured by user)
 const CAL_COM_LINKS = {
-  maatwork: "TU_CAL_COM.maatwork", // Replace with actual Cal.com username
-  cactuswealth: "TU_CAL_COM.cactuswealth"
+  maatwork: "YOUR_CAL_COM_USERNAME", // Replace with actual Cal.com username
+  cactuswealth: "YOUR_CAL_COM_USERNAME"
 };
 
 async function getData() {
@@ -151,7 +151,7 @@ Hola ${lead.name},
 
 Vi ${lead.company || "tu negocio"} y me copó lo que muestran.
 
-Te escribo porque estamos ayudando a negocios como el tuyo a automatizar:
+Te escribo porque estamos ayudando a gyms como el tuyo a automatizar:
 - Cobros y renovaciones
 - Turnos y horarios
 - Seguimiento con clientes por WhatsApp
@@ -232,6 +232,34 @@ Tenemos 3 plazas disponibles esta semana para implementar MaatWork sin costo de 
 
 Si no te interesa, simplemente respondeme "no" y no te molesto más :)
 
+Gio
+          `,
+          status: "pending" as const
+        },
+        {
+          day: 14,
+          subject: `PD: ¿Puedo ayudarte con algo más?`,
+          content: lead.interest === "cactus_wealth" ? `
+Hola ${lead.name},
+
+Sé que quizás no era el momento. Si en el futuro necesitás ayuda con tus finanzas, estoy disponible.
+
+Mientras tanto, te dejo un recurso gratis que puede servirte:
+→ ${calLink}/recursos
+
+¡Abrazo!
+Gio
+          ` : `
+Hola ${lead.name},
+
+Una última cosa — también trabajo con asesoría financiera para dueños de negocios como vos.
+
+Si alguna vez querés revisar cómo están tus finanzas personales o las del negocio, con mucho gusto te ayudo.
+
+Consultá sin compromiso:
+→ ${calLink}
+
+¡Éxitos con ${lead.company || "tu negocio"}!
 Gio
           `,
           status: "pending" as const
