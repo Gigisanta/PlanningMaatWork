@@ -3,8 +3,8 @@ import { writeFile, readFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 
-// Simple JSON file storage
-const DATA_DIR = path.join(process.cwd(), "data");
+// Simple JSON file storage - use /tmp for Vercel serverless compatibility
+const DATA_DIR = path.join("/tmp", "maatwork-leads");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
 
 interface Lead {
