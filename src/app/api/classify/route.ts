@@ -36,7 +36,10 @@ async function getData() {
     return { leads: [], outreachLogs: [] };
   }
   const data = JSON.parse(await readFile(LEADS_FILE, "utf-8"));
-  return { leads: data.leads || [], outreachLogs: data.outreachLogs || [] };
+  return { 
+    leads: Array.isArray(data.leads) ? data.leads : [], 
+    outreachLogs: Array.isArray(data.outreachLogs) ? data.outreachLogs : [] 
+  };
 }
 
 async function saveData(data: { leads: Lead[]; outreachLogs: any[] }) {
