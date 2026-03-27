@@ -115,7 +115,8 @@ interface PortfolioEditorProps {
   formatNumber: (n: number) => string
 }
 
-export function PortfolioEditor({
+// ⚡ Bolt: Wrapped PortfolioEditor in React.memo to prevent heavy re-renders (like AllocationChart) on every parent form keystroke
+export const PortfolioEditor = React.memo(function PortfolioEditor({
   wizardStep, setWizardStep,
   ingresosMensuales, setIngresosMensuales,
   gastosMensuales, setGastosMensuales,
@@ -612,4 +613,4 @@ export function PortfolioEditor({
       </div>
     </div>
   )
-}
+})
