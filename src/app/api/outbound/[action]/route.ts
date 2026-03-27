@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile, writeFile, existsSync } from "fs/promises";
+import { readFile, writeFile, existsSync, mkdir } from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 
 const DATA_DIR = path.join("/tmp", "maatwork-leads");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
@@ -52,7 +53,7 @@ async function getData() {
 
 async function saveData(data: { leads: Lead[]; outreachLogs: OutreachLog[] }) {
   if (!existsSync(DATA_DIR)) {
-    await require("fs").promises.mkdir(DATA_DIR, { recursive: true });
+    await mkdir(DATA_DIR, { recursive: true });
   }
   await writeFile(LEADS_FILE, JSON.stringify(data, null, 2));
 }
@@ -147,7 +148,7 @@ Gio`,
 
     for (const seq of sequences) {
       const log: OutreachLog = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+        id: randomUUID(),
         leadId,
         type: type as "email" | "whatsapp" | "telegram",
         subject: (seq as any).subject,
