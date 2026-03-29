@@ -50,6 +50,7 @@ import {
   ConfigurableLink,
   AttachedFile
 } from '@/components/portfolio/types'
+import { PlanData } from '@/lib/generatePlan'
 import { PortfolioEditor } from '@/components/portfolio/PortfolioEditor'
 import { PortfolioPreview } from '@/components/portfolio/PortfolioPreview'
 import { toast } from 'sonner'
@@ -65,7 +66,7 @@ interface SavedPortfolio {
     id: string;
     name: string;
     date: string;
-    data: any;
+    data: Partial<PlanData>;
 }
 
 const defaultAsignacionEstrategica: AsignacionEstrategica[] = [
