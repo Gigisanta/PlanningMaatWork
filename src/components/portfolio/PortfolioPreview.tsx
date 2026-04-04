@@ -28,8 +28,52 @@ interface PortfolioPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
 }
 
-// ⚡ Bolt: Memoize the heavy PortfolioPreview (contains iframe) to prevent it from re-rendering on every form keystroke
-export const PortfolioPreview = React.memo(function PortfolioPreview({
+// ⚡ Bolt: Extracted the heavy iframe/textarea into a strictly memoized sub-component to perfectly isolate it from callback reference changes
+const PreviewContent = React.memo(function PreviewContent({
+  generatedHTML,
+  viewMode,
+  editableHTML,
+  setEditableHTML,
+  isMobile
+}: {
+  generatedHTML: string;
+  viewMode: 'preview' | 'edit';
+  editableHTML: string;
+  setEditableHTML: (v: string) => void;
+  isMobile: boolean
+}) {
+  if (!generatedHTML) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-[#7A8B80] bg-white rounded-3xl border-2 border-dashed border-[#E8E6E0]">
+        <div className="w-20 h-20 bg-[#F5F4F0] rounded-full flex items-center justify-center mb-6">
+            <FileText className={`${isMobile ? 'w-10 h-10' : 'w-8 h-8'} opacity-40`} />
+        </div>
+        <p className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold text-[#1F2D26]`}>Sin plan generado</p>
+        <p className={`${isMobile ? 'text-base mt-2' : 'text-sm mt-1'} text-[#7A8B80]`}>Completa el formulario a la izquierda y pulsa "Generar Plan"</p>
+      </div>
+    );
+  }
+
+  return viewMode === 'preview' ? (
+    <div className="bg-white rounded-2xl shadow-xl border border-[#E8E6E0] overflow-hidden h-full min-h-[800px]">
+      <iframe
+        srcDoc={editableHTML}
+        title="Preview"
+        className="w-full h-full bg-[#FAFAF8]"
+        sandbox="allow-same-origin allow-popups"
+      />
+    </div>
+  ) : (
+    <Textarea
+      value={editableHTML}
+      onChange={(e) => setEditableHTML(e.target.value)}
+      className={`font-mono ${isMobile ? 'text-xs min-h-[500px]' : 'text-[11px] min-h-full'} bg-white rounded-2xl p-6 shadow-inner border-[#E8E6E0]`}
+      placeholder="HTML..."
+    />
+  );
+});
+
+export function PortfolioPreview({
   isMobile,
   generatedHTML,
   viewMode,
@@ -108,35 +152,15 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
       {/* Contenido preview */}
       <div className="flex-1 overflow-auto p-4 md:p-8" ref={previewRef}>
         <div className="max-w-[850px] mx-auto h-full">
-            {generatedHTML ? (
-              viewMode === 'preview' ? (
-                <div className="bg-white rounded-2xl shadow-xl border border-[#E8E6E0] overflow-hidden h-full min-h-[800px]">
-                  <iframe
-                    srcDoc={editableHTML}
-                    title="Preview"
-                    className="w-full h-full bg-[#FAFAF8]"
-                    sandbox="allow-same-origin allow-popups"
-                  />
-                </div>
-              ) : (
-                <Textarea
-                  value={editableHTML}
-                  onChange={(e) => setEditableHTML(e.target.value)}
-                  className={`font-mono ${isMobile ? 'text-xs min-h-[500px]' : 'text-[11px] min-h-full'} bg-white rounded-2xl p-6 shadow-inner border-[#E8E6E0]`}
-                  placeholder="HTML..."
-                />
-              )
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-[#7A8B80] bg-white rounded-3xl border-2 border-dashed border-[#E8E6E0]">
-                <div className="w-20 h-20 bg-[#F5F4F0] rounded-full flex items-center justify-center mb-6">
-                    <FileText className={`${isMobile ? 'w-10 h-10' : 'w-8 h-8'} opacity-40`} />
-                </div>
-                <p className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold text-[#1F2D26]`}>Sin plan generado</p>
-                <p className={`${isMobile ? 'text-base mt-2' : 'text-sm mt-1'} text-[#7A8B80]`}>Completa el formulario a la izquierda y pulsa "Generar Plan"</p>
-              </div>
-            )}
+            <PreviewContent
+              generatedHTML={generatedHTML}
+              viewMode={viewMode}
+              editableHTML={editableHTML}
+              setEditableHTML={setEditableHTML}
+              isMobile={isMobile}
+            />
         </div>
       </div>
     </div>
   )
-});
+}

@@ -160,42 +160,44 @@ function saveConfig(config: any) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
 }
 
+// ⚡ Bolt: Fixed array mutation anti-pattern by explicitly deep-cloning modified items to strictly respect React state immutability
 function adjustWeights<T>(items: T[], changedIndex: number, newValue: number, key: keyof T): T[] {
-  const newItems = [...items]
-  const item = newItems[changedIndex] as any
-  const oldValue = item[key] as number
-  item[key] = newValue
+  const newItems = items.map(item => ({ ...item }));
+  const item = newItems[changedIndex] as any;
+  const oldValue = item[key] as number;
+  item[key] = newValue;
 
-  const unlockedItems = newItems.filter((_, i) => i !== changedIndex && !(newItems[i] as any).locked)
-  if (unlockedItems.length === 0) return newItems
+  const unlockedItems = newItems.filter((_, i) => i !== changedIndex && !(newItems[i] as any).locked);
+  if (unlockedItems.length === 0) return newItems;
 
-  const diff = newValue - oldValue
-  const diffPerItem = diff / unlockedItems.length
-  unlockedItems.forEach(ui => { (ui as any)[key] = Math.max(0, (ui as any)[key] - diffPerItem) })
+  const diff = newValue - oldValue;
+  const diffPerItem = diff / unlockedItems.length;
+  unlockedItems.forEach(ui => { (ui as any)[key] = Math.max(0, (ui as any)[key] - diffPerItem) });
 
-  return newItems
+  return newItems;
 }
 
+// ⚡ Bolt: Fixed array mutation anti-pattern by explicitly deep-cloning modified items to strictly respect React state immutability
 function normalizeWeights<T>(items: T[], key: keyof T): T[] {
-  const newItems = [...items]
-  const total = newItems.reduce((sum, item) => sum + (item[key] as number), 0)
-  if (total === 0) return newItems
+  const newItems = items.map(item => ({ ...item }));
+  const total = newItems.reduce((sum, item) => sum + (item[key] as number), 0);
+  if (total === 0) return newItems;
 
-  const factor = 100 / total
+  const factor = 100 / total;
   newItems.forEach(item => {
     if (!(item as any).locked) {
-        (item as any)[key] = Math.round((item[key] as number) * factor)
+        (item as any)[key] = Math.round((item[key] as number) * factor);
     }
-  })
+  });
 
-  const finalTotal = newItems.reduce((sum, item) => sum + (item[key] as number), 0)
-  const diff = 100 - finalTotal
+  const finalTotal = newItems.reduce((sum, item) => sum + (item[key] as number), 0);
+  const diff = 100 - finalTotal;
   if (diff !== 0) {
-    const firstUnlocked = newItems.find(item => !(item as any).locked)
-    if (firstUnlocked) (firstUnlocked as any)[key] += diff
+    const firstUnlocked = newItems.find(item => !(item as any).locked);
+    if (firstUnlocked) (firstUnlocked as any)[key] += diff;
   }
 
-  return newItems
+  return newItems;
 }
 
 function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, asesorTelefono, setAsesorTelefono, asesorMensajePredefinido, setAsesorMensajePredefinido, platformLinks, setPlatformLinks, socialLinks, setSocialLinks, asesorRecomendacion, setAsesorRecomendacion, colorPrincipal, setColorPrincipal, colorAcento, setColorAcento, logoUrl, setLogoUrl, onReset, configSaved }: any) {
