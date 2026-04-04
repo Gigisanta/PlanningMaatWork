@@ -576,11 +576,11 @@ export function PortfolioEditor({
 
                 <div className="grid grid-cols-1 gap-4 pt-4">
                   <div className="p-4 bg-white rounded-3xl border-2 border-dashed border-[#E8E6E0]">
-                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" checked={usarTerminoIA} onChange={(e) => setUsarTerminoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[var(--primary-light)] focus:ring-[#3D7A5F]" /><Label className="text-xs font-black uppercase text-[#1F2D26]">Término IA Autogenerado</Label></div>
+                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" id="usarTerminoIA" checked={usarTerminoIA} onChange={(e) => setUsarTerminoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[var(--primary-light)] focus:ring-[#3D7A5F]" /><Label htmlFor="usarTerminoIA" className="text-xs font-black uppercase text-[#1F2D26] cursor-pointer">Término IA Autogenerado</Label></div>
                     {!usarTerminoIA && <Textarea value={terminoFinanciero} onChange={(e) => setTerminoFinanciero(e.target.value)} className="text-sm font-medium min-h-[80px] p-4 rounded-2xl border-[#E8E6E0] bg-[#F5F4F0]" placeholder="Escribe un término clave..." />}
                   </div>
                   <div className="p-4 bg-white rounded-3xl border-2 border-dashed border-[#E8E6E0]">
-                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" checked={usarConsejoIA} onChange={(e) => setUsarConsejoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[var(--primary-light)] focus:ring-[#3D7A5F]" /><Label className="text-xs font-black uppercase text-[#1F2D26]">Consejo IA Autogenerado</Label></div>
+                    <div className="flex items-center gap-2 mb-3"><input type="checkbox" id="usarConsejoIA" checked={usarConsejoIA} onChange={(e) => setUsarConsejoIA(e.target.checked)} className="w-5 h-5 rounded-lg border-[#E8E6E0] text-[var(--primary-light)] focus:ring-[#3D7A5F]" /><Label htmlFor="usarConsejoIA" className="text-xs font-black uppercase text-[#1F2D26] cursor-pointer">Consejo IA Autogenerado</Label></div>
                     {!usarConsejoIA && <Textarea value={consejoFinal} onChange={(e) => setConsejoFinal(e.target.value)} className="text-sm font-medium min-h-[80px] p-4 rounded-2xl border-[#E8E6E0] bg-[#F5F4F0]" placeholder="Escribe un consejo final..." />}
                   </div>
                 </div>
