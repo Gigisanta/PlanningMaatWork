@@ -608,7 +608,7 @@ export default function Home() {
     setLogoUrl("")
     localStorage.removeItem(STORAGE_KEY)
   }, [])
-  const editorProps = {
+  const editorProps = useMemo(() => ({
     isMobile, activeSection, setActiveSection, wizardStep, setWizardStep,
     ingresosMensuales, setIngresosMensuales, gastosMensuales, setGastosMensuales,
     fondoEmergenciaMeses, setFondoEmergenciaMeses, fondoEmergenciaActual, setFondoEmergenciaActual,
@@ -625,7 +625,24 @@ export default function Home() {
     terminoFinanciero, setTerminoFinanciero, usarConsejoIA, setUsarConsejoIA,
     consejoFinal, setConsejoFinal, metaCalculada, formatNumber,
     colorPrincipal, setColorPrincipal, colorAcento, setColorAcento, logoUrl, setLogoUrl
-  }
+  }), [
+    isMobile, activeSection, setActiveSection, wizardStep, setWizardStep,
+    ingresosMensuales, setIngresosMensuales, gastosMensuales, setGastosMensuales,
+    fondoEmergenciaMeses, setFondoEmergenciaMeses, fondoEmergenciaActual, setFondoEmergenciaActual,
+    metasVida, setMetasVida, proyeccionRetiro, setProyeccionRetiro,
+    patrimonioActivos, setPatrimonioActivos, patrimonioDeudas, setPatrimonioDeudas,
+    edad, setEdad, aporteInicial, setAporteInicial, aporteMensual, setAporteMensual, horizonteMeses, setHorizonteMeses,
+    profesion, setProfesion, objetivo, setObjetivo, perfilRiesgo, setPerfilRiesgo,
+    gastosPrincipales, setGastosPrincipales, attachedFiles, setAttachedFiles,
+    handleFileUpload, fileInputRef, instruments, setInstruments,
+    asignacionEstrategica, setAsignacionEstrategica, exposicionUSD, exposicionARS,
+    totalAsignacion, totalAsignacionEstrategica, adjustWeights, normalizeWeights,
+    obligacionesNegociables, setObligacionesNegociables, riesgos, setRiesgos,
+    beneficiosFiscales, setBeneficiosFiscales, usarTerminoIA, setUsarTerminoIA,
+    terminoFinanciero, setTerminoFinanciero, usarConsejoIA, setUsarConsejoIA,
+    consejoFinal, setConsejoFinal, metaCalculada, formatNumber,
+    colorPrincipal, setColorPrincipal, colorAcento, setColorAcento, logoUrl, setLogoUrl
+  ]);
 
   const previewProps = {
     isMobile, generatedHTML, viewMode, setViewMode, editableHTML, setEditableHTML, handleCopyToClipboard, handleDownloadHTML, handleDownloadPDF, isDownloadingPdf, copied, previewRef

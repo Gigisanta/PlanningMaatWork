@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile, writeFile, existsSync } from "fs/promises";
+import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 const DATA_DIR = path.join("/tmp", "maatwork-leads");
@@ -57,9 +57,7 @@ async function getData() {
 }
 
 async function saveData(data: { leads: Lead[]; outreachLogs: OutreachLog[] }) {
-  if (!existsSync(DATA_DIR)) {
-    await require("fs").promises.mkdir(DATA_DIR, { recursive: true });
-  }
+  await mkdir(DATA_DIR, { recursive: true });
   await writeFile(LEADS_FILE, JSON.stringify(data, null, 2));
 }
 
