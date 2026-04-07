@@ -1,3 +1,6 @@
 ## 2023-10-27 - Preventing Heavy Recharts Re-renders on Form Input
 **Learning:** In a single-page app (like `src/app/page.tsx`) with many form inputs (50+ `useState` hooks) that trigger frequent re-renders, any heavy child components (like `Recharts` visualizations) will also re-render on every keystroke if not properly memoized, leading to noticeable input lag.
 **Action:** Always wrap heavy charting components in `React.memo` and ensure the `data` prop passed to them is memoized using `useMemo` in the parent component. Also, memoize expensive array operations (`filter`, `reduce`) that compute derived state across the entire portfolio on every render.
+## 2026-03-04 - Optimize array iterations in template literals
+**Learning:** Extracting multiple O(N) array reductions (like `.filter().reduce()`) that operate on the same data into a single `reduce` pass at the start of a function significantly improves performance, especially when constructing large template strings where inline operations are repeated.
+**Action:** Always precompute complex data aggregation involving multiple derived metrics into a single O(N) pass at the beginning of a function, instead of performing multiple passes inline within the return statement or template literal.
