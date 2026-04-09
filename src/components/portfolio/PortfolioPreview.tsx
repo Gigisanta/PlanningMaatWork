@@ -98,7 +98,7 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 disabled={isDownloadingPdf}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary)] text-[var(--primary)] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary-light)]`}
               >
-                {isDownloadingPdf ? <><Loader2 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} animate-spin mr-1`} />...</> : <><FileDown className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Exportar PDF</>}
+                {isDownloadingPdf ? <><Loader2 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} animate-spin mr-1`} /><span className="sr-only">Generando PDF...</span>Exportando</> : <><FileDown className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Exportar PDF</>}
               </Button>
             </div>
           </div>
