@@ -464,7 +464,7 @@ export default function Home() {
         waLink.style.fontSize = '12px';
         waLink.style.display = 'inline-block';
         waLink.style.fontFamily = 'sans-serif';
-        waLink.innerHTML = 'Recomendar asesor 💬';
+        waLink.textContent = 'Recomendar asesor 💬';
 
         const hr = iframe.contentDocument.createElement('div');
         hr.style.height = '1px';
