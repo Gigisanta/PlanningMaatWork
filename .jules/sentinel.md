@@ -1,3 +1,8 @@
+## 2026-04-14 - [Insecure Randomness in ID Generation]
+**Vulnerability:** Weak random number generation using `Math.random()` for ID generation (`Date.now().toString(36) + Math.random().toString(36).substr(2, 9)`) in multiple Next.js API routes (`leads`, `outbound`, `classify`).
+**Learning:** `Math.random()` is not cryptographically secure and produces predictable outputs. Using it to generate unique identifiers, especially for items like outreach logs or leads, can lead to ID collision or enumeration attacks, compromising data integrity or confidentiality.
+**Prevention:** Always use cryptographically secure random number generators for identifiers. In Node.js environments (like Next.js API routes), use `import { randomUUID } from 'crypto';` or `crypto.randomUUID()` instead of `Math.random()`.
+
 ## 2024-11-20 - [XSS Prevention in User-Editable HTML Preview]
 **Vulnerability:** The application renders user-editable HTML directly into an `iframe` without any sandboxing, creating a potential XSS vulnerability if a user adds malicious scripts to the `editableHTML` state.
 **Learning:** The `PortfolioPreview` component allows users to edit the generated HTML code. If this HTML contains a `<script>` tag, it would be executed within the context of the application since the `iframe` had no restrictions.
