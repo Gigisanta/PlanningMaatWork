@@ -5,3 +5,7 @@
 ## 2025-03-10 - Accessibility gaps in icon-only buttons
 **Learning:** Found a recurring pattern in the app where icon-only interactive elements (like Settings and Toggle buttons on list items) lack `aria-label` or `title` attributes. Without these attributes, screen reader users and those navigating visually cannot easily infer the button's purpose or action state.
 **Action:** Ensure that anytime an icon-only button is implemented or updated, both an `aria-label` for assistive technologies and a `title` attribute for native tooltips are provided, and that the language specifically describes the resulting action or context.
+
+## 2025-03-10 - Checkbox Label Association
+**Learning:** Found checkboxes for settings like "Incluir recomendaciones" that were visually placed next to `<Label>` components but were not programmatically associated via `id` and `htmlFor` attributes, meaning clicking the label text did not toggle the checkbox.
+**Action:** Always explicitly associate form controls (like `<input type="checkbox">`) with their `<Label>` components using an `id` on the input and a matching `htmlFor` on the label. Additionally, applying `cursor-pointer` to both elements improves UX by providing visual feedback that the entire area is interactive.
