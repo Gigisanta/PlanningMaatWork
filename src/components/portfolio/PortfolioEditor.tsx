@@ -115,7 +115,8 @@ interface PortfolioEditorProps {
   formatNumber: (n: number) => string
 }
 
-export function PortfolioEditor({
+// ⚡ Bolt: Memoize the heavy PortfolioEditor to prevent it from re-rendering unnecessarily during typing in parent components
+export const PortfolioEditor = React.memo(function PortfolioEditor({
   wizardStep, setWizardStep,
   ingresosMensuales, setIngresosMensuales,
   gastosMensuales, setGastosMensuales,
@@ -612,4 +613,4 @@ export function PortfolioEditor({
       </div>
     </div>
   )
-}
+})
