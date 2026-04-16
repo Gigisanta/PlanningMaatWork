@@ -750,7 +750,7 @@ export default function Home() {
           </ResizablePanelGroup>
         ) : (
           <>
-            <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+            <div role="tabpanel" id="panel-form" aria-labelledby="tab-form" aria-hidden={mobilePanel !== 'form'} className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioEditor {...editorProps} />
               <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
                 <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
@@ -758,7 +758,7 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className={`fixed inset-0 top-[60px] z-40 bg-[#F5F4F0] flex flex-col transition-transform duration-300 ${mobilePanel === 'preview' ? 'translate-x-0' : 'translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+            <div role="tabpanel" id="panel-preview" aria-labelledby="tab-preview" aria-hidden={mobilePanel !== 'preview'} className={`fixed inset-0 top-[60px] z-40 bg-[#F5F4F0] flex flex-col transition-transform duration-300 ${mobilePanel === 'preview' ? 'translate-x-0' : 'translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioPreview {...previewProps} />
             </div>
           </>
@@ -767,12 +767,12 @@ export default function Home() {
 
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom h-[calc(64px+env(safe-area-inset-bottom,0px))]">
-          <div className="flex h-16">
-            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+          <div className="flex h-16" role="tablist" aria-label="Navegación principal">
+            <button role="tab" id="tab-form" aria-selected={mobilePanel === 'form'} aria-controls="panel-form" onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'form' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <ClipboardList className="w-6 h-6" /><span className="text-xs font-medium">Formulario</span>
             </button>
-            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+            <button role="tab" id="tab-preview" aria-selected={mobilePanel === 'preview'} aria-controls="panel-preview" onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <Eye className="w-6 h-6" /><span className="text-xs font-medium">Preview</span>
               {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[var(--primary-light)] rounded-full animate-pulse" />}
