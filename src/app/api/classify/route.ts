@@ -60,18 +60,20 @@ const CROSSSELL_KEYWORDS = {
   goals: ["invertir", "ahorrar", "jubilación", "retiro", "futuro", "patrimonio", "capital"]
 };
 
+// ⚡ Bolt: Flatten keywords at module level to prevent redundant iteration inside classifyLead
+const FLATTENED_FINANCIAL_KEYWORDS = Object.values(CROSSSELL_KEYWORDS).flat();
+
+// ⚡ Bolt: Move static array to module level to prevent reallocation
+const MAATWORK_INDUSTRIES = ["gimnasio", "gym", "fitness", "natatorio", "piscina", "pool", "salon", "estetica", "peluqueria", "spa", "boxeo", "crossfit", "yoga", "pilates", "deporte"];
+
 function classifyLead(lead: Partial<Lead>): { primaryService: string; crossSellOpportunity: boolean; crossSellReason?: string } {
   const text = `${lead.name || ""} ${lead.company || ""} ${lead.notes || ""}`.toLowerCase();
   
   // Check if they're a clear MaatWork target (gym/pool/salon)
-  const maatworkIndustries = ["gimnasio", "gym", "fitness", "natatorio", "piscina", "pool", "salon", "estetica", "peluqueria", "spa", "boxeo", "crossfit", "yoga", "pilates", "deporte"];
-  const isMaatWorkTarget = maatworkIndustries.some(ind => text.includes(ind));
+  const isMaatWorkTarget = MAATWORK_INDUSTRIES.some(ind => text.includes(ind));
   
   // Check for financial advisory needs
-  let financialKeywordsFound: string[] = [];
-  for (const [category, keywords] of Object.entries(CROSSSELL_KEYWORDS)) {
-    financialKeywordsFound.push(...keywords.filter(kw => text.includes(kw)));
-  }
+  const financialKeywordsFound = FLATTENED_FINANCIAL_KEYWORDS.filter(kw => text.includes(kw));
   
   // Decision logic:
   // 1. If it's a MaatWork target -> PRIMARY = maatwork
@@ -121,21 +123,36 @@ export async function GET() {
       };
     });
     
-    // Stats
-    const stats = {
-      total: classified.length,
-      maatwork: classified.filter(l => l.primaryService === "maatwork").length,
-      cactuswealth: classified.filter(l => l.primaryService === "cactuswealth").length,
-      crossSellOpportunities: classified.filter(l => l.crossSellOpportunity).length,
-      byStage: {
-        new: classified.filter(l => l.stage === "new").length,
-        outreach: classified.filter(l => l.stage === "outreach").length,
-        qualified: classified.filter(l => l.stage === "qualified").length,
-        meeting: classified.filter(l => l.stage === "meeting").length,
-        proposal: classified.filter(l => l.stage === "proposal").length,
-        won: classified.filter(l => l.stage === "won").length,
+    // ⚡ Bolt: Consolidate multiple .filter().length passes into a single O(N) reduction pass
+    const stats = classified.reduce(
+      (acc: any, lead: any) => {
+        acc.total++;
+        if (lead.primaryService === "maatwork") acc.maatwork++;
+        if (lead.primaryService === "cactuswealth") acc.cactuswealth++;
+        if (lead.crossSellOpportunity) acc.crossSellOpportunities++;
+
+        const stage = lead.stage as keyof typeof acc.byStage;
+        if (acc.byStage[stage] !== undefined) {
+          acc.byStage[stage]++;
+        }
+
+        return acc;
+      },
+      {
+        total: 0,
+        maatwork: 0,
+        cactuswealth: 0,
+        crossSellOpportunities: 0,
+        byStage: {
+          new: 0,
+          outreach: 0,
+          qualified: 0,
+          meeting: 0,
+          proposal: 0,
+          won: 0,
+        },
       }
-    };
+    );
     
     return NextResponse.json({ leads: classified, stats });
   } catch (error) {
