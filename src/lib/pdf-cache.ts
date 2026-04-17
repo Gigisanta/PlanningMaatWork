@@ -1,5 +1,7 @@
+import { PlanData } from './generatePlan';
+
 interface CacheEntry {
-  data: any;
+  data: PlanData;
   html: string;
   timestamp: number;
 }
@@ -7,7 +9,7 @@ interface CacheEntry {
 const pdfCache = new Map<string, CacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000;
 
-export function getCachedPDF(data: any): string | null {
+export function getCachedPDF(data: PlanData): string | null {
   const key = JSON.stringify(data);
   const entry = pdfCache.get(key);
   
@@ -18,7 +20,7 @@ export function getCachedPDF(data: any): string | null {
   return null;
 }
 
-export function cachePDF(data: any, html: string): void {
+export function cachePDF(data: PlanData, html: string): void {
   const key = JSON.stringify(data);
   pdfCache.set(key, {
     data,
