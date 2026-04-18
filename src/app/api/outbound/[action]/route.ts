@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, writeFile, existsSync, mkdir } from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 
 const DATA_DIR = path.join("/tmp", "maatwork-leads");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
@@ -145,9 +146,11 @@ Gio`,
       }
     ];
 
+    // SECURITY ENHANCEMENT: Replaced Math.random() with crypto.randomUUID()
+    // to prevent predictable ID generation and potential IDOR vulnerabilities.
     for (const seq of sequences) {
       const log: OutreachLog = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+        id: randomUUID(),
         leadId,
         type: type as "email" | "whatsapp" | "telegram",
         subject: (seq as any).subject,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, readFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 
 // Simple JSON file storage - use /tmp for Vercel serverless compatibility
 const DATA_DIR = path.join("/tmp", "maatwork-leads");
@@ -63,8 +64,10 @@ async function saveLeads(data: { leads: Lead[]; followUps: FollowUp[] }) {
 }
 
 // Generate unique ID
+// SECURITY ENHANCEMENT: Replaced Math.random() with crypto.randomUUID()
+// to prevent predictable ID generation and potential IDOR vulnerabilities.
 function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return randomUUID();
 }
 
 // Calculate lead scores
