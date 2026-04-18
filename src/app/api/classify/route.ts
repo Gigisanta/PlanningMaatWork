@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, writeFile, existsSync, mkdir } from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 
 const DATA_DIR = path.join("/tmp", "maatwork-leads");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
@@ -49,8 +50,10 @@ async function saveData(data: { leads: Lead[]; outreachLogs: any[] }) {
   await writeFile(LEADS_FILE, JSON.stringify(data, null, 2));
 }
 
+// SECURITY ENHANCEMENT: Replaced Math.random() with crypto.randomUUID()
+// to prevent predictable ID generation and potential IDOR vulnerabilities.
 function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return randomUUID();
 }
 
 // Keywords that indicate cross-sell to Cactus Wealth
