@@ -193,8 +193,13 @@ export function PortfolioEditor({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="bg-[#F5F4F0] border-b border-[#E8E6E0] flex-shrink-0 px-4 py-3">
-        <div className="flex items-center justify-between relative">
-          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#E8E6E0] -translate-y-1/2 z-0" />
+        <div className="flex items-center justify-between relative px-2">
+          <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-[#E8E6E0] -translate-y-1/2 z-0">
+            <div
+              className="absolute top-0 left-0 h-full bg-[#3D7A5F] transition-all duration-300 ease-in-out"
+              style={{ width: `${(wizardStep / (steps.length - 1)) * 100}%` }}
+            />
+          </div>
           {steps.map((step, idx) => (
             <button
               key={step.id}
