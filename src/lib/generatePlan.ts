@@ -6,6 +6,7 @@ import {
   MetaVida,
   ConfigurableLink,
 } from '@/stores/portfolio-store';
+import { safeUrl, escapeHtml } from './security';
 
 // Paleta de colores CACTUS
 const COLORS = {
@@ -100,9 +101,9 @@ export function generatePlanHTML(data: PlanData): string {
 
   // Platform links
   const platformLinksHTML = (data.platformLinks || []).map(link => 
-    `<a href="${link.url}" target="_blank" class="account-link">
+    `<a href="${escapeHtml(safeUrl(link.url))}" target="_blank" class="account-link">
       <span class="link-icon">🔗</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`
   ).join('\n    ');
 
@@ -112,9 +113,9 @@ export function generatePlanHTML(data: PlanData): string {
     const isWhatsapp = link.icon === 'whatsapp' || link.name.toLowerCase().includes('whatsapp');
     const className = isInstagram ? 'footer-link instagram' : (isWhatsapp ? 'footer-link whatsapp' : 'footer-link');
     const icon = isInstagram ? '📸' : (isWhatsapp ? '💬' : '🔗');
-    return `<a href="${link.url}" target="_blank" class="${className}">
+    return `<a href="${escapeHtml(safeUrl(link.url))}" target="_blank" class="${className}">
       <span class="icon">${icon}</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`;
   }).join('\n    ');
 
