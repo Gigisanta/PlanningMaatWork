@@ -204,7 +204,7 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
     <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in slide-in-from-bottom duration-300">
       <div className="p-4 border-b border-[#E8E6E0] flex items-center justify-between bg-[#F5F4F0]">
         <h2 className="text-lg font-bold text-[var(--primary)]">Configuración</h2>
-        <Button variant="ghost" size="icon" aria-label="Cerrar configuración" onClick={onClose}><X className="w-6 h-6" /></Button>
+        <Button variant="ghost" size="icon" aria-label="Cerrar configuración" title="Cerrar configuración" onClick={onClose}><X className="w-6 h-6" /></Button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <div className="flex items-center justify-between p-4 bg-[#F5F4F0] rounded-2xl">
