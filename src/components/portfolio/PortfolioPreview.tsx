@@ -28,6 +28,16 @@ interface PortfolioPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
 }
 
+// ⚡ Bolt: Extracted and memoized iframe to prevent heavy re-renders when parent callbacks change
+const MemoizedIFrame = React.memo(({ srcDoc }: { srcDoc: string }) => (
+  <iframe
+    srcDoc={srcDoc}
+    title="Preview"
+    className="w-full h-full bg-[#FAFAF8]"
+    sandbox="allow-same-origin allow-popups"
+  />
+));
+
 // ⚡ Bolt: Memoize the heavy PortfolioPreview (contains iframe) to prevent it from re-rendering on every form keystroke
 export const PortfolioPreview = React.memo(function PortfolioPreview({
   isMobile,
@@ -111,12 +121,7 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
             {generatedHTML ? (
               viewMode === 'preview' ? (
                 <div className="bg-white rounded-2xl shadow-xl border border-[#E8E6E0] overflow-hidden h-full min-h-[800px]">
-                  <iframe
-                    srcDoc={editableHTML}
-                    title="Preview"
-                    className="w-full h-full bg-[#FAFAF8]"
-                    sandbox="allow-same-origin allow-popups"
-                  />
+                  <MemoizedIFrame srcDoc={editableHTML} />
                 </div>
               ) : (
                 <Textarea
