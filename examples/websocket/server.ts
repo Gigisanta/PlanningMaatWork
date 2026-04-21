@@ -1,5 +1,6 @@
 import { createServer } from 'http'
 import { Server } from 'socket.io'
+import { randomUUID } from 'crypto'
 
 const httpServer = createServer()
 const io = new Server(httpServer, {
@@ -28,7 +29,7 @@ interface Message {
 
 const users = new Map<string, User>()
 
-const generateMessageId = () => Math.random().toString(36).substr(2, 9)
+const generateMessageId = () => randomUUID()
 
 const createSystemMessage = (content: string): Message => ({
   id: generateMessageId(),
