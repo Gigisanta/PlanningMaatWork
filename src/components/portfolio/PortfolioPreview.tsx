@@ -58,6 +58,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label="Ver vista previa"
+                title="Ver vista previa"
                 onClick={() => setViewMode('preview')}
                 className={`${isMobile ? 'h-10 text-sm px-3' : 'h-7 text-xs'} rounded-lg ${viewMode === 'preview' ? 'bg-white shadow-sm' : ''}`}
               >
@@ -66,6 +68,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label="Editar código fuente HTML"
+                title="Editar código fuente HTML"
                 onClick={() => setViewMode('edit')}
                 className={`${isMobile ? 'h-10 text-sm px-3' : 'h-7 text-xs'} rounded-lg ${viewMode === 'edit' ? 'bg-white shadow-sm' : ''}`}
               >
@@ -78,6 +82,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Copiar HTML al portapapeles"
+                title="Copiar HTML al portapapeles"
                 onClick={handleCopyToClipboard}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary-light)] text-[var(--primary-light)] rounded-xl hover:bg-[#5A9E7F]/5`}
               >
@@ -86,6 +92,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Descargar archivo HTML"
+                title="Descargar archivo HTML"
                 onClick={handleDownloadHTML}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--accent)] text-[var(--accent)] rounded-xl hover:bg-[var(--accent)]/5`}
               >
@@ -94,6 +102,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Exportar a formato PDF"
+                title="Exportar a formato PDF"
                 onClick={handleDownloadPDF}
                 disabled={isDownloadingPdf}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary)] text-[var(--primary)] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary-light)]`}
