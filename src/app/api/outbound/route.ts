@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, writeFile, existsSync, mkdir } from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 
 const DATA_DIR = path.join("/tmp", "maatwork-leads");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
@@ -64,7 +65,7 @@ async function saveData(data: { leads: Lead[]; outreachLogs: OutreachLog[] }) {
 }
 
 function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return randomUUID();
 }
 
 // GET /api/outbound - Get outbound pipeline stats
