@@ -100,18 +100,33 @@ function calculateScores(data: { name: string; email: string; company?: string }
 export async function GET() {
   try {
     const data = await getLeads();
+
+    // ⚡ Bolt: Consolidate stats generation into a single reduce pass
+    const statsAccumulator = data.leads.reduce(
+      (acc, l) => {
+        if (l.stage === "new") acc.new++;
+        if (l.stage === "contacted") acc.contacted++;
+        if (l.stage === "qualified") acc.qualified++;
+        acc.totalScoreSum += l.totalScore || 0;
+        return acc;
+      },
+      { new: 0, contacted: 0, qualified: 0, totalScoreSum: 0 }
+    );
+
+    const stats = {
+      total: data.leads.length,
+      new: statsAccumulator.new,
+      contacted: statsAccumulator.contacted,
+      qualified: statsAccumulator.qualified,
+      avgScore: data.leads.length > 0
+        ? Math.round((statsAccumulator.totalScoreSum / data.leads.length) * 10) / 10
+        : 0,
+    };
+
     return NextResponse.json({
       leads: data.leads,
       followUps: data.followUps,
-      stats: {
-        total: data.leads.length,
-        new: data.leads.filter(l => l.stage === "new").length,
-        contacted: data.leads.filter(l => l.stage === "contacted").length,
-        qualified: data.leads.filter(l => l.stage === "qualified").length,
-        avgScore: data.leads.length > 0 
-          ? Math.round(data.leads.reduce((sum, l) => sum + (l.totalScore || 0), 0) / data.leads.length * 10) / 10
-          : 0,
-      }
+      stats
     });
   } catch (error) {
     console.error("Error fetching leads:", error);
