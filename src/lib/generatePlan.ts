@@ -1451,34 +1451,53 @@ export function generatePlanHTML(data: PlanData): string {
 
       <div class="resumen-cartera">
         <h4>📈 Resumen de tu Cartera</h4>
-        <div class="resumen-grid">
-          <div class="resumen-item">
-            <div class="label">Exposición USD</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'USD').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+        ${(() => {
+          // Optimization: Consolidate multiple O(N) array passes (filter + reduce) into a single O(N) reduce
+          // This avoids scanning data.instruments 5 separate times during PDF generation,
+          // saving memory allocations from filter() and reducing computation time from O(5N) to O(N).
+          const sums = (data.instruments || []).reduce(
+            (acc, inst) => {
+              if (inst.moneda === 'USD') acc.usd += inst.asignacion;
+              if (inst.moneda === 'ARS') acc.ars += inst.asignacion;
+              if (inst.moneda === 'Mix') acc.mix += inst.asignacion;
+              if (inst.tipo.includes('Renta')) acc.rentaFija += inst.asignacion;
+              if (inst.tipo.includes('Equity')) acc.rentaVariable += inst.asignacion;
+              return acc;
+            },
+            { usd: 0, ars: 0, mix: 0, rentaFija: 0, rentaVariable: 0 }
+          );
+
+          return `
+          <div class="resumen-grid">
+            <div class="resumen-item">
+              <div class="label">Exposición USD</div>
+              <div class="value">${sums.usd}%</div>
+            </div>
+            <div class="resumen-item">
+              <div class="label">Exposición ARS</div>
+              <div class="value">${sums.ars}%</div>
+            </div>
+            <div class="resumen-item">
+              <div class="label">Mixto</div>
+              <div class="value">${sums.mix}%</div>
+            </div>
           </div>
-          <div class="resumen-item">
-            <div class="label">Exposición ARS</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'ARS').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+          <div class="resumen-grid" style="margin-top: 16px;">
+            <div class="resumen-item">
+              <div class="label">Renta Fija</div>
+              <div class="value">${sums.rentaFija}%</div>
+            </div>
+            <div class="resumen-item">
+              <div class="label">Renta Variable</div>
+              <div class="value">${sums.rentaVariable}%</div>
+            </div>
+            <div class="resumen-item">
+              <div class="label">Liquidez</div>
+              <div class="value">24-48hs</div>
+            </div>
           </div>
-          <div class="resumen-item">
-            <div class="label">Mixto</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'Mix').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
-          </div>
-        </div>
-        <div class="resumen-grid" style="margin-top: 16px;">
-          <div class="resumen-item">
-            <div class="label">Renta Fija</div>
-            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Renta')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
-          </div>
-          <div class="resumen-item">
-            <div class="label">Renta Variable</div>
-            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Equity')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
-          </div>
-          <div class="resumen-item">
-            <div class="label">Liquidez</div>
-            <div class="value">24-48hs</div>
-          </div>
-        </div>
+          `;
+        })()}
       </div>
     </div>
 
