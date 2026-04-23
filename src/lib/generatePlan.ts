@@ -1,3 +1,4 @@
+import { escapeHtml, safeUrl } from './security';
 import {
   AsignacionEstrategica,
   Instrument,
@@ -100,9 +101,9 @@ export function generatePlanHTML(data: PlanData): string {
 
   // Platform links
   const platformLinksHTML = (data.platformLinks || []).map(link => 
-    `<a href="${link.url}" target="_blank" class="account-link">
+    `<a href="${escapeHtml(safeUrl(link.url))}" target="_blank" class="account-link">
       <span class="link-icon">🔗</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`
   ).join('\n    ');
 
@@ -112,9 +113,9 @@ export function generatePlanHTML(data: PlanData): string {
     const isWhatsapp = link.icon === 'whatsapp' || link.name.toLowerCase().includes('whatsapp');
     const className = isInstagram ? 'footer-link instagram' : (isWhatsapp ? 'footer-link whatsapp' : 'footer-link');
     const icon = isInstagram ? '📸' : (isWhatsapp ? '💬' : '🔗');
-    return `<a href="${link.url}" target="_blank" class="${className}">
+    return `<a href="${escapeHtml(safeUrl(link.url))}" target="_blank" class="${className}">
       <span class="icon">${icon}</span>
-      ${link.name}
+      ${escapeHtml(link.name)}
     </a>`;
   }).join('\n    ');
 
@@ -137,7 +138,7 @@ export function generatePlanHTML(data: PlanData): string {
       <span class="icon">💬</span>
       <p>
         <strong>Te gustó este plan?</strong> Si tenés amigos o familiares que podrían beneficiarse de una planificación financiera, 
-        no dudes en recomendar a <strong>${asesorNombre}</strong>. Las referencias son la mejor forma de agradecer!
+        no dudes en recomendar a <strong>${escapeHtml(asesorNombre)}</strong>. Las referencias son la mejor forma de agradecer!
       </p>
     </div>` : '';
 
@@ -146,7 +147,7 @@ export function generatePlanHTML(data: PlanData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plan Financiero - ${data.profesion}</title>
+  <title>Plan Financiero - ${escapeHtml(data.profesion)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1252,7 +1253,7 @@ export function generatePlanHTML(data: PlanData): string {
     <div class="header">
       <div class="header-content">
         <h1>Tu Plan Financiero</h1>
-        <div class="subtitle">${data.profesion} | ${data.edad} años | Perfil ${data.perfilRiesgo}</div>
+        <div class="subtitle">${escapeHtml(data.profesion)} | ${escapeHtml(String(data.edad))} años | Perfil ${escapeHtml(data.perfilRiesgo)}</div>
         <div class="meta">Generado el ${fecha}</div>
       </div>
     </div>
@@ -1293,7 +1294,7 @@ export function generatePlanHTML(data: PlanData): string {
     <div class="client-cards">
       <div class="client-card">
         <div class="label">Edad</div>
-        <div class="value">${data.edad} años</div>
+        <div class="value">${escapeHtml(String(data.edad))} años</div>
       </div>
             <div class="client-card">
         <div class="label">Aporte Inicial</div>
@@ -1325,7 +1326,7 @@ export function generatePlanHTML(data: PlanData): string {
 
       <div class="objetivo-box">
         <h3>🎯 Tu Objetivo</h3>
-        <p class="objetivo-text">${data.objetivo}</p>
+        <p class="objetivo-text">${escapeHtml(data.objetivo)}</p>
         <div class="objetivo-meta">
           ${(data.aporteInicial && data.aporteInicial > 0) ? `
           <div class="objetivo-meta-item">
@@ -1348,8 +1349,8 @@ export function generatePlanHTML(data: PlanData): string {
       </div>
 
       <div class="info-box">
-        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${data.perfilRiesgo}</strong>, 
-        diseñamos una cartera que balancea crecimiento y protección. Tu edad de ${data.edad} años 
+        💡 <strong>Por qué esta estrategia:</strong> Basado en tu perfil <strong>${escapeHtml(data.perfilRiesgo)}</strong>,
+        diseñamos una cartera que balancea crecimiento y protección. Tu edad de ${escapeHtml(String(data.edad))} años
         te permite aprovechar el poder del interés compuesto a largo plazo.
       </div>
 
@@ -1596,7 +1597,7 @@ export function generatePlanHTML(data: PlanData): string {
       <div class="consejo-box">
         <h4>💡 Consejo de tu Asesor</h4>
         <p>${data.consejoFinal || data.usarConsejoIA ? `Empezar a invertir joven es la mejor decisión financiera que podés tomar. No busques la perfección, buscá la consistencia. Con tiempo y disciplina, incluso aportes pequeños pueden crecer significativamente.` : ''}
-        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${data.observaciones}</p>` : ''}</p>
+        ${data.observaciones ? `<p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Notas adicionales: ${escapeHtml(data.observaciones)}</p>` : ''}</p>
         <div class="consejo-footer">Recordá revisar tu plan cada 6 meses para ajustarlo según tus necesidades cambiantes.</div>
       </div>
     </div>
@@ -1612,7 +1613,7 @@ export function generatePlanHTML(data: PlanData): string {
       <div class="recommend-box" style="margin-bottom: 24px;">
         <span class="icon">🌟</span>
         <p>
-          Si este plan te pareció útil, <strong>compartilo</strong> Recomendá a <strong>${asesorNombre}</strong> con amigos y familiares. 
+          Si este plan te pareció útil, <strong>compartilo</strong> Recomendá a <strong>${escapeHtml(asesorNombre)}</strong> con amigos y familiares.
           Las referencias nos ayudan a seguir creciendo y llevando planificación financiera a más personas.
         </p>
       </div>` : ''}
@@ -1623,7 +1624,7 @@ export function generatePlanHTML(data: PlanData): string {
       <div class="footer-disclaimer">
         <p>Plan financiero generado el ${fecha}</p>
         <p>Este documento es orientativo y no constituye asesoramiento financiero personalizado. Consultá con un profesional antes de tomar decisiones de inversión.</p>
-        <p style="margin-top: 12px;">${webUrl}</p>
+        <p style="margin-top: 12px;">${escapeHtml(webUrl)}</p>
         <p style="margin-top: 24px; font-size: 10px; font-weight: bold; color: #A0ACA5;">Powered by MaatWork</p>
       </div>
     </div>
@@ -1634,7 +1635,7 @@ export function generatePlanHTML(data: PlanData): string {
   <div style="page-break-before: always;" class="html2pdf__page-break"></div>
   <div class="page-container" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
     <div class="header" style="margin-bottom: 40px; text-align: center;">
-      ${data.logoUrl ? `<img src="${data.logoUrl}" alt="Logo" style="max-height: 60px; margin: 0 auto; display: block; margin-bottom: 15px;" />` : `<div class="header-logo" style="justify-content: center; margin-bottom: 10px; font-weight: bold; font-size: 24px; color: var(--primary-dark);">MaatWork</div>`}
+      ${data.logoUrl ? `<img src="${escapeHtml(safeUrl(data.logoUrl))}" alt="Logo" style="max-height: 60px; margin: 0 auto; display: block; margin-bottom: 15px;" />` : `<div class="header-logo" style="justify-content: center; margin-bottom: 10px; font-weight: bold; font-size: 24px; color: var(--primary-dark);">MaatWork</div>`}
       <div class="header-title" style="text-align: center;">Model Portfolios</div>
     </div>
     <div class="content" style="flex: 1; display: flex; align-items: center; justify-content: center;">
