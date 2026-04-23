@@ -302,7 +302,8 @@ export default function Home() {
   const previewRef = useRef<HTMLDivElement>(null as any)
   const fileInputRef = useRef<HTMLInputElement>(null as any)
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ⚡ Bolt: Memoize handleFileUpload to prevent re-renders when passed down to PortfolioEditor
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
@@ -324,7 +325,7 @@ export default function Home() {
     );
 
     setAttachedFiles(prev => [...prev, ...newFiles])
-  }
+  }, [])
   // ⚡ Bolt: Consolidated 3 separate array passes (2x filter + 3x reduce) into a single O(N) reduce pass
   // Reduces unnecessary iterations over the instruments array when calculating portfolio exposures.
   const { exposicionUSD, exposicionARS, totalAsignacion } = useMemo(() => {
