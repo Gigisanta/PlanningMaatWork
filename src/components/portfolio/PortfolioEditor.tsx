@@ -417,7 +417,7 @@ export function PortfolioEditor({
                     <span className="text-[10px] text-[#7A8B80]">{instruments.length} activos seleccionados</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => {
+                  <Button variant="ghost" size="sm" aria-label="Sugerir instrumentos basado en el perfil de riesgo" onClick={() => {
                       let suggested = [];
                       if (perfilRiesgo === "Conservador") suggested = ["Money Market", "Renta Fija USD", "Renta Fija USD"];
                       else if (perfilRiesgo === "Moderado") suggested = ["Renta Fija USD", "Equity Internacional", "Renta Fija USD"];
@@ -433,7 +433,7 @@ export function PortfolioEditor({
                       }));
                       setInstruments(normalizeWeights(newInstruments, 'asignacion'));
                   }} className="h-8 text-[10px] font-bold text-[var(--primary-light)] uppercase hover:bg-white flex items-center gap-1"><Sparkles className="w-3 h-3" /> Sugerir</Button>
-                  <Button variant="ghost" size="sm" onClick={() => { const perItem = Math.floor(100 / (instruments.length || 1)); const base = instruments.map(inst => ({ ...inst, asignacion: perItem, locked: false })); setInstruments(normalizeWeights(base, 'asignacion')); }} className="h-8 text-[10px] font-bold text-[#7A8B80] uppercase hover:bg-white">Igualar</Button>
+                  <Button variant="ghost" size="sm" aria-label="Igualar asignación de instrumentos" onClick={() => { const perItem = Math.floor(100 / (instruments.length || 1)); const base = instruments.map(inst => ({ ...inst, asignacion: perItem, locked: false })); setInstruments(normalizeWeights(base, 'asignacion')); }} className="h-8 text-[10px] font-bold text-[#7A8B80] uppercase hover:bg-white">Igualar</Button>
                   <Button variant="outline" size="sm" onClick={() => setInstruments((prev: any) => { const currentTotal = prev.reduce((s: any, i: any) => s + i.asignacion, 0); const remaining = Math.max(0, 100 - currentTotal); return [...prev, { nombre: '', tipo: '', asignacion: remaining, moneda: 'USD', objetivo: '', locked: false }]; })} className="h-8 text-[10px] font-bold text-[var(--primary-light)] uppercase border-[var(--primary-light)]/20 hover:bg-[var(--primary-light)] hover:text-white transition-all"><Plus className="w-3 h-3 mr-1" />Agregar</Button>
                 </div>
               </div>
