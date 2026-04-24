@@ -736,6 +736,8 @@ export default function Home() {
                   <Button
                     onClick={handleGeneratePlan}
                     disabled={isLoading}
+                    aria-busy={isLoading}
+                    aria-label={isLoading ? "Generando documento PDF" : "Finalizar y Generar PDF"}
                     className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-12 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
                   >
                     {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar y Generar PDF</>}
