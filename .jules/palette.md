@@ -1,7 +1,3 @@
-## 2026-03-04 - ARIA labels in Spanish for localized apps
-**Learning:** Found multiple icon-only buttons (like Trash, Lock/Unlock, Close X) missing ARIA labels in `PortfolioEditor.tsx`. Since the app's UI is strictly localized in Spanish, the standard ARIA labels also need to be translated.
-**Action:** Always provide translated `aria-label` attributes for icon-only buttons (e.g., "Eliminar documento" instead of "Delete document") matching the app's primary language. Also add `aria-current="step"` and descriptive `aria-label` to wizard navigation steps for better screen reader support.
-
-## 2025-03-10 - Accessibility gaps in icon-only buttons
-**Learning:** Found a recurring pattern in the app where icon-only interactive elements (like Settings and Toggle buttons on list items) lack `aria-label` or `title` attributes. Without these attributes, screen reader users and those navigating visually cannot easily infer the button's purpose or action state.
-**Action:** Ensure that anytime an icon-only button is implemented or updated, both an `aria-label` for assistive technologies and a `title` attribute for native tooltips are provided, and that the language specifically describes the resulting action or context.
+## 2025-04-25 - Explicit Checkbox Label Associations and Accessibility
+**Learning:** Radix UI or custom checkbox implementations (like those in `PortfolioEditor` and `page.tsx`) often omit explicit `id` and `htmlFor` bindings when rendering standard `<input type="checkbox">` alongside standard `<Label>` components. This breaks the ability for users to toggle the checkbox by clicking the much larger label text, harming both general UX and screen reader navigation. Furthermore, submit buttons missing `aria-busy` fail to convey loading states during asynchronous PDF generations.
+**Action:** Always verify that `<input type="checkbox">` and `<Label>` pairs are strictly bound via matching `id` and `htmlFor` attributes. Apply `cursor-pointer` to both to communicate interactivity visually. Add `aria-busy={isLoading}` alongside `disabled={isLoading}` for all critical submit buttons.
