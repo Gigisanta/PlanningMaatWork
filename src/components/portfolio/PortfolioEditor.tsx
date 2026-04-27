@@ -115,7 +115,10 @@ interface PortfolioEditorProps {
   formatNumber: (n: number) => string
 }
 
-export function PortfolioEditor({
+// ⚡ Bolt: Wrap the large PortfolioEditor component in React.memo to prevent unnecessary re-renders.
+// When settings outside the editor (like asesorNombre or mobilePanel in page.tsx) change,
+// this prevents the entire 500+ line form and its charts from pointlessly re-rendering.
+export const PortfolioEditor = React.memo(function PortfolioEditor({
   wizardStep, setWizardStep,
   ingresosMensuales, setIngresosMensuales,
   gastosMensuales, setGastosMensuales,
@@ -612,4 +615,4 @@ export function PortfolioEditor({
       </div>
     </div>
   )
-}
+});
