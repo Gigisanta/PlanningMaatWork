@@ -147,7 +147,7 @@ Gio`,
 
     for (const seq of sequences) {
       const log: OutreachLog = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         leadId,
         type: type as "email" | "whatsapp" | "telegram",
         subject: (seq as any).subject,
