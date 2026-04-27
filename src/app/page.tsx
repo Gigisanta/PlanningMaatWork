@@ -209,7 +209,7 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <div className="flex items-center justify-between p-4 bg-[#F5F4F0] rounded-2xl">
           <div><p className="font-bold text-[#1F2D26]">Sesión</p><p className="text-xs text-[#7A8B80]">Limpia todos los campos</p></div>
-          <Button variant="outline" onClick={onReset} className="text-red-500 border-red-100 hover:bg-red-50">Borrar Todo</Button>
+          <Button variant="outline" onClick={onReset} aria-label="Borrar toda la configuración" className="text-red-500 border-red-100 hover:bg-red-50">Borrar Todo</Button>
         </div>
         <div className="space-y-4">
           <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Tu Nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} className="h-12 text-base rounded-xl" /></div>
@@ -217,7 +217,7 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
           <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-base rounded-xl min-h-[80px] p-3" /></div>
           <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Plataformas de Inversión</Label><div className="space-y-2">{platformLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-1 rounded-xl" placeholder="Nombre" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
           <div><Label className="text-sm font-medium text-[var(--primary-light)] mb-2 block">Redes Sociales</Label><div className="space-y-2">{socialLinks.map((link: any, i: number) => (<div key={i} className="flex gap-2"><div className="flex items-center gap-2 flex-1">{link.icon === 'instagram' ? <Instagram className="w-5 h-5 text-[#E1306C] flex-shrink-0" /> : <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-11 text-base rounded-xl" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-11 text-base flex-[2] rounded-xl" placeholder="URL" /></div>))}</div></div>
-          <div className="flex items-center gap-3 py-2"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="w-5 h-5 rounded text-[var(--primary-light)] accent-[#3D7A5F]" /><Label className="text-base">Incluir recomendaciones</Label></div>
+          <div className="flex items-center gap-3 py-2"><input id="incluir-recomendaciones-desktop" type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="w-5 h-5 rounded text-[var(--primary-light)] accent-[#3D7A5F] cursor-pointer" /><Label htmlFor="incluir-recomendaciones-desktop" className="text-base cursor-pointer">Incluir recomendaciones</Label></div>
           <div className="pt-4 border-t border-[#E8E6E0]">
             <Label className="text-sm font-medium text-[var(--primary-light)] mb-4 block">Personalización de Marca</Label>
             <div className="space-y-4">
@@ -227,7 +227,7 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
             </div>
           </div>
         </div>
-        <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0]"><div className="flex items-center justify-center py-2 px-4 bg-[#E8F5E9] text-[var(--primary)] rounded-xl border border-[#C8E6C9] animate-in fade-in zoom-in duration-300"><Check className="w-5 h-5 mr-2" /><span className="font-medium">Cambios guardados automáticamente</span></div><Button onClick={onClose} className="w-full h-12 mt-4 bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl text-base">Listo</Button></div>
+        <div className="p-4 border-t border-[#E8E6E0] bg-[#F5F4F0]"><div className="flex items-center justify-center py-2 px-4 bg-[#E8F5E9] text-[var(--primary)] rounded-xl border border-[#C8E6C9] animate-in fade-in zoom-in duration-300"><Check className="w-5 h-5 mr-2" /><span className="font-medium">Cambios guardados automáticamente</span></div><Button onClick={onClose} aria-label="Cerrar confirmación" className="w-full h-12 mt-4 bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl text-base">Listo</Button></div>
       </div>
     </div>
   )
@@ -640,7 +640,7 @@ export default function Home() {
 
           <div className="flex items-center gap-2 md:gap-4">
             <Dialog open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
-                <DialogTrigger asChild><Button variant="outline" size="sm" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 px-3"><FolderOpen className="w-4 h-4 mr-2" />Biblioteca</Button></DialogTrigger>
+                <DialogTrigger asChild><Button variant="outline" size="sm" aria-label="Abrir biblioteca" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 px-3"><FolderOpen className="w-4 h-4 mr-2" />Biblioteca</Button></DialogTrigger>
                 <DialogContent className="max-w-2xl bg-white p-0 overflow-hidden rounded-2xl">
                     <div className="flex flex-col h-[600px]">
                         <div className="p-6 border-b border-[#E8E6E0] bg-[#F5F4F0]">
@@ -687,7 +687,7 @@ export default function Home() {
                             <Label className="text-[10px] font-bold uppercase mb-2 block text-[#7A8B80]">Guardar configuración actual</Label>
                             <div className="flex gap-2">
                                 <Input value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="Ej: Juan Perez - Moderado" className="h-10 text-sm rounded-xl"/>
-                                <Button onClick={handleSaveToLibrary} className="bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl px-6 font-bold shadow-lg shadow-[#2D5A4A]/20 transition-all active:scale-95"><Save className="w-4 h-4 mr-2"/>Guardar</Button>
+                                <Button onClick={handleSaveToLibrary} aria-label="Guardar portafolio en biblioteca" className="bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-xl px-6 font-bold shadow-lg shadow-[#2D5A4A]/20 transition-all active:scale-95"><Save className="w-4 h-4 mr-2"/>Guardar</Button>
                             </div>
                         </div>
                     </div>
@@ -703,13 +703,13 @@ export default function Home() {
                 <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label="Abrir configuración" className="bg-white/10 border-white/15 text-white hover:bg-white/20 rounded-lg h-9 w-9"><Settings className="w-4 h-4" /></Button></PopoverTrigger>
                 <PopoverContent className="w-80 bg-white border-[#E8E6E0] shadow-xl rounded-xl" align="end">
                   <div className="space-y-3 p-1">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} className="text-[var(--accent)] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
+                    <div className="flex items-center justify-between pb-2 border-b border-[#F0EEE8]"><span className="font-medium text-sm">Configuracion Asesor</span><Button variant="ghost" size="sm" onClick={handleResetConfig} aria-label="Restaurar configuración" className="text-[var(--accent)] text-xs h-6 px-2"><RotateCcw className="w-3 h-3 mr-1" />Restaurar</Button></div>
                     <div><Label className="text-xs text-[var(--primary-light)]">Tu nombre</Label><Input value={asesorNombre} onChange={(e) => setAsesorNombre(e.target.value)} placeholder="Juan Perez" className="h-8 text-sm mt-1" /></div>
                     <div><Label className="text-xs text-[var(--primary-light)]">Teléfono WhatsApp</Label><Input value={asesorTelefono} onChange={(e) => setAsesorTelefono(e.target.value)} placeholder="+54911..." className="h-8 text-sm mt-1" /></div>
                     <div><Label className="text-xs text-[var(--primary-light)]">Mensaje Recomendar</Label><Textarea value={asesorMensajePredefinido} onChange={(e) => setAsesorMensajePredefinido(e.target.value)} className="text-sm mt-1 min-h-[60px] p-2" /></div>
                     <div><Label className="text-xs text-[var(--primary-light)]">Plataformas</Label>{platformLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><Input value={link.name} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], name: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs w-24" /><Input value={link.url} onChange={(e) => { const l = [...platformLinks]; l[i] = { ...l[i], url: e.target.value }; setPlatformLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
                     <div><Label className="text-xs text-[var(--primary-light)]">Redes</Label>{socialLinks.map((link, i) => (<div key={i} className="flex gap-1 mt-1"><div className="flex items-center gap-1 w-24">{link.icon === 'instagram' ? <Instagram className="w-3 h-3 text-[#E1306C]" /> : <MessageCircle className="w-3 h-3 text-[#25D366]" />}<Input value={link.name} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], name: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div><Input value={link.url} onChange={(e) => { const l = [...socialLinks]; l[i] = { ...l[i], url: e.target.value }; setSocialLinks(l) }} className="h-7 text-xs flex-1" /></div>))}</div>
-                    <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]"><input type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[var(--primary-light)]" /><Label className="text-xs">Incluir recomendaciones</Label></div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#F0EEE8]"><input id="incluir-recomendaciones-mobile" type="checkbox" checked={asesorRecomendacion} onChange={(e) => setAsesorRecomendacion(e.target.checked)} className="rounded text-[var(--primary-light)] cursor-pointer" /><Label htmlFor="incluir-recomendaciones-mobile" className="text-xs cursor-pointer">Incluir recomendaciones</Label></div>
                     <div className="pt-2 border-t border-[#F0EEE8] mt-2">
                       <span className="font-medium text-xs text-[#1F2D26] mb-2 block">Personalización de Marca</span>
                       <div className="space-y-2">
@@ -736,6 +736,8 @@ export default function Home() {
                   <Button
                     onClick={handleGeneratePlan}
                     disabled={isLoading}
+                    aria-busy={isLoading}
+                    aria-label={isLoading ? "Generando PDF, por favor espere..." : "Finalizar y Generar PDF"}
                     className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-12 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
                   >
                     {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar y Generar PDF</>}
@@ -753,7 +755,7 @@ export default function Home() {
             <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioEditor {...editorProps} />
               <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
+                <Button onClick={handleGeneratePlan} disabled={isLoading} aria-busy={isLoading} aria-label={isLoading ? "Generando plan, por favor espere..." : "Finalizar Plan"} className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
                   {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar Plan</>}
                 </Button>
               </div>
@@ -768,11 +770,11 @@ export default function Home() {
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom h-[calc(64px+env(safe-area-inset-bottom,0px))]">
           <div className="flex h-16">
-            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+            <button onClick={() => setMobilePanel('form')} aria-label="Ver formulario" aria-pressed={mobilePanel === 'form'} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'form' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <ClipboardList className="w-6 h-6" /><span className="text-xs font-medium">Formulario</span>
             </button>
-            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+            <button onClick={() => setMobilePanel('preview')} aria-label="Ver vista previa" aria-pressed={mobilePanel === 'preview'} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <Eye className="w-6 h-6" /><span className="text-xs font-medium">Preview</span>
               {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[var(--primary-light)] rounded-full animate-pulse" />}
