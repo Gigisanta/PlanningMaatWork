@@ -79,6 +79,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 variant="outline"
                 size="sm"
                 onClick={handleCopyToClipboard}
+                aria-label={copied ? "Copiado al portapapeles" : "Copiar HTML"}
+                aria-live="polite"
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary-light)] text-[var(--primary-light)] rounded-xl hover:bg-[#5A9E7F]/5`}
               >
                 {copied ? <><Check className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Listo</> : <><Copy className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Copiar</>}
