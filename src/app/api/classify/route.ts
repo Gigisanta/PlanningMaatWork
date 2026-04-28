@@ -60,18 +60,20 @@ const CROSSSELL_KEYWORDS = {
   goals: ["invertir", "ahorrar", "jubilación", "retiro", "futuro", "patrimonio", "capital"]
 };
 
+// ⚡ Bolt: Move static arrays and pre-computed values to module scope
+// to prevent redundant heap allocations on every function call.
+const MAATWORK_INDUSTRIES = ["gimnasio", "gym", "fitness", "natatorio", "piscina", "pool", "salon", "estetica", "peluqueria", "spa", "boxeo", "crossfit", "yoga", "pilates", "deporte"];
+const ALL_FINANCIAL_KEYWORDS = Object.values(CROSSSELL_KEYWORDS).flat();
+
 function classifyLead(lead: Partial<Lead>): { primaryService: string; crossSellOpportunity: boolean; crossSellReason?: string } {
   const text = `${lead.name || ""} ${lead.company || ""} ${lead.notes || ""}`.toLowerCase();
   
   // Check if they're a clear MaatWork target (gym/pool/salon)
-  const maatworkIndustries = ["gimnasio", "gym", "fitness", "natatorio", "piscina", "pool", "salon", "estetica", "peluqueria", "spa", "boxeo", "crossfit", "yoga", "pilates", "deporte"];
-  const isMaatWorkTarget = maatworkIndustries.some(ind => text.includes(ind));
+  const isMaatWorkTarget = MAATWORK_INDUSTRIES.some(ind => text.includes(ind));
   
+  // ⚡ Bolt: Replace Object.entries loop with a direct filter over pre-computed flattened array
   // Check for financial advisory needs
-  let financialKeywordsFound: string[] = [];
-  for (const [category, keywords] of Object.entries(CROSSSELL_KEYWORDS)) {
-    financialKeywordsFound.push(...keywords.filter(kw => text.includes(kw)));
-  }
+  const financialKeywordsFound = ALL_FINANCIAL_KEYWORDS.filter(kw => text.includes(kw));
   
   // Decision logic:
   // 1. If it's a MaatWork target -> PRIMARY = maatwork
