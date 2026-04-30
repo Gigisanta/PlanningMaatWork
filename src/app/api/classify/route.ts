@@ -121,20 +121,30 @@ export async function GET() {
       };
     });
     
+    // ⚡ Bolt: Replace multiple filter passes with a single reduce for performance (O(N) instead of O(9N))
+    const statsData = classified.reduce(
+      (acc, lead) => {
+        if (lead.primaryService === "maatwork") acc.maatwork++;
+        if (lead.primaryService === "cactuswealth") acc.cactuswealth++;
+        if (lead.crossSellOpportunity) acc.crossSellOpportunities++;
+        if (lead.stage in acc.byStage) acc.byStage[lead.stage as keyof typeof acc.byStage]++;
+        return acc;
+      },
+      {
+        maatwork: 0,
+        cactuswealth: 0,
+        crossSellOpportunities: 0,
+        byStage: { new: 0, outreach: 0, qualified: 0, meeting: 0, proposal: 0, won: 0 }
+      }
+    );
+
     // Stats
     const stats = {
       total: classified.length,
-      maatwork: classified.filter(l => l.primaryService === "maatwork").length,
-      cactuswealth: classified.filter(l => l.primaryService === "cactuswealth").length,
-      crossSellOpportunities: classified.filter(l => l.crossSellOpportunity).length,
-      byStage: {
-        new: classified.filter(l => l.stage === "new").length,
-        outreach: classified.filter(l => l.stage === "outreach").length,
-        qualified: classified.filter(l => l.stage === "qualified").length,
-        meeting: classified.filter(l => l.stage === "meeting").length,
-        proposal: classified.filter(l => l.stage === "proposal").length,
-        won: classified.filter(l => l.stage === "won").length,
-      }
+      maatwork: statsData.maatwork,
+      cactuswealth: statsData.cactuswealth,
+      crossSellOpportunities: statsData.crossSellOpportunities,
+      byStage: statsData.byStage
     };
     
     return NextResponse.json({ leads: classified, stats });
