@@ -4,11 +4,7 @@ $ next dev 2>&1 | tee dev.log
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
-✓ Ready in 1139ms
+✓ Ready in 1145ms
 ○ Compiling / ...
- GET / 200 in 12.0s (compile: 10.8s, render: 1135ms)
+ GET / 200 in 10.8s (compile: 9.7s, render: 1051ms)
+ POST /api/generate-plan 200 in 1016ms (compile: 982ms, render: 34ms)
