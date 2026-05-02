@@ -50,7 +50,7 @@ async function saveData(data: { leads: Lead[]; outreachLogs: any[] }) {
 }
 
 function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return crypto.randomUUID();
 }
 
 // Keywords that indicate cross-sell to Cactus Wealth
