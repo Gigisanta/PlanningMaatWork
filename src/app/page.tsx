@@ -221,8 +221,8 @@ function MobileSettingsSheet({ isOpen, onClose, asesorNombre, setAsesorNombre, a
           <div className="pt-4 border-t border-[#E8E6E0]">
             <Label className="text-sm font-medium text-[var(--primary-light)] mb-4 block">Personalización de Marca</Label>
             <div className="space-y-4">
-              <div><Label className="text-xs text-[#7A8B80] mb-1 block">Color Principal (Fondo, Botones)</Label><div className="flex gap-2"><Input type="color" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 flex-1 text-base rounded-xl uppercase" /></div></div>
-              <div><Label className="text-xs text-[#7A8B80] mb-1 block">Color Acento (Destacados)</Label><div className="flex gap-2"><Input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 flex-1 text-base rounded-xl uppercase" /></div></div>
+              <div><Label className="text-xs text-[#7A8B80] mb-1 block">Color Principal (Fondo, Botones)</Label><div className="flex gap-2"><Input type="color" aria-label="Seleccionar color principal" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-10 flex-1 text-base rounded-xl uppercase" /></div></div>
+              <div><Label className="text-xs text-[#7A8B80] mb-1 block">Color Acento (Destacados)</Label><div className="flex gap-2"><Input type="color" aria-label="Seleccionar color acento" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 w-16 p-1 rounded-xl cursor-pointer" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-10 flex-1 text-base rounded-xl uppercase" /></div></div>
               <div><Label className="text-xs text-[#7A8B80] mb-1 block">URL Logo Asesor (Opcional)</Label><Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className="h-10 text-base rounded-xl" /></div>
             </div>
           </div>
@@ -713,8 +713,8 @@ export default function Home() {
                     <div className="pt-2 border-t border-[#F0EEE8] mt-2">
                       <span className="font-medium text-xs text-[#1F2D26] mb-2 block">Personalización de Marca</span>
                       <div className="space-y-2">
-                        <div><Label className="text-[10px] text-[#7A8B80]">Color Principal</Label><div className="flex gap-1"><Input type="color" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-7 w-12 p-0.5 cursor-pointer rounded" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-7 text-xs flex-1 uppercase" /></div></div>
-                        <div><Label className="text-[10px] text-[#7A8B80]">Color Acento</Label><div className="flex gap-1"><Input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-7 w-12 p-0.5 cursor-pointer rounded" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-7 text-xs flex-1 uppercase" /></div></div>
+                        <div><Label className="text-[10px] text-[#7A8B80]">Color Principal</Label><div className="flex gap-1"><Input type="color" aria-label="Seleccionar color principal" value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-7 w-12 p-0.5 cursor-pointer rounded" /><Input value={colorPrincipal} onChange={(e) => setColorPrincipal(e.target.value)} className="h-7 text-xs flex-1 uppercase" /></div></div>
+                        <div><Label className="text-[10px] text-[#7A8B80]">Color Acento</Label><div className="flex gap-1"><Input type="color" aria-label="Seleccionar color acento" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-7 w-12 p-0.5 cursor-pointer rounded" /><Input value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="h-7 text-xs flex-1 uppercase" /></div></div>
                         <div><Label className="text-[10px] text-[#7A8B80]">Logo URL</Label><Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className="h-7 text-xs mt-0.5" /></div>
                       </div>
                     </div>
@@ -736,6 +736,7 @@ export default function Home() {
                   <Button
                     onClick={handleGeneratePlan}
                     disabled={isLoading}
+                    aria-busy={isLoading}
                     className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-12 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
                   >
                     {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar y Generar PDF</>}
@@ -753,7 +754,7 @@ export default function Home() {
             <div className={`fixed inset-0 top-[60px] z-40 bg-white flex flex-col transition-transform duration-300 ${mobilePanel === 'form' ? 'translate-x-0' : '-translate-x-full'}`} style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
               <PortfolioEditor {...editorProps} />
               <div className="p-4 border-t border-[#E8E6E0] bg-white flex-shrink-0">
-                <Button onClick={handleGeneratePlan} disabled={isLoading} className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
+                <Button onClick={handleGeneratePlan} disabled={isLoading} aria-busy={isLoading} className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dark)] h-14 text-base font-black rounded-xl shadow-lg shadow-[#C4846C]/20 uppercase tracking-widest">
                   {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Finalizar Plan</>}
                 </Button>
               </div>
