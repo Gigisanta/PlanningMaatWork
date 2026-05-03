@@ -72,24 +72,32 @@ export async function GET() {
   try {
     const { leads, outreachLogs } = await getData();
     
+    // ⚡ Bolt: Single-pass O(N) calculation for lead stages
+    const byStage = {
+      new: 0, outreach: 0, qualified: 0, meeting: 0, proposal: 0, won: 0, lost: 0
+    };
+    for (const lead of leads) {
+      if (lead.stage in byStage) {
+        byStage[lead.stage as keyof typeof byStage]++;
+      }
+    }
+
+    // ⚡ Bolt: Single-pass O(M) calculation for outreach stats preserving hierarchy
+    const outreachStats = {
+      totalSent: 0, delivered: 0, opened: 0, replied: 0, booked: 0
+    };
+    for (const log of outreachLogs) {
+      if (log.status !== "pending") outreachStats.totalSent++;
+      if (["delivered", "opened", "replied", "booked"].includes(log.status)) outreachStats.delivered++;
+      if (["opened", "replied", "booked"].includes(log.status)) outreachStats.opened++;
+      if (["replied", "booked"].includes(log.status)) outreachStats.replied++;
+      if (log.status === "booked") outreachStats.booked++;
+    }
+
     const stats = {
       totalLeads: leads.length,
-      byStage: {
-        new: leads.filter(l => l.stage === "new").length,
-        outreach: leads.filter(l => l.stage === "outreach").length,
-        qualified: leads.filter(l => l.stage === "qualified").length,
-        meeting: leads.filter(l => l.stage === "meeting").length,
-        proposal: leads.filter(l => l.stage === "proposal").length,
-        won: leads.filter(l => l.stage === "won").length,
-        lost: leads.filter(l => l.stage === "lost").length,
-      },
-      outreachStats: {
-        totalSent: outreachLogs.filter(l => l.status !== "pending").length,
-        delivered: outreachLogs.filter(l => ["delivered", "opened", "replied", "booked"].includes(l.status)).length,
-        opened: outreachLogs.filter(l => ["opened", "replied", "booked"].includes(l.status)).length,
-        replied: outreachLogs.filter(l => ["replied", "booked"].includes(l.status)).length,
-        booked: outreachLogs.filter(l => l.status === "booked").length,
-      },
+      byStage,
+      outreachStats,
       calComLinks: CAL_COM_LINKS,
     };
 
