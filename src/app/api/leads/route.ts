@@ -100,16 +100,26 @@ function calculateScores(data: { name: string; email: string; company?: string }
 export async function GET() {
   try {
     const data = await getLeads();
+
+    // ⚡ Bolt: Single-pass O(N) calculation for stats
+    let newCount = 0, contactedCount = 0, qualifiedCount = 0, totalScoreSum = 0;
+    for (const lead of data.leads) {
+      if (lead.stage === "new") newCount++;
+      if (lead.stage === "contacted") contactedCount++;
+      if (lead.stage === "qualified") qualifiedCount++;
+      totalScoreSum += (lead.totalScore || 0);
+    }
+
     return NextResponse.json({
       leads: data.leads,
       followUps: data.followUps,
       stats: {
         total: data.leads.length,
-        new: data.leads.filter(l => l.stage === "new").length,
-        contacted: data.leads.filter(l => l.stage === "contacted").length,
-        qualified: data.leads.filter(l => l.stage === "qualified").length,
+        new: newCount,
+        contacted: contactedCount,
+        qualified: qualifiedCount,
         avgScore: data.leads.length > 0 
-          ? Math.round(data.leads.reduce((sum, l) => sum + (l.totalScore || 0), 0) / data.leads.length * 10) / 10
+          ? Math.round(totalScoreSum / data.leads.length * 10) / 10
           : 0,
       }
     });

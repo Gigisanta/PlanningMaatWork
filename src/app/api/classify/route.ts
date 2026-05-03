@@ -121,21 +121,25 @@ export async function GET() {
       };
     });
     
-    // Stats
+    // ⚡ Bolt: Single-pass O(N) calculation for stats
     const stats = {
       total: classified.length,
-      maatwork: classified.filter(l => l.primaryService === "maatwork").length,
-      cactuswealth: classified.filter(l => l.primaryService === "cactuswealth").length,
-      crossSellOpportunities: classified.filter(l => l.crossSellOpportunity).length,
+      maatwork: 0,
+      cactuswealth: 0,
+      crossSellOpportunities: 0,
       byStage: {
-        new: classified.filter(l => l.stage === "new").length,
-        outreach: classified.filter(l => l.stage === "outreach").length,
-        qualified: classified.filter(l => l.stage === "qualified").length,
-        meeting: classified.filter(l => l.stage === "meeting").length,
-        proposal: classified.filter(l => l.stage === "proposal").length,
-        won: classified.filter(l => l.stage === "won").length,
+        new: 0, outreach: 0, qualified: 0, meeting: 0, proposal: 0, won: 0,
       }
     };
+
+    for (const lead of classified) {
+      if (lead.primaryService === "maatwork") stats.maatwork++;
+      if (lead.primaryService === "cactuswealth") stats.cactuswealth++;
+      if (lead.crossSellOpportunity) stats.crossSellOpportunities++;
+      if (lead.stage in stats.byStage) {
+        stats.byStage[lead.stage as keyof typeof stats.byStage]++;
+      }
+    }
     
     return NextResponse.json({ leads: classified, stats });
   } catch (error) {
