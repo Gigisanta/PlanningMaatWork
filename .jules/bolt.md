@@ -1,3 +1,6 @@
 ## 2023-10-27 - Preventing Heavy Recharts Re-renders on Form Input
 **Learning:** In a single-page app (like `src/app/page.tsx`) with many form inputs (50+ `useState` hooks) that trigger frequent re-renders, any heavy child components (like `Recharts` visualizations) will also re-render on every keystroke if not properly memoized, leading to noticeable input lag.
 **Action:** Always wrap heavy charting components in `React.memo` and ensure the `data` prop passed to them is memoized using `useMemo` in the parent component. Also, memoize expensive array operations (`filter`, `reduce`) that compute derived state across the entire portfolio on every render.
+## 2024-05-19 - Consolidate Multiple Filter Loops for Hierarchical Statuses
+**Learning:** In codebases calculating aggregate statistics over the same array with multiple `.filter().length` calls (e.g., outreach stats where 'booked' implies 'replied', etc.), time complexity degrades to O(K * N) where K is the number of filters.
+**Action:** Replace multiple `.filter()` chains with a single O(N) pass using a `for...of` loop or `.reduce()`. When statuses are hierarchical, use cascaded accumulation (or explicit `if/else if`) to increment all implied statuses, maintaining functional equivalence to the original multiple `includes()` checks.
