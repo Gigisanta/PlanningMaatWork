@@ -80,6 +80,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 size="sm"
                 onClick={handleCopyToClipboard}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary-light)] text-[var(--primary-light)] rounded-xl hover:bg-[#5A9E7F]/5`}
+                aria-live="polite"
+                aria-label={copied ? "Copiado al portapapeles" : "Copiar HTML"}
               >
                 {copied ? <><Check className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Listo</> : <><Copy className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Copiar</>}
               </Button>
@@ -88,6 +90,7 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 size="sm"
                 onClick={handleDownloadHTML}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--accent)] text-[var(--accent)] rounded-xl hover:bg-[var(--accent)]/5`}
+                aria-label="Descargar HTML"
               >
                 <FileCode className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />HTML
               </Button>
@@ -96,6 +99,8 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 size="sm"
                 onClick={handleDownloadPDF}
                 disabled={isDownloadingPdf}
+                aria-busy={isDownloadingPdf}
+                aria-label={isDownloadingPdf ? "Exportando PDF, por favor espere" : "Exportar PDF"}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary)] text-[var(--primary)] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary-light)]`}
               >
                 {isDownloadingPdf ? <><Loader2 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} animate-spin mr-1`} />...</> : <><FileDown className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Exportar PDF</>}
