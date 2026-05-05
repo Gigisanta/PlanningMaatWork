@@ -5,3 +5,7 @@
 ## 2025-03-10 - Accessibility gaps in icon-only buttons
 **Learning:** Found a recurring pattern in the app where icon-only interactive elements (like Settings and Toggle buttons on list items) lack `aria-label` or `title` attributes. Without these attributes, screen reader users and those navigating visually cannot easily infer the button's purpose or action state.
 **Action:** Ensure that anytime an icon-only button is implemented or updated, both an `aria-label` for assistive technologies and a `title` attribute for native tooltips are provided, and that the language specifically describes the resulting action or context.
+
+## 2024-05-24 - Dynamic ARIA attributes on action buttons
+**Learning:** When action buttons have multiple states (e.g., normal, loading, success), adding `aria-live="polite"` alongside dynamically updating `aria-label`s provides immediate, non-intrusive feedback to screen reader users about the outcome of their actions.
+**Action:** When implementing action buttons with temporary success or loading states, combine `aria-label` with `aria-live="polite"` and `aria-busy` to ensure smooth state announcements.
