@@ -122,21 +122,34 @@ export async function GET() {
     });
     
     // Stats
+    // ⚡ Bolt: Consolidated 9 distinct array iterations into a single O(N) loop.
+    // Impact: Replaces O(9N) time complexity with O(N) and prevents intermediate array allocations, reducing garbage collection overhead.
     const stats = {
       total: classified.length,
-      maatwork: classified.filter(l => l.primaryService === "maatwork").length,
-      cactuswealth: classified.filter(l => l.primaryService === "cactuswealth").length,
-      crossSellOpportunities: classified.filter(l => l.crossSellOpportunity).length,
+      maatwork: 0,
+      cactuswealth: 0,
+      crossSellOpportunities: 0,
       byStage: {
-        new: classified.filter(l => l.stage === "new").length,
-        outreach: classified.filter(l => l.stage === "outreach").length,
-        qualified: classified.filter(l => l.stage === "qualified").length,
-        meeting: classified.filter(l => l.stage === "meeting").length,
-        proposal: classified.filter(l => l.stage === "proposal").length,
-        won: classified.filter(l => l.stage === "won").length,
+        new: 0,
+        outreach: 0,
+        qualified: 0,
+        meeting: 0,
+        proposal: 0,
+        won: 0,
       }
     };
     
+    for (const l of classified) {
+      if (l.primaryService === "maatwork") stats.maatwork++;
+      else if (l.primaryService === "cactuswealth") stats.cactuswealth++;
+
+      if (l.crossSellOpportunity) stats.crossSellOpportunities++;
+
+      if (l.stage in stats.byStage) {
+        stats.byStage[l.stage as keyof typeof stats.byStage]++;
+      }
+    }
+
     return NextResponse.json({ leads: classified, stats });
   } catch (error) {
     console.error("Error:", error);
