@@ -100,7 +100,7 @@ export function generatePlanHTML(data: PlanData): string {
 
   // Platform links
   const platformLinksHTML = (data.platformLinks || []).map(link => 
-    `<a href="${link.url}" target="_blank" class="account-link">
+    `<a href="${link.url}" target="_blank" rel="noopener noreferrer" class="account-link">
       <span class="link-icon">🔗</span>
       ${link.name}
     </a>`
@@ -112,7 +112,7 @@ export function generatePlanHTML(data: PlanData): string {
     const isWhatsapp = link.icon === 'whatsapp' || link.name.toLowerCase().includes('whatsapp');
     const className = isInstagram ? 'footer-link instagram' : (isWhatsapp ? 'footer-link whatsapp' : 'footer-link');
     const icon = isInstagram ? '📸' : (isWhatsapp ? '💬' : '🔗');
-    return `<a href="${link.url}" target="_blank" class="${className}">
+    return `<a href="${link.url}" target="_blank" rel="noopener noreferrer" class="${className}">
       <span class="icon">${icon}</span>
       ${link.name}
     </a>`;
@@ -125,7 +125,7 @@ export function generatePlanHTML(data: PlanData): string {
 
   // Floating button HTML
   const floatingWhatsappHTML = `
-    <a href="${whatsappUrl}" target="_blank" class="floating-whatsapp">
+    <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="floating-whatsapp">
       <span>Recomendar asesor</span>
       <span class="wapp-icon">🔗</span>
     </a>
