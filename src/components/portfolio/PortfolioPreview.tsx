@@ -75,6 +75,9 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
 
             {/* Action buttons */}
             <div className={`flex ${isMobile ? 'overflow-x-auto scrollbar-hide gap-2 max-w-[180px]' : 'gap-1'}`}>
+              <div className="sr-only" aria-live="polite">
+                {copied ? 'Copiado al portapapeles' : ''}
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -96,6 +99,7 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 size="sm"
                 onClick={handleDownloadPDF}
                 disabled={isDownloadingPdf}
+                aria-busy={isDownloadingPdf}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary)] text-[var(--primary)] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary-light)]`}
               >
                 {isDownloadingPdf ? <><Loader2 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} animate-spin mr-1`} />...</> : <><FileDown className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Exportar PDF</>}
