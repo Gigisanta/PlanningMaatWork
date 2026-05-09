@@ -62,16 +62,27 @@ export async function GET() {
   try {
     const { leads, outreachLogs } = await getData();
     
-    // Get leads in "outreach" stage with pending sequences
-    const outreachLeads = leads.filter(l => l.stage === "outreach");
+    // ⚡ Bolt Optimization: Use Map for O(1) lookups instead of O(N*M) array searches
+    // O(N) single pass to build leads map and filter outreach leads
+    const outreachLeads: Lead[] = [];
+    const leadsMap = new Map<string, Lead>();
+    for (const l of leads) {
+      leadsMap.set(l.id, l);
+      if (l.stage === "outreach") {
+        outreachLeads.push(l);
+      }
+    }
     
-    // Get pending outreach items
-    const pendingOutreach = outreachLogs
-      .filter(log => log.status === "pending")
-      .map(log => {
-        const lead = leads.find(l => l.id === log.leadId);
-        return { ...log, lead };
-      });
+    // O(M) single pass to filter pending logs and attach leads from map
+    const pendingOutreach = [];
+    for (const log of outreachLogs) {
+      if (log.status === "pending") {
+        pendingOutreach.push({
+          ...log,
+          lead: leadsMap.get(log.leadId)
+        });
+      }
+    }
 
     return NextResponse.json({
       outreachLeads,
