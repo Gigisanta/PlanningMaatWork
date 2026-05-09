@@ -81,6 +81,9 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 onClick={handleCopyToClipboard}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary-light)] text-[var(--primary-light)] rounded-xl hover:bg-[#5A9E7F]/5`}
               >
+                <span className="sr-only" aria-live="polite">
+                  {copied ? "Enlace copiado" : ""}
+                </span>
                 {copied ? <><Check className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Listo</> : <><Copy className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Copiar</>}
               </Button>
               <Button
@@ -96,6 +99,7 @@ export const PortfolioPreview = React.memo(function PortfolioPreview({
                 size="sm"
                 onClick={handleDownloadPDF}
                 disabled={isDownloadingPdf}
+                aria-busy={isDownloadingPdf}
                 className={`${isMobile ? 'h-10 text-sm px-3 flex-shrink-0' : 'h-7 text-xs'} border-[var(--primary)] text-[var(--primary)] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary-light)]`}
               >
                 {isDownloadingPdf ? <><Loader2 className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} animate-spin mr-1`} />...</> : <><FileDown className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mr-1`} />Exportar PDF</>}
