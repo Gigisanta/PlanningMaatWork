@@ -72,24 +72,58 @@ export async function GET() {
   try {
     const { leads, outreachLogs } = await getData();
     
+    // Process leads in a single O(N) pass
+    const byStage = {
+      new: 0,
+      outreach: 0,
+      qualified: 0,
+      meeting: 0,
+      proposal: 0,
+      won: 0,
+      lost: 0,
+    };
+
+    for (const lead of leads) {
+      if (lead.stage in byStage) {
+        byStage[lead.stage as keyof typeof byStage]++;
+      }
+    }
+
+    // Process outreach logs in a single O(N) pass, maintaining hierarchical accumulation
+    const outreachStats = {
+      totalSent: 0,
+      delivered: 0,
+      opened: 0,
+      replied: 0,
+      booked: 0,
+    };
+
+    for (const log of outreachLogs) {
+      if (log.status !== "pending") {
+        outreachStats.totalSent++;
+      }
+
+      if (log.status === "booked") {
+        outreachStats.booked++;
+        outreachStats.replied++;
+        outreachStats.opened++;
+        outreachStats.delivered++;
+      } else if (log.status === "replied") {
+        outreachStats.replied++;
+        outreachStats.opened++;
+        outreachStats.delivered++;
+      } else if (log.status === "opened") {
+        outreachStats.opened++;
+        outreachStats.delivered++;
+      } else if (log.status === "delivered") {
+        outreachStats.delivered++;
+      }
+    }
+
     const stats = {
       totalLeads: leads.length,
-      byStage: {
-        new: leads.filter(l => l.stage === "new").length,
-        outreach: leads.filter(l => l.stage === "outreach").length,
-        qualified: leads.filter(l => l.stage === "qualified").length,
-        meeting: leads.filter(l => l.stage === "meeting").length,
-        proposal: leads.filter(l => l.stage === "proposal").length,
-        won: leads.filter(l => l.stage === "won").length,
-        lost: leads.filter(l => l.stage === "lost").length,
-      },
-      outreachStats: {
-        totalSent: outreachLogs.filter(l => l.status !== "pending").length,
-        delivered: outreachLogs.filter(l => ["delivered", "opened", "replied", "booked"].includes(l.status)).length,
-        opened: outreachLogs.filter(l => ["opened", "replied", "booked"].includes(l.status)).length,
-        replied: outreachLogs.filter(l => ["replied", "booked"].includes(l.status)).length,
-        booked: outreachLogs.filter(l => l.status === "booked").length,
-      },
+      byStage,
+      outreachStats,
       calComLinks: CAL_COM_LINKS,
     };
 
