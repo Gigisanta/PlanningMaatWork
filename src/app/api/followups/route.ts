@@ -47,6 +47,9 @@ export async function GET() {
     const data = JSON.parse(await readFile(LEADS_FILE, "utf-8"));
     const now = new Date();
 
+    // Optimize lead lookups with O(1) access instead of O(N*M)
+    const leadMap = new Map(data.leads.map((l: Lead) => [l.id, l]));
+
     // Find follow-ups that are due (scheduledFor <= now and status = pending)
     const dueFollowUps = data.followUps
       .filter((fu: FollowUp) => {
@@ -55,7 +58,7 @@ export async function GET() {
         return scheduledDate <= now;
       })
       .map((fu: FollowUp) => {
-        const lead = data.leads.find((l: Lead) => l.id === fu.leadId);
+        const lead = leadMap.get(fu.leadId);
         return { ...fu, lead };
       });
 
