@@ -122,19 +122,36 @@ export async function GET() {
     });
     
     // Stats
+    // Performance Optimization: Replaced multiple O(N) array.filter().length calls
+    // with a single O(N) loop to calculate primaryService counts and byStage.
+    // Impact: Reduces time complexity from O(K*N) to O(N) and prevents unnecessary array allocations.
+    let maatwork = 0;
+    let cactuswealth = 0;
+    let crossSellOpportunities = 0;
+    const byStage = {
+      new: 0,
+      outreach: 0,
+      qualified: 0,
+      meeting: 0,
+      proposal: 0,
+      won: 0,
+    };
+
+    for (const l of classified) {
+      if (l.primaryService === "maatwork") maatwork++;
+      if (l.primaryService === "cactuswealth") cactuswealth++;
+      if (l.crossSellOpportunity) crossSellOpportunities++;
+      if (l.stage in byStage) {
+        byStage[l.stage as keyof typeof byStage]++;
+      }
+    }
+
     const stats = {
       total: classified.length,
-      maatwork: classified.filter(l => l.primaryService === "maatwork").length,
-      cactuswealth: classified.filter(l => l.primaryService === "cactuswealth").length,
-      crossSellOpportunities: classified.filter(l => l.crossSellOpportunity).length,
-      byStage: {
-        new: classified.filter(l => l.stage === "new").length,
-        outreach: classified.filter(l => l.stage === "outreach").length,
-        qualified: classified.filter(l => l.stage === "qualified").length,
-        meeting: classified.filter(l => l.stage === "meeting").length,
-        proposal: classified.filter(l => l.stage === "proposal").length,
-        won: classified.filter(l => l.stage === "won").length,
-      }
+      maatwork,
+      cactuswealth,
+      crossSellOpportunities,
+      byStage
     };
     
     return NextResponse.json({ leads: classified, stats });

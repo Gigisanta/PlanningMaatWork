@@ -100,16 +100,32 @@ function calculateScores(data: { name: string; email: string; company?: string }
 export async function GET() {
   try {
     const data = await getLeads();
+
+    // Performance Optimization: Replaced multiple O(N) array.filter().length and reduce calls
+    // with a single O(N) loop to calculate stats efficiently.
+    // Impact: Reduces time complexity from O(K*N) to O(N) and prevents unnecessary array allocations.
+    let newLeads = 0;
+    let contacted = 0;
+    let qualified = 0;
+    let totalScoreSum = 0;
+
+    for (const l of data.leads) {
+      if (l.stage === "new") newLeads++;
+      if (l.stage === "contacted") contacted++;
+      if (l.stage === "qualified") qualified++;
+      totalScoreSum += (l.totalScore || 0);
+    }
+
     return NextResponse.json({
       leads: data.leads,
       followUps: data.followUps,
       stats: {
         total: data.leads.length,
-        new: data.leads.filter(l => l.stage === "new").length,
-        contacted: data.leads.filter(l => l.stage === "contacted").length,
-        qualified: data.leads.filter(l => l.stage === "qualified").length,
+        new: newLeads,
+        contacted,
+        qualified,
         avgScore: data.leads.length > 0 
-          ? Math.round(data.leads.reduce((sum, l) => sum + (l.totalScore || 0), 0) / data.leads.length * 10) / 10
+          ? Math.round(totalScoreSum / data.leads.length * 10) / 10
           : 0,
       }
     });
