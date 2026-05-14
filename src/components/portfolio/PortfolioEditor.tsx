@@ -202,7 +202,7 @@ export function PortfolioEditor({
                 setWizardStep(idx);
                 setActiveSection(step.section);
               }}
-              className="relative z-10 flex flex-col items-center gap-1.5 group"
+              className="relative z-10 flex flex-col items-center gap-1.5 group focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary)] outline-none rounded-lg"
               aria-current={wizardStep === idx ? "step" : undefined}
               aria-label={`Paso ${idx + 1}: ${step.label}`}
             >

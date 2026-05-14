@@ -768,11 +768,11 @@ export default function Home() {
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E0] z-50 safe-area-bottom h-[calc(64px+env(safe-area-inset-bottom,0px))]">
           <div className="flex h-16">
-            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+            <button onClick={() => setMobilePanel('form')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary)] outline-none rounded-lg ${mobilePanel === 'form' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'form' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <ClipboardList className="w-6 h-6" /><span className="text-xs font-medium">Formulario</span>
             </button>
-            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
+            <button onClick={() => setMobilePanel('preview')} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary)] outline-none rounded-lg ${mobilePanel === 'preview' ? 'text-[var(--primary)]' : 'text-[#7A8B80]'}`}>
               {mobilePanel === 'preview' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[var(--primary)] rounded-b-full" />}
               <Eye className="w-6 h-6" /><span className="text-xs font-medium">Preview</span>
               {generatedHTML && <div className="absolute top-2 right-1/4 w-2 h-2 bg-[var(--primary-light)] rounded-full animate-pulse" />}
