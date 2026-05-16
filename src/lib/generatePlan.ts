@@ -72,6 +72,24 @@ export function generatePlanHTML(data: PlanData): string {
     year: 'numeric',
   });
 
+  // ⚡ Bolt: Consolidate multiple O(N) array iterations into a single O(N) pass.
+  // Previously we used five separate .filter().reduce() chains to calculate the portfolio summary stats,
+  // meaning we iterated over the instruments array 5 times (O(k*N)). By using a single reduce pass here,
+  // we improve performance and reduce overhead when generating the plan HTML.
+  const portfolioStats = (data.instruments || []).reduce(
+    (acc, i) => {
+      if (i.moneda === 'USD') acc.usd += i.asignacion;
+      else if (i.moneda === 'ARS') acc.ars += i.asignacion;
+      else if (i.moneda === 'Mix') acc.mix += i.asignacion;
+
+      if (i.tipo.includes('Renta')) acc.rentaFija += i.asignacion;
+      if (i.tipo.includes('Equity')) acc.rentaVariable += i.asignacion;
+
+      return acc;
+    },
+    { usd: 0, ars: 0, mix: 0, rentaFija: 0, rentaVariable: 0 }
+  );
+
   // Calculate contribution based on type
   let contributionText = '';
   let montoObjetivo = (data.aporteInicial || 0) + (data.aporteMensual * data.horizonteMeses);
@@ -1454,25 +1472,25 @@ export function generatePlanHTML(data: PlanData): string {
         <div class="resumen-grid">
           <div class="resumen-item">
             <div class="label">Exposición USD</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'USD').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${portfolioStats.usd}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Exposición ARS</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'ARS').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${portfolioStats.ars}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Mixto</div>
-            <div class="value">${data.instruments?.filter(i => i.moneda === 'Mix').reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${portfolioStats.mix}%</div>
           </div>
         </div>
         <div class="resumen-grid" style="margin-top: 16px;">
           <div class="resumen-item">
             <div class="label">Renta Fija</div>
-            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Renta')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${portfolioStats.rentaFija}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Renta Variable</div>
-            <div class="value">${data.instruments?.filter(i => i.tipo.includes('Equity')).reduce((s, i) => s + i.asignacion, 0) || 0}%</div>
+            <div class="value">${portfolioStats.rentaVariable}%</div>
           </div>
           <div class="resumen-item">
             <div class="label">Liquidez</div>
